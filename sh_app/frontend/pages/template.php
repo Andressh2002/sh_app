@@ -1,0 +1,47 @@
+<?php
+    $appVersion = "v3.1.4";
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $pageTitle ?></title>
+
+    <?php include '../layouts/head.html'; ?>
+</head>
+
+<body class="d-flex flex-column min-vh-100 overflow-visible">
+
+    <?php if (isset($showHeader) && $showHeader): ?>
+        <?php include '../layouts/header.html'; ?>
+    <?php endif; ?>
+
+    <?php if (isset($showNavbar) && $showNavbar): ?>
+        <?php include '../layouts/navbar.php'; ?>
+    <?php endif; ?>
+
+    <?php if (isset($showSidebar) && $showSidebar): ?>
+        <?php include '../layouts/sidebar.php'; ?>
+    <?php endif; ?>
+
+    <?php if (!$showSidebar): ?>
+        <div class="container-fluid flex-fill">
+            <?php echo $content; ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php include '../layouts/foot.html'; ?>
+
+</body>
+
+<?php if (isset($showFooter) && $showFooter): ?>
+    <footer class="text-center text-lg-start text-muted mt-auto pt-3" style="background-color: #DDD;">
+        <?php include '../layouts/footer.html'; ?>
+    </footer>
+<?php endif; ?>
+
+
+</html>
