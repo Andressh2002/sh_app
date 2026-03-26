@@ -1,0 +1,28 @@
+/* Estilo del contenedor del scrollbar */
+::-webkit-scrollbar {
+    width: 18px; /* Ancho del scrollbar vertical */
+    height: 18px; /* Altura del scrollbar horizontal */
+}
+
+/* Estilo de la parte interior del scrollbar */
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Color del fondo del scrollbar */
+    border-radius: 12px; /* Bordes redondeados */
+}
+
+/* Estilo de la barra que se mueve (thumb) */
+::-webkit-scrollbar-thumb {
+    background-color: #1313e9; /* Color de la barra */
+    border-radius: 12px; /* Bordes redondeados */
+    border: 3px solid #f1f1f1; /* Añadir un borde alrededor de la barra */
+}
+
+/* Cambia el color de la barra al pasar el ratón (hover) */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #4444ff; /* Color de la barra al hacer hover */
+}
+
+/* Estilo de las esquinas del scrollbar */
+::-webkit-scrollbar-corner {
+    background-color: #f1f1f1; /* Color de las esquinas */
+}

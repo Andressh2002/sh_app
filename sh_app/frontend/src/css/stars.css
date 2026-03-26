@@ -1,0 +1,36 @@
+/* Ocultar los radio buttons */
+.star-radio {
+    display: none;
+}
+
+/* Estilizar las estrellas cuando están llenas */
+.star-radio + label.bi-star {
+    font-size: 2rem;
+    color: #ccc;
+    cursor: pointer; /* Cambiar a cursor de mano */
+}
+
+/* Cuando la estrella está seleccionada, cambia a bi-star-fill */
+.star-radio:checked ~ label, 
+.star-radio + label:hover, 
+.star-radio + label:hover ~ label {
+    color: gold;
+}
+
+.star-radio:checked ~ label.bi-star {
+    color: gold;
+}
+
+/* Cambiar las estrellas anteriores cuando una está seleccionada */
+.star-radio:checked + label.bi-star-fill {
+    color: gold;
+}
+
+.star-radio + label.bi-star:hover ~ label {
+    color: gold;
+}
+
+/* Agregar el cursor de mano al pasar el mouse sobre las estrellas */
+.star-radio-pointer:hover {
+    cursor: pointer; /* Cambia el cursor al pasar el mouse */
+}

@@ -1,0 +1,17 @@
+.preview-product-card-bg {
+    background-color: #EEE;
+}
+
+.preview-product-card-bg-header {
+    background-color: #CCC;
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+}
+
+.preview-product-card-bg-footer {
+    background-color: #00df00;
+    clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
+}
+
+.preview-product-card-border {
+    border: solid 1px #BBB;
+}

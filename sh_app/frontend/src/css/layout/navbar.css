@@ -1,0 +1,201 @@
+.navbar-item {
+    background-color: #00000000;
+    color: white;
+    clip-path: polygon(2% 0, 100% 0%, 98% 100%, 0% 100%);
+    transition: all 0.25s;
+}
+
+.navbar-item:hover {
+    background-color: #0000c7;
+    clip-path: polygon(10% 5%, 100% 0, 90% 97%, 0 100%);
+    cursor: pointer;
+}
+
+.navbar-item-active {
+    background-color: #00df00;
+    color: black;
+    clip-path: polygon(10% 0, 100% 0%, 90% 100%, 0% 100%);
+}
+
+.navbar-bg {
+    background-color: #777;
+}
+
+.navbar-list {
+    display: flex;
+    list-style: none;
+}
+
+.navbar-item {
+    flex: 1 1 auto; /* Los elementos ocupan el mismo ancho disponible */
+    max-width: 150px; /* Opcional: establece un ancho máximo para cada ítem */
+    text-align: center; /* Centra el contenido dentro de cada ítem */
+    margin: 5px; /* Añade espacio entre los ítems */
+}
+
+.navbar-login-item {
+    background-color: #fff;
+    color: #000;
+    transition: all 0.25s;
+}
+
+.navbar-login-item:hover {
+    background-color: #0000c7;
+    cursor: pointer;
+}
+
+.navbar-login-item-active {
+    background-color: #00df00;
+    color: black;
+}
+
+.navbar-border {
+    border-top: #1cff1c solid 4px;
+    border-bottom: #1f1fff solid 4px;
+}
+
+.navbar-item-font-size {
+    font-size: 16px;
+}
+
+.navbar-item-icon-size {
+    font-size: 32px;
+}
+
+@media (max-width: 991px) {
+    .navbar-item {
+        flex: 1 1 100%; /* En móviles, los elementos ocupan toda la fila */
+        max-width: none; /* Quita el ancho máximo en pantallas pequeñas */
+    }
+
+    .navbar-item {
+        background-color: #00000000;
+        color: white;
+        clip-path: polygon(0% 0, 100% 0%, 100% 100%, 0% 100%);
+        transition: all 0.25s;
+        padding: 0.25rem 1rem !important; 
+    }
+    
+    .navbar-item:hover {
+        background-color: #0000c7;
+        clip-path: polygon(1% 0, 100% 0%, 99% 100%, 0% 100%);
+    }
+
+    .navbar-login-item {
+        flex: 1 1 100%; /* En móviles, los elementos ocupan toda la fila */
+        max-width: none; /* Quita el ancho máximo en pantallas pequeñas */
+    }
+
+    .navbar-login-item {
+        background-color: #00000000;
+        color: white;
+        clip-path: polygon(0% 0, 100% 0%, 100% 100%, 0% 100%);
+        transition: all 0.25s;
+        padding: 0.25rem 1rem !important; 
+    }
+    
+    .navbar-login-item:hover {
+        background-color: #0084F000;
+        clip-path: polygon(1% 0, 100% 0%, 99% 100%, 0% 100%);
+    }
+}
+
+@media (max-width: 1646px) {
+    .navbar-item-font-size {
+        font-size: 14px;
+    }
+    
+    .navbar-item-icon-size {
+        font-size: 28px;
+    }
+
+    .navbar-item {
+        max-width: 140px;
+        margin: 0px 4px;
+    }
+
+    /* filterbar.css */
+    .filterbar-font-size {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 1523px) {
+    .navbar-item-font-size {
+        font-size: 13px;
+    }
+    
+    .navbar-item-icon-size {
+        font-size: 26px;
+    }
+
+    .navbar-item {
+        max-width: 135px;
+        margin: 0px 3px;
+    }
+
+    /* filterbar.css */
+    .filterbar-font-size {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 1399px) {
+    .navbar-item-font-size {
+        font-size: 12px;
+    }
+    
+    .navbar-item-icon-size {
+        font-size: 24px;
+    }
+
+    .navbar-item {
+        max-width: 128px;
+        margin: 0px 2px;
+    }
+}
+
+@media (max-width: 991px) {
+    .navbar-item-font-size {
+        font-size: 11px;
+    }
+    
+    .navbar-item-icon-size {
+        font-size: 22px;
+    }
+
+    .navbar-item {
+        max-width: 100%;
+        margin: 6px 0px;
+    }
+}
+
+@media (max-width: 664px) {
+    .navbar-item-font-size {
+        font-size: 10px;
+    }
+    
+    .navbar-item-icon-size {
+        font-size: 20px;
+    }
+
+    .navbar-item {
+        max-width: 100%;
+        margin: 6px 0px;
+    }
+}
+
+@media (max-width: 320px) {
+    .navbar-item-font-size {
+        font-size: 9px;
+    }
+    
+    .navbar-item-icon-size {
+        font-size: 18px;
+    }
+
+    .navbar-item {
+        max-width: 100%;
+        margin: 7px 0px;
+    }
+}

@@ -1,0 +1,23 @@
+.bg-header {
+    background-color: #222;
+}
+
+.admin-body-bg {
+    background-color: #DDD;
+}
+
+.admin-header-card-bg {
+    background-color: #BBB;
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+}
+
+.admin-subheader-card-bg {
+    background-color: #DDD;
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+}
+
+.admin-indicator-card-card-bg {
+    background-color: #00df00;
+    color: black;
+    clip-path: polygon(0 0, 100% 0%, 100% 100%, 0 85%);
+}

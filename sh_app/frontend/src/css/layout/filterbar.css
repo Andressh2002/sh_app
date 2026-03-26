@@ -1,0 +1,38 @@
+.rangePrice-input {
+    max-width: 102px;
+}
+
+.filterbar-header-bg {
+    background-color: #555;
+    color: white;
+}
+
+.filterbar-body-bg {
+    background-color: #CCC;
+}
+
+.filterbar-input-bg {
+    background-color: #EEE;
+}
+
+.filterbar-span-bg {
+    background-color: #DDD;
+}
+
+.filterbar-font-size {
+    font-size: 16px;
+}
+
+#filterBar-container {
+    max-height: calc(100vh - 40px);
+}
+
+.filterBar-responsive {
+    display: block;
+}
+
+@media (max-width: 1366px) {
+    .filterBar-responsive {
+    	display: none;
+    }
+}
