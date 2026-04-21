@@ -119,7 +119,127 @@
         }
     }
 
-    function contarProductos($conn, $filtros) {
+    function contarUniversos($conn, $nombre) {
+        $stmt = $conn->prepare("
+            SELECT DISTINCT un.id 
+            FROM universos un
+            JOIN productos pr ON pr.idUniverso = un.id
+            WHERE un.estado = 1 
+            AND pr.idFestividad = 0 
+            AND pr.visible = 1
+            AND un.nombre LIKE ?
+
+            UNION
+
+            SELECT DISTINCT un.id 
+            FROM universos un
+            JOIN productos pr ON pr.idUniverso = un.id
+            JOIN festividades fe ON pr.idFestividad = fe.id
+            WHERE un.estado = 1 
+            AND pr.idFestividad != 0 
+            AND pr.visible = 1
+            AND un.nombre LIKE ? 
+            AND NOW() >= STR_TO_DATE(CONCAT(YEAR(NOW()), '-', fe.fecha_inicial, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+            AND NOW() <= STR_TO_DATE(CONCAT(YEAR(NOW()), '-', fe.fecha_final, ' 00:00:00'), '%Y-%m-%d %H:%i:%s');
+        ");
+        
+        $nombre = "%" . $nombre . "%";
+        
+        $stmt->bind_param("ss", $nombre, $nombre);
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+    
+        $universos = [];
+    
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $universos[] = $row;
+            }
+            return $universos;
+        } else {
+            return null;
+        }
+    }
+
+    function buscarUniverso($conn, $id) {
+        $stmt = $conn->prepare("
+            SELECT 
+                un.id, 
+                un.nombre, 
+                un.descripcion, 
+                un.estado, 
+                un.fecha_registro, 
+                COUNT(DISTINCT pr.id) AS cantidad, 
+                MAX(
+                    CASE 
+                        WHEN pr.idFestividad != 0 
+                        AND NOW() >= STR_TO_DATE(CONCAT(YEAR(NOW()), '-', fe.fecha_inicial, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+                        AND NOW() <= STR_TO_DATE(CONCAT(YEAR(NOW()), '-', fe.fecha_final, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+                        THEN 1 
+                        ELSE 0 
+                    END
+                ) AS tiene_disponibilidad_limitada,
+                MAX(
+                    CASE 
+                        WHEN FIND_IN_SET(d.id, pr.idDescuentos) > 0 
+                        AND NOW() BETWEEN STR_TO_DATE(CONCAT(YEAR(NOW()), '-', d.fecha_inicial), '%Y-%m-%d') 
+                            AND STR_TO_DATE(CONCAT(YEAR(NOW()), '-', d.fecha_final), '%Y-%m-%d') 
+                        THEN 1 
+                        ELSE 0 
+                    END
+                ) AS tiene_descuentos_activos,
+                 MAX(
+                    CASE 
+                        WHEN pr.existencia != 0 
+                        THEN 1 
+                        ELSE 0 
+                    END
+                ) AS tiene_existencias_limitadas
+            FROM universos un
+            JOIN productos pr ON pr.idUniverso = un.id
+            LEFT JOIN festividades fe ON pr.idFestividad = fe.id
+            LEFT JOIN descuentos d 
+                ON FIND_IN_SET(d.id, pr.idDescuentos) > 0 -- Verifica si el ID del descuento está en la lista
+            WHERE un.estado = 1 
+            AND un.id = ? 
+            AND (
+                pr.idFestividad = 0 
+                OR (
+                    pr.idFestividad != 0 
+                    AND NOW() >= STR_TO_DATE(CONCAT(YEAR(NOW()), '-', fe.fecha_inicial, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+                    AND NOW() <= STR_TO_DATE(CONCAT(YEAR(NOW()), '-', fe.fecha_final, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+                )
+            )
+            GROUP BY un.id, un.nombre;
+        ");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return null;
+        }
+    }
+
+    function buscarImagenUniverso($conn, $id) {
+        $stmt = $conn->prepare("SELECT imagen FROM universos WHERE id = ? AND estado = 1");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return null;
+        }
+    }
+
+    function contarProductos($conn, $filtros, $limite) {
         // Extrae los filtros
         list($nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos) = $filtros;
     
@@ -207,6 +327,12 @@
         // Construir consulta final
         $sql .= " " . implode(" ", $joins);
         $sql .= " WHERE " . implode(" AND ", $where);
+
+        // Verificar aleatoridad
+        if ($limite != '') {
+            $sql .= " ORDER BY RAND() ";
+            $sql .= " LIMIT " . intval($limite);
+        }
     
         // Preparar la consulta
         $stmt = $conn->prepare($sql);
@@ -243,7 +369,6 @@
                 p.pedidos,
                 p.vendidos,
                 p.altura,
-                p.anchura,
                 p.peso,
                 p.especial,
                 p.estado,

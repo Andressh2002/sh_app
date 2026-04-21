@@ -1,6 +1,6 @@
 function guardarComentario() {
     const idCliente = $('#Sesion').val();
-    const idProducto = $('#idProducto').val();
+    const idProducto = $('#Id').val();
     const mensaje = $('#Comentario').val();
 
     if (!validarCampos(

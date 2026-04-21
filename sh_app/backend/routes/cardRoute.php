@@ -17,6 +17,15 @@
             header('Content-Type: application/json');
             echo json_encode($respuesta);
             break;
+
+        case 'contarUniversos':
+            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+        
+            $respuesta = contarUniversos($conn, $nombre);
+        
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
+            break;
         
         case 'contarProductos':
             $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
@@ -25,9 +34,10 @@
             $idFestividades = isset($_POST['idFestividades']) ? $_POST['idFestividades'] : [];
             $idRarezas = isset($_POST['idRarezas']) ? $_POST['idRarezas'] : [];
             $idUniversos = isset($_POST['idUniversos']) ? $_POST['idUniversos'] : [];
+            $limite = isset($_POST['limite']) ? $_POST['limite'] : '';
             $filtros = [$nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos];
 
-            $respuesta = contarProductos($conn, $filtros);
+            $respuesta = contarProductos($conn, $filtros, $limite);
         
             header('Content-Type: application/json');
             echo json_encode($respuesta);
@@ -37,6 +47,15 @@
             $id = isset($_POST['id']) ? $_POST['id'] : '';
         
             $respuesta = buscarCategoria($conn, $id);
+        
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
+            break;
+
+        case 'buscarUniverso':
+            $id = isset($_POST['id']) ? $_POST['id'] : '';
+        
+            $respuesta = buscarUniverso($conn, $id);
         
             header('Content-Type: application/json');
             echo json_encode($respuesta);
@@ -65,6 +84,15 @@
             $id = isset($_POST['id']) ? $_POST['id'] : '';
         
             $respuesta = buscarImagenCategoria($conn, $id);
+        
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
+            break;
+
+        case 'buscarImagenUniverso':
+            $id = isset($_POST['id']) ? $_POST['id'] : '';
+        
+            $respuesta = buscarImagenUniverso($conn, $id);
         
             header('Content-Type: application/json');
             echo json_encode($respuesta);

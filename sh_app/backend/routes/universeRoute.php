@@ -13,8 +13,9 @@
             if (isset($_POST['nombre']) && isset($_POST['descripcion'])) {
                 $nombre = $_POST['nombre'];
                 $descripcion = $_POST['descripcion'];
+                $imagen = $_POST['imagen'];
 
-                $respuesta = insertar($conn, $nombre, $descripcion);
+                $respuesta = insertar($conn, $nombre, $descripcion, $imagen);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos";
@@ -26,8 +27,9 @@
                 $id = $_POST['id'];
                 $nombre = $_POST['nombre'];
                 $descripcion = $_POST['descripcion'];
+                $imagen = $_POST['imagen'];
 
-                $respuesta = actualizar($conn, $id, $nombre, $descripcion);
+                $respuesta = actualizar($conn, $id, $nombre, $descripcion, $imagen);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos para actualizar la categoría";
@@ -43,7 +45,8 @@
         
         case 'obtener':
             $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $respuesta = obtener($conn, $nombre);
+            $isImagen = isset($_POST['isImagen']) ? $_POST['isImagen'] : '';
+            $respuesta = obtener($conn, $nombre, $isImagen);
 
             header('Content-Type: application/json');
             echo json_encode($respuesta);

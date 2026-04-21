@@ -43,6 +43,9 @@ function showInfo(page) {
         case 'accesorios':
             text = 'En esta parte se muestran los accesorios para productos que has registrado, puedes modificarlos y borrarlos. Estos accesorios son para que los ligues con algún producto, por ejemplo; una canasta, con sus colores y todo, y el accesorio probablemente sería una maceta, esta misma con sus colores propios... algo así funciona. Solo que desde "productos" es donde debes buscar estos accesorios para juntarlos.';
             break;
+        case 'interacciones':
+            text = 'En esta parte se muestran las acciones de los usuarios quienes entran a la aplicación. Esto con el fin de observar la frecuencia con la que las personas ingresan a la aplicación.';
+            break;
         default:
             break;
     }

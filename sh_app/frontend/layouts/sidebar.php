@@ -99,6 +99,16 @@
             'url' => 'store.php'
         ],
         [
+            'label' => 'Interacciones',
+            'icon' => 'bi-broadcast-pin',
+            'url' => 'interactions.php'
+        ],
+        [
+            'label' => 'Configuración',
+            'icon' => 'bi-gear-fill',
+            'url' => 'configuration.php'
+        ],
+        [
             'label' => 'Sesión',
             'url' => null
         ],

@@ -10,7 +10,10 @@
 
     $saveIdProducto = isset($_GET['idProducto']) ? $_GET['idProducto'] : null;
     $saveIdColor = isset($_GET['idColor']) ? $_GET['idColor'] : null;
-    $saveIdAccesorio = isset($_GET['idAccesorio']) ? $_GET['idAccesorio'] : null;
+    $saveIdAccesorio = $_GET['idAccesorio'] ?? null;
+    if ($saveIdAccesorio === "undefined" || $saveIdAccesorio === "") {
+        $saveIdAccesorio = null;
+    }
     $saveIdColorAccesorio = isset($_GET['idColorAccesorio']) ? $_GET['idColorAccesorio'] : null;
     $saveCantidad = isset($_GET['cantidad']) ? $_GET['cantidad'] : null;
     $saveTotal = isset($_GET['total']) ? $_GET['total'] : null;
@@ -100,7 +103,7 @@
     ];
 ?>
 
-<div class="row my-3 p-4">
+<div class="row my-3 p-4 mx-0">
     <div class="d-flex align-items-center gap-2 px-0">
         <h4 class="mb-0">Tu producto</h4>
         <i class="bi bi-cart-fill fs-4 d-flex align-self-center"></i>
@@ -115,7 +118,7 @@
                 </div>
                 <div class="row p-3" id="div-pre-img-producto"></div>
             </div>
-            <?php if ($saveIdAccesorio !=  0) : ?>
+            <?php if ($saveIdAccesorio !== null && $saveIdAccesorio != 0) : ?>
                 <div class="card rounded-3 overflow-hidden my-2 col-12 col-md p-0 m-0">
                     <div class="card-body admin-subheader-card-bg py-1">
                         <div class="d-flex align-items-center gap-2">
@@ -176,43 +179,43 @@
         </div>
     </div>
 
-    <div class="bg-clip-path-up-store-section"></div>
-    <div class="m-0 w-100 bg-store-section pb-3 pt-5">
-        <div class="row container-fluid mx-auto gap-1">
-            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="fw-bold card-category-text-h m-0">¡Opción de crear un usuario!</p>
-                    <i class="bi bi-person fs-4 d-flex align-self-center m-0"></i>
-                </div>
-                <p class="card-category-text-p">
-                    Al crear un usuario puedes gestionar y ver tus pedidos. Incluso puedes valorar por estrellas y comentar nuestros productos.
-                </p>
-            </div>
-            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="fw-bold card-category-text-h m-0">¡Cuidado con falsa información!</p>
-                    <i class="bi bi-bug fs-4 d-flex align-self-center m-0"></i>
-                </div>
-                <p class="card-category-text-p">
-                    Si recibimos un pedido a nombre falso o número de teléfono falso, o cualquier otro dato ficticio, ese pedido no será tomado en cuenta.
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="bg-clip-path-down-store-section mb-4"></div>
-
-    <div class="align-items-center">
-        <button type="button" class="btn-details text-white border-0 rounded-2 px-4 py-2 d-flex align-items-center mx-auto" onclick='guardarPedidoSinUsuario(<?php echo json_encode($saveIdProducto); ?>, <?php echo json_encode($saveCantidad); ?>, <?php echo json_encode($saveTotal); ?>)'>
-            Realizar pedido<i class="bi bi-cart-fill ms-2 d-flex align-self-center"></i>
-        </button>
-    </div>
-
     <input type="hidden" id="Product" value="<?php echo isset($saveIdProducto) ? $saveIdProducto : ''; ?>"> 
     <input type="hidden" id="Color" value="<?php echo isset($saveIdColor) ? $saveIdColor : ''; ?>"> 
     <input type="hidden" id="AccesoryColor" value="<?php echo isset($saveIdColorAccesorio) ? $saveIdColorAccesorio : ''; ?>"> 
     <input type="hidden" id="Cant" value="<?php echo isset($saveCantidad) ? $saveCantidad : ''; ?>"> 
     <input type="hidden" id="Total" value="<?php echo isset($saveTotal) ? $saveTotal : ''; ?>"> 
 </div>
+
+<div class="bg-clip-path-up-store-section"></div>
+<div class="m-0 w-100 bg-store-section pb-3 pt-5">
+    <div class="row container-fluid mx-auto gap-1">
+        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <p class="fw-bold card-category-text-h m-0">¡Opción de crear un usuario!</p>
+                <i class="bi bi-person fs-4 d-flex align-self-center m-0"></i>
+            </div>
+            <p class="card-category-text-p">
+                Al crear un usuario puedes gestionar y ver tus pedidos. Incluso puedes valorar por estrellas y comentar nuestros productos.
+            </p>
+        </div>
+        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <p class="fw-bold card-category-text-h m-0">¡Cuidado con falsa información!</p>
+                <i class="bi bi-bug fs-4 d-flex align-self-center m-0"></i>
+            </div>
+            <p class="card-category-text-p">
+                Si recibimos un pedido con nombre de cliente, teléfono o cualquier otro dato falso, ese pedido no será tomado en cuenta.
+            </p>
+        </div>
+    </div>
+</div>
+<div class="bg-clip-path-down-store-section mb-4"></div>
+
+<div class="align-items-center">
+        <button id="btn-guardar-pedido" type="button" class="btn-details text-white border-0 rounded-2 px-4 py-2 d-flex align-items-center mx-auto" onclick='guardarPedidoSinUsuario(<?php echo json_encode($saveIdProducto); ?>, <?php echo json_encode($saveCantidad); ?>, <?php echo json_encode($saveTotal); ?>)'>
+            Realizar pedido<i class="bi bi-cart-fill ms-2 d-flex align-self-center"></i>
+        </button>
+    </div>
 
 <?php
     $content = ob_get_clean();

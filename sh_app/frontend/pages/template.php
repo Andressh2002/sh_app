@@ -1,5 +1,5 @@
 <?php
-    $appVersion = "v3.1.4";
+    $appVersion = "v3.2.0";
 ?>
 
 <!DOCTYPE html>
@@ -28,7 +28,7 @@
     <?php endif; ?>
 
     <?php if (!$showSidebar): ?>
-        <div class="container-fluid flex-fill">
+        <div class="container-fluid flex-fill px-0">
             <?php echo $content; ?>
         </div>
     <?php endif; ?>
@@ -38,7 +38,7 @@
 </body>
 
 <?php if (isset($showFooter) && $showFooter): ?>
-    <footer class="text-center text-lg-start text-muted mt-auto pt-3" style="background-color: #DDD;">
+    <footer class="text-center text-lg-start text-muted pt-3 mt-4" style="background-color: #DDD;">
         <?php include '../layouts/footer.html'; ?>
     </footer>
 <?php endif; ?>

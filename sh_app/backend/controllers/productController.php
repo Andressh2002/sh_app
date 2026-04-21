@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $altura, $anchura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia) {
+    function insertar($conn, $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -21,12 +21,12 @@
             }
     
             // Consulta SQL de inserción
-            $query = "INSERT INTO productos (nombre, idCategoria, idColores, precio, imagen_portada, imagen_galeria, descripcion, fecha_registro, pedidos, vendidos, altura, anchura, idDescuentos, estado, peso, idFestividad, visible, idRareza, idUniverso, idAccesorio, advertencia, tiempo, comida, existencia, fecha_destacado) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, 1, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO productos (nombre, idCategoria, idColores, precio, imagen_portada, imagen_galeria, descripcion, fecha_registro, pedidos, vendidos, altura, idDescuentos, estado, peso, idFestividad, visible, idRareza, idUniverso, idAccesorio, advertencia, tiempo, comida, existencia, fecha_destacado) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?,  ?, 1, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             $stmt = $conn->prepare($query);
             // Aquí, se pasa el número correcto de parámetros y los tipos
-            $stmt->bind_param("sssssssssssssssssssss", $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $fecha_registro, $altura, $anchura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fecha_registro);
+            $stmt->bind_param("ssssssssssssssssssss", $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $fecha_registro, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fecha_registro);
     
             if ($stmt->execute()) {
                 // Obtener el ID del producto insertado
@@ -217,7 +217,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $anchura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia) {
+    function actualizar($conn, $id, $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM productos WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -243,7 +243,6 @@
                             imagen_galeria = ?, 
                             descripcion = ?, 
                             altura = ?, 
-                            anchura = ?, 
                             idDescuentos = ?,
                             peso = ?, 
                             idFestividad = ?, 
@@ -257,7 +256,7 @@
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("sssssssssssssssssssi", $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $anchura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $id);
+            $stmt->bind_param("ssssssssssssssssssi", $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $id);
     
             if ($stmt->execute()) {
                 return [
@@ -623,7 +622,6 @@
                 p.pedidos,
                 p.vendidos,
                 p.altura,
-                p.anchura,
                 p.peso,
                 p.especial,
                 p.estado,
@@ -663,5 +661,100 @@
         }
         
         return $datas;
+    }
+
+    function buscarCartaProducto($conn, $id) {
+        $stmt = $conn->prepare("
+            SELECT 
+                p.nombre, 
+                p.idCategoria, 
+                p.idFestividad, 
+                p.idRareza, 
+                p.idUniverso, 
+                p.idColores, 
+                p.idDescuentos, 
+                p.idAccesorio,
+                p.precio, 
+                p.id, 
+                p.altura, 
+                p.tiempo, 
+                p.peso, 
+                p.descripcion, 
+                p.advertencia, 
+                p.fecha_destacado, 
+                p.fecha_registro, 
+                p.estado, 
+                p.especial, 
+                p.existencia, 
+                p.comida, 
+                p. calificaciones_estrellas,
+                ct.nombre AS categoria, 
+                fs.nombre AS festividad, 
+                fs.fecha_inicial AS festividad_inicio, 
+                fs.fecha_final AS festividad_final, 
+                rr.nombre AS rareza,
+                un.nombre AS universo,
+                ac.nombre AS accesorio, 
+                ac.idColores AS idColoresAccesorio,
+                (SELECT 
+                    GROUP_CONCAT(
+                        CONCAT(
+                            ds.id, ',', ds.fecha_inicial, ',', ds.fecha_final, ',', ds.descuento
+                        ) SEPARATOR '|'
+                    )
+                FROM descuentos ds
+                WHERE FIND_IN_SET(ds.id, p.idDescuentos) AND p.idDescuentos != '' 
+                ) AS descuentos,
+                (SELECT 
+                    GROUP_CONCAT(
+                        CONCAT(
+                            cl.id, ',', cl.codigo_color_principal, ',', cl.codigo_color_secundario, ',', cl.codigo_color_terciario, ',', cl.color_familia
+                        ) SEPARATOR '|'
+                    )
+                FROM colores cl
+                WHERE FIND_IN_SET(cl.id, p.idColores)
+                ) AS colores,
+                (SELECT 
+                    GROUP_CONCAT(
+                        CONCAT(
+                            cl_accesorio.id, ',', cl_accesorio.codigo_color_principal, ',', cl_accesorio.codigo_color_secundario, ',', cl_accesorio.codigo_color_terciario, ',', cl_accesorio.color_familia
+                        ) SEPARATOR '|'
+                    )
+                FROM 
+                    colores cl_accesorio
+                WHERE 
+                    FIND_IN_SET(cl_accesorio.id, ac.idColores)
+                ) AS colores_accesorio
+            FROM 
+                productos p
+            JOIN 
+                categorias ct ON p.idCategoria = ct.id
+            LEFT JOIN 
+                rarezas rr ON p.idRareza = rr.id AND p.idRareza != 0
+            LEFT JOIN 
+                universos un ON p.idUniverso = un.id AND p.idUniverso != 0
+            LEFT JOIN 
+                accesorios ac ON p.idAccesorio = ac.id AND p.idAccesorio != 0
+            LEFT JOIN 
+                festividades fs ON p.idFestividad = fs.id AND p.idFestividad != 0
+            LEFT JOIN 
+                descuentos ds ON FIND_IN_SET(ds.id, p.idDescuentos) AND p.idDescuentos != '' || NULL
+            LEFT JOIN 
+                colores cl ON FIND_IN_SET(cl.id, p.idColores)
+            WHERE 
+                p.id = ?
+            GROUP BY 
+                p.id;
+        ");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return null;
+        }
     }
 ?>

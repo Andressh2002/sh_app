@@ -3,24 +3,24 @@
     checkAccess('Administrador');
 
     ob_start();
-    $pageTitle = "Universos";
-    $pageIcon = 'bi-flag-fill';
-    $type = 'universo';
+    $pageTitle = "Interacciones";
+    $pageIcon = 'bi-broadcast-pin';
+    $type = 'interacción';
 
     $showHeader = false;
     $showNavbar = false;
     $showFooter = false;
     $showSidebar = true;
 
-    $updateUniverse = false;
+    $updateRarity = false;
 
     $inputs = [
         [
-            'label' => 'Nombre',
-            'id' => 'Nombre',
+            'label' => 'Acción',
+            'id' => 'Accion',
             'icon' => 'bi bi-card-text',
             'input' => 'text',
-            'onchange' => 'currentPage = 1; aplicarFiltrosUniverso()',
+            'onchange' => 'currentPage = 1; aplicarFiltrosInteraccion()',
             'btnHelp' => false,
             'spans' => [null, null],
         ]
@@ -32,31 +32,31 @@
             'icon' => '',
             'input' => 'select',
             'options' => [
-                'un.nombre' => 'Nombre',
-                'un.id' => 'Fecha de creación'
+                'id' => 'Fecha de registro',
+                'accion' => 'Acción',
             ],
-            'onchange' => 'aplicarFiltrosUniverso()',
+            'onchange' => 'aplicarFiltrosInteraccion()',
             'btnHelp' => false,
             'spans' => [null, null],
         ]
     ];
     $menuTable = [
-        'url' => 'addUniverse.php',
-        'updateMethod' => 'seleccionarUniversos('.')',
-        'clearMethod' => 'limpiarFiltrosUniverso()',
-        'pageInfo' => 'universos',
-        'showAdd' => true,
+        'url' => '',
+        'updateMethod' => 'seleccionarInteracciones('.')',
+        'clearMethod' => 'limpiarFiltrosInteraccion()',
+        'pageInfo' => 'interacciones',
+        'showAdd' => false,
         'showUpdate' => true,
         'showInfo' => true,
         'spans' => [null, null],
     ];
-    $headers = ['#', 'Imagen', 'Nombre', 'Opciones'];
+    $headers = ['#', 'Acción', 'Url', 'Fecha de registro'];
 ?>
 
 <div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
     <div class="admin-header-card-bg w-100 px-3 py-4">
         <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Universos</h4>
+            <h4 class="card-title">Interacciones</h4>
             <i class="bi bi-search fs-4 d-flex align-self-center"></i>
         </div>
     </div>
@@ -117,6 +117,6 @@
 
 <script>
     $(document).ready(function() {
-        seleccionarUniversos('');
+        seleccionarInteracciones('');
     });
 </script>

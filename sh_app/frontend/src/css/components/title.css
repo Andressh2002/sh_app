@@ -1,0 +1,12 @@
+.title-element {
+    background-color: #ccc;
+    clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 90%);
+    min-height: 128px;
+
+    display: flex;
+    align-items: center;
+}
+
+.title-element > div {
+    width: 100%;
+}

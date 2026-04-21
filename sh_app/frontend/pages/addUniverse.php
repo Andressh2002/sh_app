@@ -26,8 +26,8 @@
             'inputInfo' => "Aquí se escribe el nombre del universo.",
             'spans' => ['Obligatorio', null],
         ],
-        /* [
-            'label' => 'Imágen o logo',
+        [
+            'label' => 'Imágen',
             'id' => 'imagenUniverso',
             'idVista' => 'vistaImagenUniverso',
             'idHidden' => 'hiddenImagenUniverso',
@@ -35,9 +35,9 @@
             'icon' => 'bi bi-image-fill',
             'input' => 'image',
             'btnHelp' => true,
-            'inputInfo' => "Aquí seleccionas una imagen o logo para el universo.",
+            'inputInfo' => "Aquí seleccionas una imagen para el universo. Esta parte se ve en la página de inicio de la tienda.",
             'spans' => ['Obligatorio', 'Máximo un 1 MB (1000 KB) de tamaño'],
-        ], */
+        ],
         [
             'label' => 'Descripcion',
             'id' => 'Descripcion',

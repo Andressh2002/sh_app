@@ -10,7 +10,7 @@
 
     switch ($accion) {
         case 'insertar':
-            if (isset($_POST['nombre']) && isset($_POST['categoria']) && isset($_POST['precio']) && isset($_POST['imagen1']) && isset($_POST['imagen2']) && isset($_POST['descripcion']) && isset($_POST['altura']) && isset($_POST['anchura']) && isset($_POST['descuentos']) && isset($_POST['peso']) && isset($_POST['festividad']) && isset($_POST['rareza']) && isset($_POST['universo']) && isset($_POST['advertencia']) && isset($_POST['comida']) && isset($_POST['existencia'])) {
+            if (isset($_POST['nombre']) && isset($_POST['categoria']) && isset($_POST['precio']) && isset($_POST['imagen1']) && isset($_POST['imagen2']) && isset($_POST['descripcion']) && isset($_POST['altura']) && isset($_POST['descuentos']) && isset($_POST['peso']) && isset($_POST['festividad']) && isset($_POST['rareza']) && isset($_POST['universo']) && isset($_POST['advertencia']) && isset($_POST['comida']) && isset($_POST['existencia'])) {
                 $nombre = $_POST['nombre'];
                 $categoria = $_POST['categoria'];
                 $colores = $_POST['colores'];
@@ -19,7 +19,6 @@
                 $imagen2 = $_POST['imagen2'];
                 $descripcion = $_POST['descripcion'];
                 $altura = $_POST['altura'];
-                $anchura = $_POST['anchura'];
                 $peso = $_POST['peso'];
                 $festividad = $_POST['festividad'];
                 $descuentos = $_POST['descuentos'];
@@ -31,7 +30,7 @@
                 $comida = $_POST['comida'];
                 $existencia = $_POST['existencia'];
 
-                $respuesta = insertar($conn, $nombre, $categoria, $colores, $precio, $imagen1, $imagen2, $descripcion, $altura, $anchura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia);
+                $respuesta = insertar($conn, $nombre, $categoria, $colores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos";
@@ -39,7 +38,7 @@
             break;
 
         case 'actualizar':
-            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['categoria']) && isset($_POST['precio']) && isset($_POST['imagen1']) && isset($_POST['imagen2']) && isset($_POST['descripcion']) && isset($_POST['altura']) && isset($_POST['anchura']) && isset($_POST['descuentos']) && isset($_POST['peso']) && isset($_POST['festividad']) && isset($_POST['rareza']) && isset($_POST['universo']) && isset($_POST['advertencia']) && isset($_POST['comida']) && isset($_POST['existencia'])) {
+            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['categoria']) && isset($_POST['precio']) && isset($_POST['imagen1']) && isset($_POST['imagen2']) && isset($_POST['descripcion']) && isset($_POST['altura']) && isset($_POST['descuentos']) && isset($_POST['peso']) && isset($_POST['festividad']) && isset($_POST['rareza']) && isset($_POST['universo']) && isset($_POST['advertencia']) && isset($_POST['comida']) && isset($_POST['existencia'])) {
                 $id = $_POST['id'];
                 $nombre = $_POST['nombre'];
                 $categoria = $_POST['categoria'];
@@ -49,7 +48,6 @@
                 $imagen2 = $_POST['imagen2'];
                 $descripcion = $_POST['descripcion'];
                 $altura = $_POST['altura'];
-                $anchura = $_POST['anchura'];
                 $peso = $_POST['peso'];
                 $festividad = $_POST['festividad'];
                 $descuentos = $_POST['descuentos'];
@@ -61,7 +59,7 @@
                 $comida = $_POST['comida'];
                 $existencia = $_POST['existencia'];
 
-                $respuesta = actualizar($conn, $id, $nombre, $categoria, $colores, $precio, $imagen1, $imagen2, $descripcion, $altura, $anchura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia);
+                $respuesta = actualizar($conn, $id, $nombre, $categoria, $colores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos para actualizar el producto";
@@ -196,6 +194,14 @@
         
             header('Content-Type: application/json');
             echo json_encode(['datos' => $respuesta]);
+            break;
+
+        case 'buscarCartaProducto':
+            $id = isset($_POST['id']) ? $_POST['id'] : '';
+            $producto = buscarCartaProducto($conn, $id);
+
+            header('Content-Type: application/json');
+            echo json_encode($producto);
             break;
         
         default:

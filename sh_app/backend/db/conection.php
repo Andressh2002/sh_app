@@ -1,7 +1,7 @@
 <?php
-    $bdServerName = "sql103.infinityfree.com";
-    $bdUsername = "if0_37449711";
-    $bdPassword = "G2FsF6VqGhQ";
+    $bdServerName = "localhost";
+    $bdUsername = "root";
+    $bdPassword = "";
     $bdDatabase = "if0_37449711_sh_app";
 
     // Crear conexión

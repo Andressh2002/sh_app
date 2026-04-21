@@ -148,8 +148,8 @@
 <script>
     $(document).ready(function() {
         seleccionarProductos('', '', '', '');
-        obtenerCategoriasParaProductos('Categorias', true);
+        obtenerCategoriasParaProductos('Categorias', true, "false");
         obtenerRarezasParaDashboard('Rareza', true);
-        obtenerUniversosParaDashboard('Universo', true);
+        obtenerUniversosParaDashboard('Universo', true, "false");
     });
 </script>

@@ -15,6 +15,9 @@ const urlRarity = 'rarityRoute.php';
 const urlUniverse = 'universeRoute.php';
 const urlDiscount = 'discountRoute.php';
 const urlAccesory = 'accesoryRoute.php';
+const urlImage = 'imageRoute.php';
+const urlInteraction = 'interactionRoute.php';
+const urlConfiguration = 'configurationRoute.php';
 
 let solicitudAjaxActiva = null;
 let cancelarCargaSecuencial = false;

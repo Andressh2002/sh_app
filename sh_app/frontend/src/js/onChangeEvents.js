@@ -72,7 +72,7 @@ try {
         });
     });
 } catch (error) {
-    console.error("Error:", error);
+    //
 }
 
 try {

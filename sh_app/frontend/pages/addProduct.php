@@ -169,17 +169,6 @@
             'spans' => ['Obligatorio', null],
         ],
         [
-            'label' => 'Ancho',
-            'id' => 'Anchura',
-            'icon' => 'bi bi-rulers',
-            'input' => 'long',
-            'symbol' => 'cm',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe la anchura del producto.",
-            'spans' => ['Obligatorio', null],
-        ],
-        [
             'label' => 'Peso',
             'id' => 'Peso',
             'icon' => 'bi bi-hammer',
@@ -377,7 +366,7 @@
         if (<?php echo $updateProduct ? 'true' : 'false'; ?>) {
             buscarProducto(<?php echo $productId; ?>);
         }
-        obtenerCategoriasParaProductos('Categorias', false);
+        obtenerCategoriasParaProductos('Categorias', false, "false");
     });
 
     $('#modalColors').on('shown.bs.modal', function () {

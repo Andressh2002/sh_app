@@ -10,9 +10,12 @@
     $showSidebar = false;
 
     $nombreCategoria = isset($_GET['nombreCategoria']) ? $_GET['nombreCategoria'] : '';
+    $nombreUniverso = isset($_GET['nombreUniverso']) ? $_GET['nombreUniverso'] : '';
     $idCategoria = isset($_GET['idCategoria']) ? $_GET['idCategoria'] : '';
+    $idUniverso = isset($_GET['idUniverso']) ? $_GET['idUniverso'] : '';
     $nombreProducto = isset($_GET['nombreProducto']) ? $_GET['nombreProducto'] : '';
     $nombreCategoria = $nombreCategoria ?? '';
+    $nombreUniverso = $nombreUniverso ?? '';
 
     $listFilters = [
         [
@@ -70,62 +73,36 @@
     <div class="col">
         <!-- Productos destacados -->
         <div class="m-0 p-0" id="col-productos-destacados">
-            <div class="bg-clip-path-up-store-section mt-3"></div>
-            <div class="m-0 w-100 bg-store-section pb-4">
-                <div class="m-auto row container-fluid w-100 m-auto">
-                    <p class="fw-bold card-category-text-h m-0">Productos destacados</p>
-                </div>
-            </div>
-            <div class="bg-clip-path-down-store-section"></div>
-
-            <div id="contenedor-productos-destacados" class="row p-0 m-0">
-                <div class="spinner-border spinner-color custom-spinner m-auto" role="status" style="width: 50px; height: 50px;">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
+            <?php 
+                $title = [
+                    'title' => 'Productos destacados',
+                    'icon' => 'bi bi-lightbulb',
+                ];
+                include '../src/components/titles/titleStore.php';
+            ?>
+            <div id="contenedor-productos-destacados" class="row my-3 mx-0 px-0">
+                <?php 
+                    include '../src/components/loading/loading.php';
+                ?>
             </div>
         </div>
 
         <!-- Productos de la tienda -->
         <div class="m-0 p-0" id="col-productos-ordinarios">
-            <div class="bg-clip-path-up-store-section mt-3"></div>
-            <div class="m-0 w-100 bg-store-section pb-4">
-                <div class="m-auto row container-fluid w-100 m-auto">
-                    <p class="fw-bold card-category-text-h m-0">Productos de la tienda</p>
-                </div>
-            </div>
-            <div class="bg-clip-path-down-store-section"></div>
-        </div>
-        <div id="contenedor-productos" class="row p-0 m-0">
-            <div class="spinner-border spinner-color custom-spinner m-auto" role="status" style="width: 50px; height: 50px;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-clip-path-up-store-section"></div>
-    <div class="m-0 w-100 bg-store-section pb-3 pt-5">
-        <div class="row container-fluid mx-auto gap-1">
-            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="fw-bold card-category-text-h m-0">¡Siempre con más productos!</p>
-                    <i class="bi bi-tools fs-4 d-flex align-self-center m-0"></i>
-                </div>
-                <p class="card-category-text-p">
-                    Siempre nos encargamos de hacer nuevos productos para que puedan pedirlos en la tienda. Siempre notificamos la llegada de los nuevos productos u otras novedades.
-                </p>
-            </div>
-            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="fw-bold card-category-text-h m-0">¿Cuándo llegan?</p>
-                    <i class="bi bi-alarm fs-4 d-flex align-self-center m-0"></i>
-                </div>
-                <p class="card-category-text-p">
-                    No tenemos fechas definidas para la llegada de los nuevos productos, sin embargo, siempre tratamos de hacerlos lo más pronto posible.
-                </p>
+            <?php 
+                $title = [
+                    'title' => 'Productos de la tienda',
+                    'icon' => 'bi bi-brush',
+                ];
+                include '../src/components/titles/titleStore.php';
+            ?>
+            <div id="contenedor-productos" class="row my-3 mx-0 px-0">
+                <?php 
+                    include '../src/components/loading/loading.php';
+                ?>
             </div>
         </div>
     </div>
-    <div class="bg-clip-path-down-store-section mb-4"></div>
 </div>
 
 <?php
@@ -138,19 +115,25 @@
     document.addEventListener('DOMContentLoaded', function() {
         const nombreProducto = <?php echo json_encode($nombreProducto); ?>;
         const nombreCategoria = <?php echo json_encode($nombreCategoria); ?>;
+        const nombreUniverso = <?php echo json_encode($nombreUniverso); ?>;
         const cartaProductosFiltrosDefecto = {
             nombre: nombreProducto,
             categorias: <?php echo $idCategoria ? json_encode([$idCategoria]) : json_encode([]); ?>,
             precio: [],
             festividades: [],
             rarezas: [],
-            universos: [],
+            universos: <?php echo $idUniverso ? json_encode([$idUniverso]) : json_encode([]); ?>,
         };
         obtenerCartasProductos(cartaProductosFiltrosDefecto);
         obtenerListaFiltros('lista-categorias-filtros', 'categorias', nombreCategoria);
         //obtenerListaFiltros('lista-festividades-filtros', 'festividades');
         obtenerListaFiltros('lista-rarezas-filtros', 'rarezas');
-        obtenerListaFiltros('lista-universos-filtros', 'universos');
+        obtenerListaFiltros('lista-universos-filtros', 'universos', nombreUniverso);
+
+        guardarInteraccion({
+            usuario: <?php echo json_encode($_SESSION['usuario_id'] ?? ''); ?>,
+            accion: `Ir a la página de ${"<?php echo $pageTitle; ?>"}`,
+        });
     });
 
     try {

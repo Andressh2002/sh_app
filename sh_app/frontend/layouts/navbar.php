@@ -90,7 +90,7 @@ $navbarItems = array_filter($navbarItems);
                     <?php $style2Class = (2 === $item['style']) ? 'navbar-login-item' : ''; ?>
                     <li class="d-flex align-items-center w-100 navbar-item <?php echo $isActive; ?>" onclick="window.location.href='<?php echo $item['url']; ?>'">
                         <div class="mx-auto">
-                            <a href="<?php echo $item['url']; ?>" class="nav-link text-decoration-none d-flex align-items-center w-100 h-100 text-center px-3 py-1 <?php echo $style2Class; ?>">
+                            <a id="a-<?php echo $item['url']; ?>" href="<?php echo $item['url']; ?>" class="nav-link text-decoration-none d-flex align-items-center w-100 h-100 text-center px-3 py-1 <?php echo $style2Class; ?>">
                                 <i class="me-2 bi <?php echo $item['icon']; ?> d-flex align-self-center me-sm-2 h2 my-auto navbar-item-icon-size"></i>
                                 <span class="d-sm-inline fw-bold navbar-item-font-size"><?php echo $item['label']; ?></span>
                             </a>

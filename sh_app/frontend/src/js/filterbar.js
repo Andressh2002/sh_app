@@ -98,7 +98,7 @@ function obtenerValoresCheckbox(idElement) {
 }
 
 try {
-    $(document).on('input change', '#nombre, #precioInicial, #precioFinal, #checkDescount', function () {
+    $(document).on('input change', '#checkDescount', function () {
         const filtros = obtenerFiltrosActuales();
         obtenerCartasProductos(filtros);
     });
@@ -106,6 +106,14 @@ try {
     $(document).on('change', '#lista-categorias-filtros input, #lista-festividades-filtros input, #lista-rarezas-filtros input, #lista-universos-filtros input', function () {
         const filtros = obtenerFiltrosActuales();
         obtenerCartasProductos(filtros);
+    });
+
+    let typingTimer;
+
+    $('#nombre, #precioInicial, #precioFinal').on('input', function () {
+        clearTimeout(typingTimer);
+        const filtros = obtenerFiltrosActuales();
+        typingTimer = setTimeout(() => obtenerCartasProductos(filtros), 300);
     });
 
 /*

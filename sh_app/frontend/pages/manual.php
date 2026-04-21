@@ -9,7 +9,7 @@
     $showSidebar = false;
 ?>
 
-<div class="row my-3 p-4">
+<div class="row my-3 p-4 mx-0">
     <div class="d-flex align-items-center gap-2 mb-4 px-0">
         <h4 class="mb-0">Manual de usuario</h4>
         <i class="bi bi-book-fill fs-4 d-flex align-self-center"></i>

@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $descripcion) {
+    function insertar($conn, $nombre, $descripcion, $imagen) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -19,11 +19,11 @@
                 ];
             }
     
-            $query = "INSERT INTO universos (nombre, descripcion, fecha_registro, estado) 
-                      VALUES (?, ?, ?, 1)";
+            $query = "INSERT INTO universos (nombre, descripcion, fecha_registro, estado, imagen) 
+                      VALUES (?, ?, ?, 1, ?)";
             
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("sss", $nombre, $descripcion, $fecha_registro);
+            $stmt->bind_param("ssss", $nombre, $descripcion, $fecha_registro, $imagen);
     
             if ($stmt->execute()) {
                 return [
@@ -42,8 +42,14 @@
         }
     }
 
-    function obtener($conn, $nombre) {
-        $query = "SELECT * FROM universos WHERE estado=1";
+    function obtener($conn, $nombre, $isImagen) {
+        $query = "";
+
+        if ($isImagen == "false") {
+            $query = "SELECT id, nombre, fecha_registro, estado, descripcion FROM categorias WHERE estado=1";
+        } else {
+            $query = "SELECT * FROM universos WHERE estado=1";
+        }
     
         if ($nombre !== null && $nombre !== '') {
             $query .= " AND nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
@@ -75,7 +81,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $descripcion) {
+    function actualizar($conn, $id, $nombre, $descripcion, $imagen) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM universos WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -94,11 +100,12 @@
     
             $queryUpdate = "UPDATE universos SET 
                             nombre = ?, 
-                            descripcion = ? 
+                            descripcion = ?, 
+                            imagen = ? 
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("ssi", $nombre, $descripcion, $id);
+            $stmt->bind_param("sssi", $nombre, $descripcion, $imagen, $id);
     
             if ($stmt->execute()) {
                 return [
@@ -251,9 +258,20 @@
                 un.nombre, 
                 un.descripcion, 
                 un.estado, 
-                un.fecha_registro 
+                un.fecha_registro,
+                COUNT(p.id) AS total_productos
             FROM universos un
-            WHERE un.estado=1 AND un.id=?
+            LEFT JOIN productos p 
+                ON p.idUniverso = un.id 
+                AND p.estado = 1
+            WHERE un.estado = 1 
+            AND un.id = ?
+            GROUP BY 
+                un.id, 
+                un.nombre, 
+                un.descripcion, 
+                un.estado, 
+                un.fecha_registro;
         ");
 
         $stmt->bind_param("i", $id);

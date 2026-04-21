@@ -21,7 +21,6 @@ function guardarProducto() {
     const colores = colores_almacenados.map(item => item.id).join(',');
     const descuentos = descuentos_almacenados.map(item => item.id).join(',');
     const altura = $('#Altura').val();
-    const anchura = $('#Anchura').val();
     const peso = $('#Peso').val();
     const imagen1 = $('#hiddenImagen1Producto').val();
     const imagen2 = $('#hiddenImagen2Producto').val();
@@ -59,7 +58,6 @@ function guardarProducto() {
                 colores: colores,
                 descuentos: descuentos,
                 altura: altura,
-                anchura: anchura,
                 peso: peso,
                 festividad: !existencia ? festividad : '',
                 imagen1: imagen1,
@@ -677,7 +675,6 @@ function cargarProductoSeleccionado(id, callback) {
                     }
                 }
                 
-
                 let validarComida = false;
                 if (p_comida == null || p_comida == 0) {
                     validarComida = true;
@@ -790,13 +787,14 @@ function limpiarFiltrosProducto() {
     $('#Nombre').val('');
 }
 
-function obtenerCategoriasParaProductos(select, all) {
+function obtenerCategoriasParaProductos(select, all, isImagen = true) {
     $.ajax({
         url: backend + urlCategory,
         type: 'POST',
         data: {
             accion: 'obtener',
-            nombre: ''
+            nombre: '',
+            isImagen,
         },
         success: function (response) {
             try {
@@ -1041,14 +1039,15 @@ function obtenerRarezasParaProductos(table, nombre) {
     });
 }
 
-function obtenerUniversosParaProductos(table, nombre) {
+function obtenerUniversosParaProductos(table, nombre, isImagen = true) {
     toggleLoadingIcon(table, true, 3, 28);
     $.ajax({
         url: backend + urlUniverse,
         type: 'POST',
         data: {
             accion: 'obtener',
-            nombre: nombre
+            nombre: nombre,
+            isImagen
         },
         success: function (response) {
             try {

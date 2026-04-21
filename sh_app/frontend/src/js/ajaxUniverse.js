@@ -2,10 +2,11 @@ function guardarUniverso() {
     const id = document.getElementById('Id').value || null;
     const nombre = $('#Nombre').val();
     const descripcion = $('#Descripcion').val();
+    const imagen = $('#hiddenImagenUniverso').val();
 
     if (!validarCampos(
-        [nombre],
-        ['el nombre']
+        [nombre, imagen.length > 30 ? 'A' : ''],
+        ['el nombre', 'la imagen de portada']
     )) {
         return;
     }
@@ -18,7 +19,8 @@ function guardarUniverso() {
         const data = {
             accion: accion,
             nombre: nombre,
-            descripcion: descripcion
+            descripcion: descripcion,
+            imagen: imagen
         };
 
         if (id) {
@@ -82,7 +84,7 @@ function mostrarUniversos(universos) {
     universos = ordenar(universos, order);
 
     if (!Array.isArray(universos) || universos.length === 0) {
-        container.append('<tr><td class="text-center" colspan="3">No se encontraron universos.</td></tr>');
+        container.append('<tr><td class="text-center" colspan="4">No se encontraron universos.</td></tr>');
         return;
     }
 
@@ -91,6 +93,15 @@ function mostrarUniversos(universos) {
         const html = `
             <tr>
                 <td class="align-middle">${startIndex + index + 1}</td>
+                <td class="align-middle">
+                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
+                        <!-- Spinner mientras se carga la imagen -->
+                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${universo.id}" 
+                            style="width: 50px; height: 50px;"></div>
+                        <!-- Imagen (oculta por defecto) -->
+                        <img id="img-${universo.id}" class="d-none product-img-hover" alt="Imagen">
+                    </div>
+                </td>
                 <td class="align-middle">${universo.nombre}</td>
                 <td class="align-middle text-center" style="width: 1px;">
                     <div class="d-flex gap-2 justify-content-start">
@@ -111,7 +122,7 @@ function mostrarUniversos(universos) {
             </tr>
         `;
         container.append(html);
-        //buscarImagenUniverso(universo.id);
+        buscarImagenUniverso(universo.id);
     });
 }
 
@@ -128,8 +139,8 @@ function buscarImagenUniverso(id) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
                 const imagenURL = data[0].imagen && data[0].imagen !== '' ? data[0].imagen : '../src/img/app/no_image.png';
 
-                const imgElement = document.getElementById(`img-${id + 'universo'}`);
-                const spinnerElement = document.getElementById(`spinner-${id + 'universo'}`);
+                const imgElement = document.getElementById(`img-${id}`);
+                const spinnerElement = document.getElementById(`spinner-${id}`);
 
                 imgElement.src = imagenURL;
                 imgElement.classList.remove('d-none');
@@ -147,7 +158,7 @@ function buscarImagenUniverso(id) {
             }
         },
         error: function () {
-            console.error('Error al cargar la imagen o icono del universo.');
+            console.error('Error al cargar la imagen del universo.');
         }
     });
 }
@@ -179,8 +190,8 @@ function mostrarUniverso(universo) {
         $('#Nombre').val(universo.nombre);
         $('#Descripcion').val(universo.descripcion);
 
-        //cargarImagenGuardada(universo.imagen, '#vistaImagenUniverso');
-        //$('#hiddenImagenUniverso').val(universo.imagen);
+        cargarImagenGuardada(universo.imagen, '#vistaImagenUniverso');
+        $('#hiddenImagenUniverso').val(universo.imagen);
     }
 }
 
@@ -245,7 +256,7 @@ function seleccionarUniversos(nombre) {
     const container = $('#data-container');
     const order = $('#Ordenar_por').val();
     container.empty();
-    const colspan = 3;
+    const colspan = 4;
     container.append(`
         <tr><td class="text-center align-middle" colspan="${colspan}">
             <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
@@ -311,6 +322,14 @@ function procesarUniversosSecuencialmente(lista, index, colspan) {
         const html = `
             <tr>
                 <td class="align-middle">${index + 1}</td>
+                <td class="align-middle" style="max-width: 256px; min-width: 140px;">
+                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 140px;">
+                        <!-- Spinner mientras se carga la imagen -->
+                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${universo.id}" style="width: 50px; height: 50px;"></div>
+                        <!-- Imagen (oculta por defecto) -->
+                        <img id="img-${universo.id}" class="d-none product-img-hover" alt="Imagen">
+                    </div>
+                </td>
                 <td class="align-middle" id="informacion-${universo.id}"></td>
                 <td class="align-middle text-center" id="opciones-${universo.id}" style="width: 1px;"></td>
             </tr>
@@ -344,7 +363,7 @@ function cargarUniversoSeleccionado(id, callback) {
                 const json = encodeURIComponent(JSON.stringify(universo));
                 
                 tdInformacion.append(`
-                    <ul class="list-group border-0 px-0">
+                    <ul class="list-group border-0 px-0" style="min-width: 248px;">
                         <li class="${liClasses}">${universo.nombre || 'Sin nombre'}</li>
                     </ul>
                 `);
@@ -370,6 +389,8 @@ function cargarUniversoSeleccionado(id, callback) {
                         </button>
                     </div>
                 `);
+
+                buscarImagenUniverso(universo.id);
             } catch (error) {
                 console.error('Error al procesar la respuesta:', error);
             }

@@ -16,6 +16,15 @@
     ]
 ?>
 
+<?php 
+    $title = [
+        'title' => 'Bienvenidos a SH APP',
+        'icon' => 'bi bi-shop',
+        'text' => 'Aquí podrás ver nuestros productos. Ofrecemos una amplia variedad de ellos.'
+    ];
+    include '../src/components/titles/titleStore.php';
+?>
+
 <div class="row container-sm my-3 mx-auto" id="row-carousel">
     <div class="border border-2 rounded rounded-3 overflow-hidden p-0">
         <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
@@ -53,81 +62,42 @@
     </div>
 </div>
 
-<div class="bg-clip-path-up-store-section"></div>
-<div class="m-0 w-100 bg-store-section pb-3">
-    <div class="m-auto row container-sm w-100 m-auto">
-        <p class="fw-bold card-category-text-h m-0">Productos de SH</p>
-        <p class="card-category-text-p m-0">
-            Productos hechos de material reutilizable como cartón, latas, botellas plásticas, fon, entre otros. Y también hechos de una mezcla de tierra, agua y cemento para las artesanías. Hasta tenemos productos mixtos de material reutilizado y tierra.
-            <br>
-            Son productos muy resistentes, muy elaborados, muy bonitos y en especial muy coloridos. Tienen calidad y belleza nuestro trabajo.
-        </p>
-    </div>
+<div id="contenedor-productos" class="row my-3 mx-0 px-0">
+    <?php 
+        include '../src/components/loading/loading.php';
+    ?>
 </div>
-<div class="bg-clip-path-down-store-section"></div>
 
-<div id="contenedor-categorias" class="row my-3"></div>
 
-<div class="bg-clip-path-up-store-section"></div>
-<div class="m-0 w-100 bg-store-section pb-3 pt-5">
-    <div class="row container-fluid mx-auto gap-1">
-        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold card-category-text-h m-0">Lógica del negocio</p>
-                <i class="bi bi-arrow-repeat fs-4 d-flex align-self-center m-0"></i>
-            </div>
-            <p class="card-category-text-p">
-                Ustedes realizan pedidos de nuestros productos y nosotros se los hacemos desde cero.
-            </p>
-        </div>
-        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold card-category-text-h m-0">Productos coloridos</p>
-                <i class="bi bi-paint-bucket fs-4 d-flex align-self-center m-0"></i>
-            </div>
-            <p class="card-category-text-p">
-                Muchos de nuestros productos tienen opciones de pedirlos en otras paletas de colores.
-            </p>
-        </div>
-        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold card-category-text-h m-0">Duración en elaboración</p>
-                <i class="bi bi-alarm fs-4 d-flex align-self-center m-0"></i>
-            </div>
-            <p class="card-category-text-p">
-                Depende de la complejidad y tamaño del producto.
-            </p>
-        </div>
-        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold card-category-text-h m-0">Pedir algo fuera de la tienda</p>
-                <i class="bi bi-chat-left-dots fs-4 d-flex align-self-center m-0"></i>
-            </div>
-            <p class="card-category-text-p">
-                Si, tenemos la opción de hacer pedidos externos que no están en la tienda, es más. incluso ya hecho uno de ellos queda registrado como producto oficial en la tienda. Solo tomar en cuenta el tiempo en el que se nos vamos a dedicar en tratar de hacerlo, ya que es un producto nuevo.
-            </p>
-        </div>
-        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold card-category-text-h m-0">Método de pago</p>
-                <i class="bi bi-cash fs-4 d-flex align-self-center m-0"></i>
-            </div>
-            <p class="card-category-text-p">
-                Aceptamos efectivo o SINPE.
-            </p>
-        </div>
-        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-            <div class="d-flex align-items-center gap-2">
-                <p class="fw-bold card-category-text-h m-0">Dejar comentarios</p>
-                <i class="bi bi-chat-dots fs-4 d-flex align-self-center m-0"></i>
-            </div>
-            <p class="card-category-text-p">
-                Ustedes pueden dejarnos comentarios en cualquier lado, tanto en nuestra página de Facebook como en cada uno de los productos de la tienda, incluso permite una calificación de estrellas.
-            </p>
-        </div>
-    </div>
+<?php 
+    $title = [
+        'title' => 'Algunos de nuestros tipos de productos',
+        'icon' => 'bi bi-tools',
+        'text' => 'No solo hay figuras coleccionables, tenemos una gran varidedad en nuestros productos, tanto de decoración como de utilidad.'
+    ];
+    include '../src/components/titles/titleStore.php';
+?>
+
+<div id="contenedor-categorias" class="row my-3 mx-0 px-0">
+    <?php 
+        include '../src/components/loading/loading.php';
+    ?>
 </div>
-<div class="bg-clip-path-down-store-section mb-4"></div>
+
+<?php 
+    $title = [
+        'title' => 'Productos de varios universos',
+        'icon' => 'bi bi-flag-fill',
+        'text' => 'En la tienda tenemos productos hechos y basados en varios universos. Ideales si eres fan de alguno de ellos.'
+    ];
+    include '../src/components/titles/titleStore.php';
+?>
+
+<div id="contenedor-universos" class="row my-3 mx-0 px-0">
+    <?php 
+        include '../src/components/loading/loading.php';
+    ?>
+</div>
 
 <?php
     $content = ob_get_clean();
@@ -136,7 +106,25 @@
 ?>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        obtenerCartasCategorias('');
+    document.addEventListener('DOMContentLoaded', async function() {
+        const cartaProductosFiltrosDefecto = {
+            nombre: '',
+            categorias: [],
+            precio: [],
+            festividades: [],
+            rarezas: [],
+            universos: [],
+        };
+        const random = {
+            limite: 10,
+        }
+        await obtenerCartasProductos(cartaProductosFiltrosDefecto, random);
+        await obtenerCartasCategorias('');
+        await obtenerCartasUniversos('');
+
+        guardarInteraccion({
+            usuario: <?php echo json_encode($_SESSION['usuario_id'] ?? ''); ?>,
+            accion: `Ir a la página de ${"<?php echo $pageTitle; ?>"}`,
+        });
     });
 </script>

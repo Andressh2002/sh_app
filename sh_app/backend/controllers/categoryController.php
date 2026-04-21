@@ -42,8 +42,14 @@
         }
     }
 
-    function obtener($conn, $nombre) {
-        $query = "SELECT * FROM categorias WHERE estado=1";
+    function obtener($conn, $nombre, $isImagen) {
+        $query = "";
+
+        if ($isImagen == "false") {
+            $query = "SELECT id, nombre, fecha_registro, estado, descripcion FROM categorias WHERE estado=1";
+        } else {
+            $query = "SELECT * FROM categorias WHERE estado=1";
+        }
     
         if ($nombre !== null && $nombre !== '') {
             $query .= " AND nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";

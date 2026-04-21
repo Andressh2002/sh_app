@@ -370,10 +370,10 @@ function cargarCategoriaSeleccionada(id, callback) {
                 tdOpciones.append(`
                     <div class="d-flex gap-2 justify-content-start">
                         <div class="dropdown">
-                            <button class="dropdown-toggle btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="dropdown-toggle btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center" type="button" id="dropdownMenuButton${categoria.id}" data-bs-toggle="dropdown" aria-expanded="false">
                                 Editar<i class="bi bi-pencil-square ms-2"></i>
                             </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${categoria.id}">
                                 <li><a class="dropdown-item" href="addCategory.php?id=${categoria.id}&accion=actualizar">En esta pestaña</a></li>
                                 <li><a class="dropdown-item" href="addCategory.php?id=${categoria.id}&accion=actualizar" target="_blank">En otra pestaña</a></li>
                             </ul>

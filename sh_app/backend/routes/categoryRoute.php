@@ -45,7 +45,8 @@
         
         case 'obtener':
             $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $respuesta = obtener($conn, $nombre);
+            $isImagen = isset($_POST['isImagen']) ? $_POST['isImagen'] : '';
+            $respuesta = obtener($conn, $nombre, $isImagen);
 
             header('Content-Type: application/json');
             echo json_encode($respuesta);
