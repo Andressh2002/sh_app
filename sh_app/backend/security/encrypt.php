@@ -1,5 +1,5 @@
 <?php
-    define("CIPHER_KEY", "Mw5I2r3rVKLWp2kaz8UwEcpZRNNXHhJXZlOaHmmFIhoi8Frt1Rk2FyrnNsCZ4lWU");
+    define("CIPHER_KEY", "Mw5I2r3rVKLWp2ka");
 
     function encryptData($data) {
         $cipher = "AES-128-CTR"; 

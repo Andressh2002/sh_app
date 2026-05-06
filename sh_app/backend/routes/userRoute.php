@@ -10,7 +10,7 @@
 
     switch ($accion) {
         case 'insertar':
-            if (isset($_POST['nombre']) && isset($_POST['primerApellido']) && isset($_POST['nombreUsuario']) && isset($_POST['contrasennia']) && isset($_POST['rol'])) {
+            if (isset($_POST['nombre']) && isset($_POST['primerApellido']) && isset($_POST['nombreUsuario']) && isset($_POST['rol'])) {
                 $nombre = $_POST['nombre'];
                 $segundoNombre = $_POST['segundoNombre'];
                 $primerApellido = $_POST['primerApellido'];
@@ -31,7 +31,7 @@
             break;
 
         case 'actualizar':
-            if (isset($_POST['id']) && isset($_POST['primerApellido']) && isset($_POST['nombre']) && isset($_POST['nombreUsuario']) && isset($_POST['contrasennia']) && isset($_POST['rol'])) {
+            if (isset($_POST['id']) && isset($_POST['primerApellido']) && isset($_POST['nombre']) && isset($_POST['nombreUsuario']) && isset($_POST['rol'])) {
                 $id = $_POST['id'];
                 $nombre = $_POST['nombre'];
                 $segundoNombre = $_POST['segundoNombre'];
@@ -42,10 +42,9 @@
                 $distrito = $_POST['distrito'];
                 $telefono = $_POST['telefono'];
                 $nombreUsuario = $_POST['nombreUsuario'];
-                $contrasennia = $_POST['contrasennia'];
                 $rol = $_POST['rol'];
 
-                $respuesta = actualizar($conn, $id, $nombre, $nombreUsuario, $contrasennia, $rol, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono);
+                $respuesta = actualizar($conn, $id, $nombre, $nombreUsuario, $rol, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos para actualizar el usuario";

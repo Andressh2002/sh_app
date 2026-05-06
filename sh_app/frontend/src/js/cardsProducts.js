@@ -49,7 +49,7 @@ async function obtenerCartasProductos(filtros, random = null) {
                     safeHTML(contenedorProductosDestacados, '');
 
                     if (!productos || productos.length === 0) {
-                        safeDisplay(columnaContenedorProductos, 'none');
+                        //safeDisplay(columnaContenedorProductos, 'none');
                         safeDisplay(columnaContenedorProductosDestacados, 'none');
 
                         safeHTML(contenedorProductos, '<p class="card-title w-100 text-center">No hay productos encontrados</p>');
@@ -457,7 +457,7 @@ function procesarProducto(producto, idCliente) {
     document.getElementById("spinner-descripcion").style.display = "none";
     if (producto.advertencia.trim() != "") {
         $('#advertenciasProducto').text(producto.advertencia);
-        document.getElementById("spinner-advertencia").style.display = "none";
+        document.getElementById("spinner-advertencias").style.display = "none";
     } else {
         document.getElementById("row-advertencias").style.display = "none";
     }

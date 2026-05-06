@@ -209,6 +209,7 @@
     $(document).ready(function() {
         if (<?php echo $updateUser ? 'true' : 'false'; ?>) {
             buscarUsuario(<?php echo $userId; ?>);
+            $("#input-col-Contrasennia").hide();
         }
     });
 </script>

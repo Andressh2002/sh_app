@@ -1,6 +1,6 @@
 <?php
     ob_start();
-    $pageTitle = "Configuración";
+    $pageTitle = "En mantenimiento";
     $pageIcon = 'bi-gear-fill';
 
     $showHeader = false;

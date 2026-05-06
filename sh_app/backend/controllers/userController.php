@@ -6,9 +6,7 @@
         $segundoNombre = encryptData($segundoNombre);
         $primerApellido = encryptData($primerApellido);
         $segundoApellido = encryptData($segundoApellido);
-        $nombreUsuario = encryptData($nombreUsuario);
-        $contrasennia = encryptData($contrasennia);
-        $rol = encryptData($rol);
+        $contrasennia = password_hash($contrasennia, PASSWORD_DEFAULT);
         $provincia = encryptData($provincia);
         $canton = encryptData($canton);
         $distrito = encryptData($distrito);
@@ -32,7 +30,7 @@
                     'icon' => "error"
                 ];
             }
-    
+            
             $query = "INSERT INTO usuarios (nombre, nombre_usuario, contrasennia, rol, fecha_registro, estado, segundo_nombre, primer_apellido, segundo_apellido, provincia, canton, distrito, telefono) 
                       VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)";
             
@@ -48,6 +46,13 @@
             }
     
         } catch (mysqli_sql_exception $e) {
+            if ($e->getCode() == 1062) {
+                return [
+                    'title' => "¡No se guardó!",
+                    'text' => "Este usuario ya existe. Pruebe con otro nombre de usuario",
+                    'icon' => "error"
+                ];
+            }
             return [
                 'title' => "¡Error!",
                 'text' => "Ha ocurrido un error: " . $e->getMessage(),
@@ -67,8 +72,6 @@
                 $row['segundo_nombre'] = decryptData($row['segundo_nombre']);
                 $row['primer_apellido'] = decryptData($row['primer_apellido']);
                 $row['segundo_apellido'] = decryptData($row['segundo_apellido']);
-                $row['nombre_usuario'] = decryptData($row['nombre_usuario']);
-                $row['rol'] = decryptData($row['rol']);
                 $row['provincia'] = decryptData($row['provincia']);
                 $row['canton'] = decryptData($row['canton']);
                 $row['distrito'] = decryptData($row['distrito']);
@@ -94,8 +97,6 @@
             $row['segundo_nombre'] = decryptData($row['segundo_nombre']);
             $row['primer_apellido'] = decryptData($row['primer_apellido']);
             $row['segundo_apellido'] = decryptData($row['segundo_apellido']);
-            $row['nombre_usuario'] = decryptData($row['nombre_usuario']);
-            $row['rol'] = decryptData($row['rol']);
             $row['provincia'] = decryptData($row['provincia']);
             $row['canton'] = decryptData($row['canton']);
             $row['distrito'] = decryptData($row['distrito']);
@@ -106,35 +107,17 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $nombreUsuario, $contrasennia, $rol, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono) {
+    function actualizar($conn, $id, $nombre, $nombreUsuario, $rol, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono) {
         $nombre = encryptData($nombre);
         $segundoNombre = encryptData($segundoNombre);
         $primerApellido = encryptData($primerApellido);
         $segundoApellido = encryptData($segundoApellido);
-        $nombreUsuario = encryptData($nombreUsuario);
-        $contrasennia = encryptData($contrasennia);
-        $rol = encryptData($rol);
         $provincia = encryptData($provincia);
         $canton = encryptData($canton);
         $distrito = encryptData($distrito);
         $telefono = encryptData($telefono);
 
         try {
-            $queryCheck = "SELECT COUNT(*) AS total FROM usuarios WHERE nombre_usuario = ? AND estado = 1 AND id != ?";
-            $stmtCheck = $conn->prepare($queryCheck);
-            $stmtCheck->bind_param("si", $nombreUsuario, $id);
-            $stmtCheck->execute();
-            $resultCheck = $stmtCheck->get_result();
-            $rowCheck = $resultCheck->fetch_assoc();
-    
-            if ($rowCheck['total'] > 0) {
-                return [
-                    'title' => "¡No se actualizó!",
-                    'text' => "Ya existe un usuario con ese nombre de usuario",
-                    'icon' => "error"
-                ];
-            }
-    
             $queryUpdate = "UPDATE usuarios SET 
                             nombre = ?, 
                             segundo_nombre = ?, 
@@ -145,12 +128,11 @@
                             distrito = ?, 
                             telefono = ?, 
                             nombre_usuario = ?, 
-                            contrasennia = ?, 
                             rol = ? 
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("sssssssssssi", $nombre, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono, $nombreUsuario, $contrasennia, $rol, $id);
+            $stmt->bind_param("ssssssssssi", $nombre, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono, $nombreUsuario, $rol, $id);
     
             if ($stmt->execute()) {
                 return [
@@ -226,8 +208,6 @@
                 $row['segundo_nombre'] = decryptData($row['segundo_nombre']);
                 $row['primer_apellido'] = decryptData($row['primer_apellido']);
                 $row['segundo_apellido'] = decryptData($row['segundo_apellido']);
-                $row['nombre_usuario'] = decryptData($row['nombre_usuario']);
-                $row['rol'] = decryptData($row['rol']);
                 $row['provincia'] = decryptData($row['provincia']);
                 $row['canton'] = decryptData($row['canton']);
                 $row['distrito'] = decryptData($row['distrito']);
@@ -265,7 +245,6 @@
             while ($row = $result->fetch_assoc()) {
                 // Desencripta solo los campos necesarios para el filtrado
                 $nombreDesencriptado = decryptData($row['nombre']);
-                $rolDesencriptado = decryptData($row['rol']);
                 
                 // Filtrar por nombre si se proporcionó
                 if (!empty($nombre) && stripos($nombreDesencriptado, $nombre) === false) {
@@ -273,7 +252,7 @@
                 }
                 
                 // Filtrar por rol si se proporcionó
-                if (!empty($rol) && stripos($rolDesencriptado, $rol) === false) {
+                if (!empty($rol) === false) {
                     continue; // Saltar si no coincide
                 }
 
@@ -290,34 +269,35 @@
     }
 
     function login($conn, $nombreUsuario, $contrasennia) {
-        $query = "SELECT * FROM usuarios WHERE estado = 1";
-        $result = $conn->query($query);
-    
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                // Desencriptar nombre de usuario y contraseña para comparar
-                $nombreUsuarioDescifrado = decryptData($row['nombre_usuario']);
-                $contrasenniaDescifrada = decryptData($row['contrasennia']);
-                
-                // Comparar con los valores proporcionados
-                if ($nombreUsuarioDescifrado === $nombreUsuario && $contrasenniaDescifrada === $contrasennia) {
-                    // Desencriptar todos los valores necesarios antes de devolver
-                    $row['nombre'] = decryptData($row['nombre']);
-                    $row['nombre_usuario'] = $nombreUsuarioDescifrado;
-                    $row['contrasennia'] = $contrasenniaDescifrada;
-                    $row['rol'] = decryptData($row['rol']);
+        $query = "SELECT * FROM usuarios WHERE nombre_usuario = ? AND estado = 1";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("s", $nombreUsuario);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-                    if ($row['rol'] == "Cliente" || $row['rol'] == "Administrador") {
-                        return $row;
-                    } else if ($row['rol'] == "Invitado") {
-                        return null;
-                    }
-                    return null;
+        if ($row = $result->fetch_assoc()) {
+
+            // Verificar contraseña (HASH)
+            if (password_verify($contrasennia, $row['contrasennia'])) {
+
+                // Desencriptar datos necesarios
+                $row['nombre'] = decryptData($row['nombre']);
+                $row['segundo_nombre'] = decryptData($row['segundo_nombre']);
+                $row['primer_apellido'] = decryptData($row['primer_apellido']);
+                $row['segundo_apellido'] = decryptData($row['segundo_apellido']);
+                $row['provincia'] = decryptData($row['provincia']);
+                $row['canton'] = decryptData($row['canton']);
+                $row['distrito'] = decryptData($row['distrito']);
+                $row['telefono'] = decryptData($row['telefono']);
+
+                // Validar rol
+                if ($row['rol'] == "Cliente" || $row['rol'] == "Administrador") {
+                    return $row;
                 }
             }
         }
-    
-        return null; // Si no se encuentra coincidencia
+
+        return null;
     }
 
     function contarTodos($conn) {
@@ -341,8 +321,6 @@
             while ($row = $result->fetch_assoc()) {
                 // Desencriptar campos
                 $row['nombre'] = decryptData($row['nombre']);
-                $row['nombre_usuario'] = decryptData($row['nombre_usuario']);
-                $row['rol'] = decryptData($row['rol']);
     
                 // Filtros
                 if (!empty($nombre) && stripos($row['nombre'], $nombre) === false) {
@@ -380,8 +358,6 @@
             while ($row = $result->fetch_assoc()) {
                 // Desencriptar campos
                 $row['nombre'] = decryptData($row['nombre']);
-                $row['nombre_usuario'] = decryptData($row['nombre_usuario']);
-                $row['rol'] = decryptData($row['rol']);
     
                 // Filtros
                 if (!empty($nombre) && stripos($row['nombre'], $nombre) === false) {
@@ -416,8 +392,6 @@
             while ($row = $result->fetch_assoc()) {
                 // Desencriptar campos
                 $row['nombre'] = decryptData($row['nombre']);
-                $row['nombre_usuario'] = decryptData($row['nombre_usuario']);
-                $row['rol'] = decryptData($row['rol']);
     
                 // Filtros
                 if (!empty($nombre) && stripos($row['nombre'], $nombre) === false) {

@@ -13,11 +13,20 @@ function guardarUsuario() {
     const distrito = $('#Distrito').val();
     const telefono = $('#Telefono').val();
 
-    if (!validarCampos(
-        [nombre, primerApellido, provincia, canton, distrito, nombreUsuario, contrasennia, rol],
-        ['el nombre', 'el primer apellido', 'la provincia', 'el cantón', 'el distrito', 'el nombre de usuario', 'la contraseña', 'el rol']
-    )) {
-        return;
+    if (!id) {
+        if (!validarCampos(
+            [nombre, primerApellido, provincia, canton, distrito, nombreUsuario, contrasennia, rol],
+            ['el nombre', 'el primer apellido', 'la provincia', 'el cantón', 'el distrito', 'el nombre de usuario', 'la contraseña', 'el rol']
+        )) {
+            return;
+        }
+    } else {
+        if (!validarCampos(
+            [nombre, primerApellido, provincia, canton, distrito, nombreUsuario, rol],
+            ['el nombre', 'el primer apellido', 'la provincia', 'el cantón', 'el distrito', 'el nombre de usuario', 'el rol']
+        )) {
+            return;
+        }
     }
     
     alertLoadingBlocked(
@@ -33,7 +42,6 @@ function guardarUsuario() {
             accion: accion,
             nombre: nombre,
             nombreUsuario: nombreUsuario,
-            contrasennia: contrasennia,
             rol: rol,
             segundoNombre: segundoNombre,
             primerApellido: primerApellido,
@@ -43,6 +51,10 @@ function guardarUsuario() {
             distrito: distrito,
             telefono: telefono,
         };
+
+        if (id == null) {
+            data.contrasennia = contrasennia;
+        }
 
         if (id) {
             data.id = id;
