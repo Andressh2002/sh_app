@@ -51,8 +51,6 @@ async function cargarKPIs(){
 
     const k = res?.[0] || {};
 
-        console.log(k);
-
     const config=[
 
         ['Ganancias',

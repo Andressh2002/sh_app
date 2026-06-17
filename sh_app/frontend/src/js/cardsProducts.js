@@ -1423,7 +1423,6 @@ function mostrarEstrellas(calificacion) {
 }
 
 function mostrarComentariosEnProducto(comentarios) {
-
     const html = document.getElementById('container-comentaries');
     html.innerHTML = '';
 

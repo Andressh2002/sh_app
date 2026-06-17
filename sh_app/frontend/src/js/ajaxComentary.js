@@ -298,11 +298,10 @@ function seleccionarComentariosPorIdProducto(idProducto) {
         },
         success: function(response) {
             try {
-                const comentarios = response.datos;
-                const total = response.total;
+                const comentarios = response;
+                const total = response.length;
                 mostrarTotalRegistros(response.total);
                 mostrarComentariosEnProducto(comentarios);
-                actualizarPaginacionComentarioPorIdProducto(total);
             } catch (error) {
                 toggleLoadingIcon('container-comentaries', false, 4, 28);
                 console.error('Error al procesar la respuesta:', error);

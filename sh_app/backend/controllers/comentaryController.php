@@ -111,14 +111,12 @@
         return $comentarios;
     }
 
-    function seleccionarPorIdProducto($conn, $idProducto, $limit, $offset) {
+    function seleccionarPorIdProducto($conn, $idProducto) {
         $query = "SELECT * FROM comentarios WHERE 1=1 AND estado=1";
         
         if ($idProducto !== null && $idProducto !== '') {
             $query .= " AND idProducto = " . $conn->real_escape_string($idProducto);
         }
-    
-        $query .= " LIMIT $limit OFFSET $offset";
         
         $result = $conn->query($query);
         

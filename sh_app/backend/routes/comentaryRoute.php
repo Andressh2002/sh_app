@@ -70,11 +70,10 @@
             $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 10;
             $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
         
-            $respuesta = seleccionarPorIdProducto($conn, $idProducto, $limit, $offset);
-            $total = contarPorIdProducto($conn, $idProducto);
+            $respuesta = seleccionarPorIdProducto($conn, $idProducto);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
+            echo json_encode($respuesta);
             break;
 
         case 'contar':
