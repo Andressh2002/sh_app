@@ -79,11 +79,26 @@ async function obtenerCartasProductos(filtros, random = null) {
                         const esDestacado = esDestacadoVigente(producto.fecha_destacado);
 
                         const cardHTML = `
-                            <div class="col" id="producto-${producto.id}">
-                                <div class="card mx-auto rounded-0 shadow-sm my-3 card-hover card-sizes">
-                                    <div class="card-body card-body-product card-shadow text-decoration-none">
-                                        <div class="spinner-border spinner-color m-auto" role="status">
-                                            <span class="visually-hidden">Loading...</span>
+                            <div
+                                class="col-6 col-sm-4 col-md-3 col-xl-2 mb-4"
+                                id="producto-${producto.id}"
+                            >
+                                <div class="product-card-shadow h-100">
+                                    <div class="info-card skeleton-card">
+
+                                        <!-- Imagen -->
+                                        <div class="card-img-wrapper skeleton-img" style="background: ${producto.color_rareza || '#ffffff'}15;">
+                                            <div class="skeleton-shimmer"></div>
+                                        </div>
+
+                                        <!-- Body -->
+                                        <div class="card-body-wrapper">
+                                            <div class="skeleton-title skeleton-block"></div>
+                                            <div class="skeleton-category skeleton-block"></div>
+                                            <div class="skeleton-stars skeleton-block"></div>
+                                            <div class="price-wrapper mt-auto">
+                                                <div class="skeleton-price skeleton-block"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -231,32 +246,54 @@ function mostrarCartaProducto(idProducto, callback) {
                 if (mostrarTarjeta) {
                     // Tarjeta sin imagen inicial, pero con spinner
                     const cardHTML = `
-                        <div class="col">
-                            <div class="card mx-auto rounded-0 shadow-sm my-3 card-hover card-sizes position-relative" style="background: ${producto.color_rareza ? producto.color_rareza + '23' : ''}">
-                                <a id="product-card-${producto.id}" class="card-body p-0 pb-3 card-body-product card-shadow text-decoration-none d-flex flex-column align-items-center justify-content-between" href="../pages/product.php?nombreProducto=${encodeURIComponent(producto.nombre)}&id=${encodeURIComponent(producto.id)}">
-                                    <div class="card-header-bg w-100 pt-2 px-1 pb-0 pt-sm-4 px-sm-2 pb-sm-0" style="background: ${producto.color_rareza ? producto.color_rareza : ''}">
-                                        <h4 class="card-product-text-h text-center">${producto.nombre}</h4>
-                                        <p class="card-product-text-p">${producto.categoria}</p>
+                            <div class="product-card-shadow h-100">
+                                <a
+                                    id="product-card-${producto.id}"
+                                    class="info-card"
+                                    href="../pages/product.php?nombreProducto=${encodeURIComponent(producto.nombre)}&id=${encodeURIComponent(producto.id)}"
+                                >
+                                    <div
+                                        class="card-img-wrapper"
+                                        style="background: ${producto.color_rareza || '#ffffff'}22;"
+                                    >
+                                        <div
+                                            class="spinner-border spinner-color position-absolute"
+                                            role="status"
+                                            id="spinner-${idProducto}"
+                                        ></div>
+                                        <img
+                                            id="img-${idProducto}"
+                                            class="d-none p-1 p-sm-2 p-md-3 p-lg-4"
+                                            alt="${producto.nombre}"
+                                        >
+                                        ${badgeHTML}
+                                        ${discountHTML}
                                     </div>
-                                    <div class="m-auto text-star" id="rating-producto${producto.id}"></div>
-                                    <div class="position-relative d-flex justify-content-center align-items-center card-img-product-container">
-                                        <!-- Spinner mientras se carga la imagen -->
-                                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${idProducto}" 
-                                            style="width: 50px; height: 50px;"></div>
-                                        <!-- Imagen del producto (oculta por defecto) -->
-                                        <img id="img-${idProducto}" class="d-none product-img-hover" alt="Imagen del Producto">
+                                    <div 
+                                        class="card-body-wrapper" 
+                                        style="background: ${producto.color_rareza || '#ffffff'};"
+                                    >
+                                        <h5 class="card-title">
+                                            ${producto.nombre}
+                                        </h5>
+                                        <p class="card-category">
+                                            ${producto.categoria}
+                                        </p>
+                                        <div
+                                            class="text-center mb-3 card-star-text"
+                                            id="rating-producto${producto.id}"
+                                        ></div>
+                                        <div class="price-wrapper mt-auto">
+                                            ${priceHTML}
+                                        </div>
                                     </div>
-                                    ${priceHTML}
                                 </a>
-                                ${badgeHTML}
-                                ${discountHTML}
                             </div>
-                        </div>
                     `;
                     cardContainer.innerHTML = cardHTML;
 
                     // Mostrar estrellas
-                    mostrarEstrellasCartaProducto(producto.calificaciones_estrellas, producto.id);
+                    mostrarEstrellasCartaProducto(producto.calificacion_estrellas, producto.id);
 
                     // Cargar la imagen del producto después
                     cargarImagenProducto(idProducto);
@@ -317,41 +354,69 @@ function cargarImagenProducto(idProducto) {
     });
 }
 
-function mostrarEstrellasCartaProducto(calificaciones, idElement) {
-    if (!calificaciones) {
-        calificaciones = '';
+function mostrarEstrellasCartaProducto(calificacion, idElement) {
+    // convertir a número
+    const rating =
+        parseFloat(calificacion) || 0;
+
+    const divRating =
+        document.getElementById(
+            'rating-producto' +
+            idElement.toString()
+        );
+
+    if(!divRating){
+        return;
     }
-    let totalEstrellas = 0;
-    let contador = 0;
 
-    // Remover los corchetes y luego dividir la cadena en pares clave:valor
-    const pares = calificaciones.replace(/[{}]/g, '').split(',');
+    divRating.innerHTML = '';
 
-    // Iterar sobre los pares clave:valor
-    pares.forEach(par => {
-        const [clave, estrellas] = par.split(':'); // Separar clave y valor
-        totalEstrellas += parseInt(estrellas); // Sumar las estrellas (valor)
-        contador++; // Incrementar el contador
-    });
+    for(let i = 1; i <= 5; i++){
 
-    // Calcular el promedio de estrellas
-    const promedioEstrellas = contador > 0 ? totalEstrellas / contador : 0;
+        // estrella completa
+        if(rating >= i){
 
-    const divRating = document.getElementById('rating-producto' + idElement.toString());
-    divRating.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevas estrellas
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star-fill
+                    text-star
+                "></i>
+            `;
+        }
 
-    // Rellenar las estrellas según el promedio (redondeado)
-    for (let i = 1; i <= 5; i++) {
-        // Rellenar las estrellas en función del promedio redondeado
-        if (i <= Math.round(promedioEstrellas)) {
-            divRating.innerHTML += `<i class="bi bi-star-fill"></i>`;
-        } else {
-            divRating.innerHTML += `<i class="bi bi-star"></i>`;
+        // media estrella
+        else if(rating >= i - 0.5){
+
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star-half
+                    text-star
+                "></i>
+            `;
+        }
+
+        // estrella vacía
+        else{
+
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star
+                    text-star
+                "></i>
+            `;
         }
     }
 }
 
+let productoActual = null;
+
 function buscarCartaProducto(id, idCliente) {
+
+    // Mostrar skeleton general
+    $('#producto-page-skeleton').removeClass('d-none');
+
+    $('#producto-page-content').addClass('d-none');
+
     $.ajax({
         url: backend + urlProduct,
         type: 'POST',
@@ -359,52 +424,121 @@ function buscarCartaProducto(id, idCliente) {
             accion: 'buscarCartaProducto',
             id: id
         },
-        success: function (response) {
-            try {
-                const producto = typeof response === 'string' ? JSON.parse(response) : response;
 
-                // pintar datos
+        success: function (response) {
+
+            try {
+
+                const producto =
+                    typeof response === 'string'
+                        ? JSON.parse(response)
+                        : response;
+
+                productoActual = producto;
+
+                // Procesar información
                 procesarProducto(producto, idCliente);
 
-                // cargar imágenes
+                // Cargar imágenes
                 cargarImagenes(producto);
 
+                // Mostrar contenido
+                $('#producto-page-skeleton')
+                    .addClass('d-none');
+
+                $('#producto-page-content')
+                    .removeClass('d-none');
+
             } catch (error) {
-                console.error('Error al procesar:', error);
+
+                console.error(
+                    'Error al procesar producto:',
+                    error
+                );
             }
         },
-        error: function () {
-            console.error('Error AJAX');
+
+        error: function (xhr, status, error) {
+
+            console.error(
+                'Error AJAX:',
+                error
+            );
+
+            console.error(xhr.responseText);
         }
     });
 }
 
 function procesarProducto(producto, idCliente) {
-    const fechaActual = new Date();
-    const anioActual = fechaActual.getFullYear();
 
-    let precioFinal = producto.precio;
+    const fechaActual = new Date();
+
+    const anioActual =
+        fechaActual.getFullYear();
+
+    let precioFinal = parseFloat(producto.precio);
+
     let mejorDescuento = null;
 
-    // Calcular descuentos
-    if (producto.descuentos) {
-        const vectDescuentos = producto.descuentos.split('|');
+    // =====================================
+    // DESCUENTOS
+    // =====================================
 
-        vectDescuentos.forEach(d => {
-            const [_, inicio, fin, rebaja] = d.split(',');
+    if (
+        producto.descuentos &&
+        producto.descuentos.trim() !== ''
+    ) {
 
-            const [mesI, diaI] = inicio.split('-').map(Number);
-            const [mesF, diaF] = fin.split('-').map(Number);
+        const descuentos =
+            producto.descuentos.split('|');
 
-            const fechaInicio = new Date(anioActual, mesI - 1, diaI);
-            const fechaFin = new Date(
-                mesF >= mesI ? anioActual : anioActual + 1,
-                mesF - 1,
-                diaF
-            );
+        descuentos.forEach(d => {
 
-            if (fechaActual >= fechaInicio && fechaActual <= fechaFin) {
-                if (!mejorDescuento || rebaja > mejorDescuento.rebaja) {
+            const partes = d.split(',');
+
+            if (partes.length < 4) return;
+
+            const [
+                _,
+                inicio,
+                fin,
+                rebaja
+            ] = partes;
+
+            const [mesI, diaI] =
+                inicio.split('-').map(Number);
+
+            const [mesF, diaF] =
+                fin.split('-').map(Number);
+
+            const fechaInicio =
+                new Date(
+                    anioActual,
+                    mesI - 1,
+                    diaI
+                );
+
+            const fechaFin =
+                new Date(
+                    mesF >= mesI
+                        ? anioActual
+                        : anioActual + 1,
+                    mesF - 1,
+                    diaF
+                );
+
+            if (
+                fechaActual >= fechaInicio &&
+                fechaActual <= fechaFin
+            ) {
+
+                if (
+                    !mejorDescuento ||
+                    parseFloat(rebaja) >
+                    mejorDescuento.rebaja
+                ) {
+
                     mejorDescuento = {
                         rebaja: parseFloat(rebaja),
                         fechaFin: `${mesF}-${diaF}`
@@ -414,159 +548,376 @@ function procesarProducto(producto, idCliente) {
         });
 
         if (mejorDescuento) {
-            precioFinal = producto.precio - (producto.precio * (mejorDescuento.rebaja / 100));
+
+            precioFinal =
+                producto.precio -
+                (
+                    producto.precio *
+                    (
+                        mejorDescuento.rebaja / 100
+                    )
+                );
         }
     }
 
-    // Validad disponibilidad del producto
+    // =====================================
+    // DISPONIBILIDAD
+    // =====================================
+
     let mensajeDisponibilidad = '';
 
     if (!producto.existencia) {
-        if (producto.idFestividad) {
-            const [mesI, diaI] = producto.festividad_inicio.split('-').map(Number);
-            const [mesF, diaF] = producto.festividad_final.split('-').map(Number);
 
-            const fechaInicio = new Date(anioActual, mesI - 1, diaI);
-            const fechaFin = new Date(
-                mesF >= mesI ? anioActual : anioActual + 1,
-                mesF - 1,
-                diaF
-            );
+        if (producto.idFestividad) {
+
+            const [mesI, diaI] =
+                producto.festividad_inicio
+                    .split('-')
+                    .map(Number);
+
+            const [mesF, diaF] =
+                producto.festividad_final
+                    .split('-')
+                    .map(Number);
+
+            const fechaFin =
+                new Date(
+                    mesF >= mesI
+                        ? anioActual
+                        : anioActual + 1,
+                    mesF - 1,
+                    diaF
+                );
 
             if (fechaActual > fechaFin) {
-                mostrarNoDisponible();
+
+                $('#producto-page-content').html(`
+                    <div class="container py-5">
+
+                        <div
+                            class="
+                                product-not-available-card
+                            "
+                        >
+
+                            <i
+                                class="
+                                    bi
+                                    bi-x-circle-fill
+                                "
+                            ></i>
+
+                            <h2 class="mt-3">
+                                Este producto
+                                no está disponible
+                            </h2>
+
+                            <p class="mt-2">
+                                El producto ya no
+                                se encuentra disponible.
+                            </p>
+
+                        </div>
+
+                    </div>
+                `);
+
+                $('#producto-page-skeleton')
+                    .addClass('d-none');
+
+                $('#producto-page-content')
+                    .removeClass('d-none');
+
                 return;
             }
 
-            mensajeDisponibilidad = `Disponible hasta el ${formarFecha(`${mesF}-${diaF}`)}`;
+            mensajeDisponibilidad =
+                `Disponible hasta el ${
+                    formarFecha(
+                        `${mesF}-${diaF}`
+                    )
+                }`;
+
         }
+
     } else {
-        mensajeDisponibilidad = 'Disponible hasta agotar existencias';
+
+        mensajeDisponibilidad =
+            'Disponible hasta agotar existencias';
     }
 
-    // Estrellas
-    renderEstrellas(producto.calificaciones_estrellas);
-    const estrellasUsuario = obtenerEstrellasIdCliente(producto.calificaciones_estrellas);
+    // =====================================
+    // ESTRELLAS
+    // =====================================
 
-    renderEstrellas(producto.calificaciones_estrellas, estrellasUsuario);
+    renderEstrellas(
+        producto.calificacion_estrellas
+    );
 
-    // Rellenar textos
-    $('#nombreProducto').text(producto.nombre);
-    $('#nombreCategoria').text(producto.categoria);
-    $('#descripcionProducto').text(producto.descripcion);
-    document.getElementById("spinner-descripcion").style.display = "none";
-    if (producto.advertencia.trim() != "") {
-        $('#advertenciasProducto').text(producto.advertencia);
-        document.getElementById("spinner-advertencias").style.display = "none";
-    } else {
-        document.getElementById("row-advertencias").style.display = "none";
-    }
-    $('#alturaProducto').text(`Cerca de ${producto.altura} cm`);
-    document.getElementById("spinner-altura").style.display = "none";
-    $('#pesoProducto').text(`Aproximadamente ${producto.peso} kg`);
-    document.getElementById("spinner-peso").style.display = "none";
-    $('#tiempoProducto').text(`Está hecho en ${producto.tiempo} día${producto.tiempo != 1 ? "s" : ""}`);
-    document.getElementById("spinner-tiempo").style.display = "none";
+    const estrellasUsuario =
+        obtenerEstrellasIdCliente(
+            producto.calificacion_estrellas
+        );
 
-    // Calucar precios
-    if (mejorDescuento) {
-        $('#nombrePrecio').html(`
-            <span style="text-decoration:line-through">₡${producto.precio}</span>
-            <span>₡${precioFinal.toFixed(0)}</span>
+    renderEstrellas(
+        producto.calificacion_estrellas,
+        estrellasUsuario
+    );
+
+    // =====================================
+    // INFORMACIÓN GENERAL
+    // =====================================
+
+    $('#nombreProducto')
+        .text(producto.nombre || '');
+
+    $('#nombreCategoria').html(`
+        <span class="product-category-badge">
+            ${producto.categoria || ''}
+        </span>
+    `);
+
+    $('#descripcionProducto')
+        .text(producto.descripcion || '');
+
+    // =====================================
+    // ADVERTENCIAS
+    // =====================================
+
+    if (
+        producto.advertencia &&
+        producto.advertencia.trim() !== ''
+    ) {
+
+        $('#row-advertencias').show();
+
+        $('#advertenciasProducto').html(`
+            <div class="product-warning-box">
+
+                <i
+                    class="
+                        bi
+                        bi-exclamation-triangle-fill
+                        me-2
+                    "
+                ></i>
+
+                ${producto.advertencia}
+
+            </div>
         `);
 
-        $('#descuento').text(`-${mejorDescuento.rebaja}% de descuento`);
-        $('#tiempoDescuento').text(`El descuento termina hasta el ${formarFecha(mejorDescuento.fechaFin)}`);
     } else {
-        $('#nombrePrecio').text(`₡${producto.precio}`);
+
+        $('#row-advertencias').hide();
+    }
+
+    // =====================================
+    // CARACTERÍSTICAS
+    // =====================================
+
+    $('#alturaProducto').html(`
+        <span class="product-feature-value">
+            Cerca de ${producto.altura} cm
+        </span>
+    `);
+
+    $('#pesoProducto').html(`
+        <span class="product-feature-value">
+            Aproximadamente ${producto.peso} kg
+        </span>
+    `);
+
+    $('#tiempoProducto').html(`
+        <span class="product-feature-value">
+            Está hecho en
+            ${producto.tiempo}
+            día${producto.tiempo != 1 ? 's' : ''}
+        </span>
+    `);
+
+    // =====================================
+    // PRECIOS
+    // =====================================
+
+    if (mejorDescuento) {
+
+        $('#nombrePrecio').html(`
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="product-old-price text-decoration-line-through">
+                    ₡${producto.precio}
+                </span>
+                <span class="product-new-price">
+                    ₡${precioFinal.toFixed(0)}
+                </span>
+                <span class="product-discount-badge">
+                    -${mejorDescuento.rebaja}%
+                </span>
+            </div>
+        `);
+
+        $('#descuento').text(`
+            ${mejorDescuento.rebaja}%
+            de descuento aplicado
+        `);
+
+        $('#tiempoDescuento').html(`
+            <i
+                class="
+                    bi
+                    bi-clock-fill
+                    me-1
+                "
+            ></i>
+
+            Termina el
+            ${formarFecha(
+                mejorDescuento.fechaFin
+            )}
+        `);
+
+        $('#Precio').val(precioFinal);
+
+    } else {
+
+        $('#nombrePrecio').html(`
+            <span class="product-normal-price">
+                ₡${producto.precio}
+            </span>
+        `);
+
         $('#descuento').text('');
+
         $('#tiempoDescuento').text('');
     }
 
-    // Mostrar disponibilidad
-    $('#disponibilidad').text(mensajeDisponibilidad);
+    // =====================================
+    // DISPONIBILIDAD
+    // =====================================
 
-    // Total
-    $('#cantidad').off('change').on('change', function () {
-        calcularTotal(precioFinal);
-    });
+    if (
+        mensajeDisponibilidad &&
+        mensajeDisponibilidad.length > 0
+    ) {
+
+        $('#disponibilidad').html(`
+            <span class="product-stock-text">
+
+                <i
+                    class="
+                        bi
+                        bi-check-circle-fill
+                        me-1
+                    "
+                ></i>
+
+                ${mensajeDisponibilidad}
+
+            </span>
+        `);
+    }
+
+    // =====================================
+    // TOTAL
+    // =====================================
+
+    $('#cantidad')
+        .off('change')
+        .on('change', function () {
+
+            calcularTotal(precioFinal);
+        });
 
     calcularTotal(precioFinal);
 
-    // Comentarios
-    seleccionarComentariosPorIdProducto(producto.id);
-    document.getElementById("spinner-comentarios").style.display = "none";
+    // =====================================
+    // COMENTARIOS
+    // =====================================
 
-    if (idCliente == "") {
-        document.getElementById("row-comentario").style.display = "none";
+    seleccionarComentariosPorIdProducto(
+        producto.id
+    );
+
+    if (!idCliente) {
+        $("#btn-comentar").addClass("d-none");
     }
 
-    // Evento de paletas de colores
-    window.mostrarColorImagen = function (index, id) {
-        $('#product-color-image').attr('src', producto[`imagen_color${index + 1}`]);
-        $('#Color').val(id);
-        $('#NumColor').val(index + 1);
-    }
-
-    window.mostrarColorImagenAccesorio = function (index, id) {
-        $('#accesory-color-image').attr('src', producto[`imagen_accesorio_color${index + 1}`]);
-        $('#AccesoryColor').val(id);
-        $('#NumAccesoryColor').val(index + 1);
-    }
-
-    // Acción de guardar pedido
-    if (idCliente) {
-        $('#btnAccionProducto').text('Agregar a pedidos')
-            .off().on('click', () => guardarPedido(producto.id));
-    } else {
-        $('#btnAccionProducto').text('Reservar')
-            .off().on('click', () => irReservar(producto.id, producto.idAccesorio));
-    }
-
-    // Botón de guardar calificación de estrellas
-    const btn = $('#save-rating');
-    const texto = $('#texto-boton-rating');
-    const icono = $('#icono-boton-rating');
-
-    btn.off('click'); // limpiar eventos anteriores
+    // =====================================
+    // BOTÓN PRINCIPAL
+    // =====================================
 
     if (idCliente) {
-        // Usuario logueado
-        texto.text('Guardar calificación');
-        icono.attr('class', 'bi bi-pencil-square ms-2 d-flex align-items-center');
 
-        btn.on('click', function () {
-            guardarEstrellas();
-        });
+        $('#btnAccionProducto')
+            .html(`
+                Agregar a pedidos
+                <i
+                    class="
+                        bi
+                        bi-cart-fill
+                        ms-2
+                    "
+                ></i>
+            `)
+            .off()
+            .on(
+                'click',
+                () => guardarPedido(producto.id)
+            );
 
     } else {
-        // Usuario NO logueado
-        texto.text('Iniciar sesión');
-        icono.attr('class', 'bi bi-person-fill ms-2 d-flex align-items-center');
 
-        btn.on('click', function () {
-            irLogin();
-        });
+        $('#btnAccionProducto')
+            .html(`
+                Reservar
+                <i
+                    class="
+                        bi
+                        bi-box-arrow-in-right
+                        ms-2
+                    "
+                ></i>
+            `)
+            .off()
+            .on(
+                'click',
+                () =>
+                    irReservar(
+                        producto.id,
+                        producto.idAccesorio
+                    )
+            );
     }
 
-    if (idCliente == "") {
-        document.getElementById("row-calificacion").style.display = "none";
-    }
+    // =====================================
+    // MOSTRAR CONTENIDO
+    // =====================================
 
-    //Buscar productos relacionados
-    const cartaProductosFiltrosDefecto = {
+    $('#skeleton-info').hide();
+
+    $('#product-info-content')
+        .removeClass('d-none');
+
+    // =====================================
+    // PRODUCTOS RELACIONADOS
+    // =====================================
+
+    const filtros = {
         nombre: '',
         categorias: [],
         precio: [],
         festividades: [],
         rarezas: [],
-        universos: [producto.idUniverso],
+        universos: [producto.idUniverso]
     };
-    obtenerCartasProductos(cartaProductosFiltrosDefecto);
+
+    obtenerCartasProductos(filtros);
 }
 
 function renderColores(producto) {
+
     if (!producto.colores) {
+
         $('#contenedor-colores').html('');
         return;
     }
@@ -574,18 +925,23 @@ function renderColores(producto) {
     let html = '';
 
     const coloresArray = producto.colores.split('|');
-    const ids = producto.idColores.split(',').map(Number);
+
+    const ids =
+        producto.idColores.split(',').map(Number);
 
     let dict = {};
 
     // Crear diccionario
     coloresArray.forEach(c => {
+
         const [id, ...rest] = c.split(',');
+
         dict[parseInt(id)] = rest;
     });
 
     // Generar HTML
     ids.forEach((id, index) => {
+
         if (!dict[id]) return;
 
         const [
@@ -596,70 +952,111 @@ function renderColores(producto) {
         ] = dict[id];
 
         html += `
-            <div class="d-flex flex-column align-items-center mx-2" style="width: 48px">
-                
-                <div class="color-preview"
-                     style="background: ${codigo_color_principal}; cursor:pointer;"
-                     onclick="mostrarColorImagen(${index}, ${id})">
-                     
-                    <div class="color-secondary"
-                         style="background: ${codigo_color_secundario};">
-                    </div>
-                    
-                    <div class="color-terciary"
-                         style="background: ${codigo_color_terciario};">
-                    </div>
+            <div
+                class="
+                    color-option
+                    d-flex
+                    flex-column
+                    align-items-center
+                    p-2
+                "
+                data-color="${id}"
+            >
+                <div
+                    class="color-preview"
+                    style="
+                        background:${codigo_color_principal};
+                        cursor:pointer;
+                    "
+                    onclick="mostrarColorImagen(${index}, ${id})"
+                >
+                    <div
+                        class="color-secondary"
+                        style="
+                            background:${codigo_color_secundario};
+                        "
+                    ></div>
+                    <div
+                        class="color-terciary"
+                        style="
+                            background:${codigo_color_terciario};
+                        "
+                    ></div>
                 </div>
-
-                <span class="mt-1 text-center">${color_familia}</span>
             </div>
         `;
     });
 
     $('#contenedor-colores').html(html);
 
-    // Seleccionar el primero automáticamente
+    // Seleccionar primero
     if (ids.length > 0) {
+
         $('#Color').val(ids[0]);
+
         $('#NumColor').val(1);
+
+        $('.color-option').first().addClass('active');
     }
 }
 
 function renderColoresAccesorio(producto) {
+
     if (!producto.colores_accesorio) {
+
         $('#contenedor-colores-accesorio').html('');
         return;
     }
 
     let html = '';
 
-    const coloresArray = producto.colores_accesorio.split('|');
-    const ids = producto.idColoresAccesorio.split(',').map(Number);
+    const coloresArray =
+        producto.colores_accesorio.split('|');
+
+    const ids =
+        producto.idColoresAccesorio.split(',').map(Number);
 
     let dict = {};
 
     coloresArray.forEach(c => {
+
         const [id, ...rest] = c.split(',');
+
         dict[parseInt(id)] = rest;
     });
 
     ids.forEach((id, index) => {
+
         if (!dict[id]) return;
 
         const [p, s, t, nombre] = dict[id];
 
         html += `
-            <div class="d-flex flex-column align-items-center mx-2" style="width: 48px">
-                
-                <div class="color-preview"
-                     style="background: ${p}; cursor:pointer;"
-                     onclick="mostrarColorImagenAccesorio(${index}, ${id})">
-                     
-                    <div class="color-secondary" style="background: ${s};"></div>
-                    <div class="color-terciary" style="background: ${t};"></div>
-                </div>
+            <div
+                class="
+                    accesory-color-option
+                    d-flex
+                    flex-column
+                    align-items-center
+                    p-2
+                "
+                data-color="${id}"
+            >
+                <div
+                    class="color-preview"
+                    style="background:${p}; cursor:pointer;"
+                    onclick="mostrarColorImagenAccesorio(${index}, ${id})"
+                >
+                    <div
+                        class="color-secondary"
+                        style="background:${s};"
+                    ></div>
 
-                <span class="mt-1 text-center">${nombre}</span>
+                    <div
+                        class="color-terciary"
+                        style="background:${t};"
+                    ></div>
+                </div>
             </div>
         `;
     });
@@ -667,12 +1064,59 @@ function renderColoresAccesorio(producto) {
     $('#contenedor-colores-accesorio').html(html);
 
     if (ids.length > 0) {
+
         $('#AccesoryColor').val(ids[0]);
+
         $('#NumAccesoryColor').val(1);
+
+        $('.accesory-color-option')
+            .first()
+            .addClass('active');
     }
 }
 
+function mostrarColorImagen(index, id) {
+
+    $('#product-color-image')
+        .attr(
+            'src',
+            productoActual[`imagen_color${index + 1}`]
+        );
+
+    $('.color-option')
+        .removeClass('active');
+
+    $(`.color-option[data-color="${id}"]`)
+        .addClass('active');
+
+    $('#Color').val(id);
+
+    $('#NumColor').val(index + 1);
+}
+
+function mostrarColorImagenAccesorio(index, id) {
+
+    $('#accesory-color-image')
+        .attr(
+            'src',
+            productoActual[
+                `imagen_accesorio_color${index + 1}`
+            ]
+        );
+
+    $('.accesory-color-option')
+        .removeClass('active');
+
+    $(`.accesory-color-option[data-color="${id}"]`)
+        .addClass('active');
+
+    $('#AccesoryColor').val(id);
+
+    $('#NumAccesoryColor').val(index + 1);
+}
+
 function renderEstrellas(data, estrellasUsuario = 0) {
+
     mostrarEstrellas(data);
 
     const contenedor = $('[data-id="opinion"]');
@@ -680,98 +1124,221 @@ function renderEstrellas(data, estrellasUsuario = 0) {
     // Limpiar eventos anteriores
     contenedor.off('click', 'i');
 
-    // Click en estrellas (IMPORTANTE: star y star-fill)
+    // Click en estrellas
     contenedor.on('click', 'i', function () {
+
         const selected = $(this).data('star');
 
         pintarEstrellasUsuario(selected);
+
         $('#Estrellas').val(selected);
     });
 
-    // Inicializar con estrellas del usuario
+    // Inicializar estrellas usuario
     if (estrellasUsuario > 0) {
+
         pintarEstrellasUsuario(estrellasUsuario);
+
         $('#Estrellas').val(estrellasUsuario);
     }
 
-    // Botón reset
-    $('#reset-rating').off('click').on('click', function () {
-        pintarEstrellasUsuario(0);
-        $('#Estrellas').val(0);
-    });
+    // Reset
+    $('#reset-rating')
+        .off('click')
+        .on('click', function () {
+
+            pintarEstrellasUsuario(0);
+
+            $('#Estrellas').val(0);
+        });
 }
 
 function pintarEstrellasUsuario(valor) {
+
     const estrellas = $('[data-id="opinion"] i');
 
     estrellas
-        .removeClass('bi-star-fill')
+        .removeClass('bi-star-fill active-star')
         .addClass('bi-star');
 
     estrellas.each(function () {
+
         if ($(this).data('star') <= valor) {
-            $(this).removeClass('bi-star').addClass('bi-star-fill');
+
+            $(this)
+                .removeClass('bi-star')
+                .addClass('bi-star-fill active-star');
         }
     });
-}
-
-function mostrarNoDisponible() {
-    $('#producto-informacion').html(`
-        <p class="text-center">Este producto no está disponible</p>
-    `);
 }
 
 function cargarImagenes(producto) {
-    // Imagen principal
-    obtenerImagen(producto.id, 'imagen_color1', 'productos', 'id', function (img) {
-        producto["imagen_color1"] = img;
 
-        $('#product-color-image').attr('src', img);
-        $('#spinner-imagen-portada').hide();
-    });
+    // =====================================
+    // IMAGEN PRINCIPAL
+    // =====================================
 
-    // Imagen galería
-    obtenerImagen(producto.id, 'imagen_galeria', 'productos', 'id', function (img) {
-        $('#imagenGaleria').attr('src', `${img}`);
-        $('#spinner-imagen-galeria').hide();
-    });
+    obtenerImagen(
+        producto.id,
+        'imagen_color1',
+        'productos',
+        'id',
 
-    // Colores producto
+        function (img) {
+
+            if (!img) return;
+
+            producto.imagen_color1 = img;
+
+            $('#product-color-image')
+                .attr('src', img)
+                .removeClass('d-none');
+
+            $('#skeleton-image-main')
+                .hide();
+        }
+    );
+
+    // =====================================
+    // GALERÍA
+    // =====================================
+
+    obtenerImagen(
+        producto.id,
+        'imagen_galeria',
+        'productos',
+        'id',
+
+        function (img) {
+            
+            if (!img) return;
+
+            $('#imagenGaleria')
+                .attr('src', img);
+
+            $('#skeleton-galeria')
+                .hide();
+
+            $('#imagenGaleria').removeClass("d-none");
+        }
+    );
+
+    // =====================================
+    // IMÁGENES PRODUCTO
+    // =====================================
+
     for (let i = 2; i <= 20; i++) {
-        obtenerImagen(producto.id, `imagen_color${i}`, 'productos', 'id', function (img) {
-            producto[`imagen_color${i}`] = `${img}`;
-        });
+
+        obtenerImagen(
+            producto.id,
+            `imagen_color${i}`,
+            'productos',
+            'id',
+
+            function (img) {
+
+                producto[
+                    `imagen_color${i}`
+                ] = img;
+            }
+        );
     }
+
+    // =====================================
+    // COLORES PRODUCTO
+    // =====================================
+
     renderColores(producto);
 
-    // Accesorio
-    if (producto.idAccesorio && producto.idAccesorio != "" && producto.idAccesorio != "0") {
-        // primera imagen
-        obtenerImagen(producto.idAccesorio, 'imagen_color1', 'accesorios', 'id', function (img) {
-            producto.imagen_accesorio_color1 = img;
+    // =====================================
+    // ACCESORIO
+    // =====================================
 
-            $('#accesory-color-image').attr('src', img);
-            $('#spinner-imagen-accesorio').hide();
-        });
+    const tieneAccesorio =
+        producto.idAccesorio !== null &&
+        producto.idAccesorio !== undefined &&
+        producto.idAccesorio !== '' &&
+        producto.idAccesorio !== '0' &&
+        producto.idAccesorio !== 0;
 
-        // demás imagenes
+    if (tieneAccesorio) {
+
+        $('#row-imagen-accesorio')
+            .show();
+
+        // ==============================
+        // IMAGEN ACCESORIO
+        // ==============================
+
+        obtenerImagen(
+            producto.idAccesorio,
+            'imagen_color1',
+            'accesorios',
+            'id',
+
+            function (img) {
+
+                if (!img) return;
+
+                producto.imagen_accesorio_color1 =
+                    img;
+
+                $('#accesory-color-image')
+                    .attr('src', img)
+                    .removeClass('d-none');
+
+                $('#skeleton-image-accesorio')
+                    .hide();
+            }
+        );
+
+        // ==============================
+        // COLORES ACCESORIO
+        // ==============================
+
         for (let i = 2; i <= 16; i++) {
-            obtenerImagen(producto.idAccesorio, `imagen_color${i}`, 'accesorios', 'id', function (img) {
-                producto[`imagen_accesorio_color${i}`] = img;
-            });
+
+            obtenerImagen(
+                producto.idAccesorio,
+                `imagen_color${i}`,
+                'accesorios',
+                'id',
+
+                function (img) {
+
+                    producto[
+                        `imagen_accesorio_color${i}`
+                    ] = img;
+                }
+            );
         }
 
         renderColoresAccesorio(producto);
+
     } else {
-        $('#row-imagen-accesorio').hide();
-        $('#row-colores-accesorio').hide();
+
+        $('#row-imagen-accesorio')
+            .hide();
+
+        $('#row-colores-accesorio')
+            .hide();
     }
 }
 
-function obtenerImagen(id, columna, tabla, campo, callback) {
+function obtenerImagen(
+    id,
+    columna,
+    tabla,
+    campo,
+    callback
+) {
+
     $.ajax({
+
         url: backend + urlImage,
+
         type: 'POST',
+
         data: {
             accion: 'buscarImagen',
             id: id,
@@ -779,64 +1346,117 @@ function obtenerImagen(id, columna, tabla, campo, callback) {
             tabla: tabla,
             campo: campo
         },
-        success: function (res) {
-            try {
-                const data = typeof res === 'string' ? JSON.parse(res) : res;
 
-                if (data.value && data.value !== 0) {
+        success: function (res) {
+
+            try {
+
+                const data =
+                    typeof res === 'string'
+                        ? JSON.parse(res)
+                        : res;
+
+                if (
+                    data.value &&
+                    data.value !== 0
+                ) {
+
                     callback(data.value);
                 }
 
             } catch (e) {
-                console.error('Error imagen:', e);
+
+                console.error(
+                    'Error imagen:',
+                    e
+                );
             }
+        },
+
+        error: function (
+            xhr,
+            status,
+            error
+        ) {
+
+            console.error(
+                'Error AJAX imagen:',
+                error
+            );
+
+            console.error(xhr.responseText);
         }
     });
 }
 
-function mostrarEstrellas(calificaciones) {
-    if (!calificaciones || calificaciones === '{}') {
-        calificaciones = '';
+function mostrarEstrellas(calificacion) {
+    const rating = parseFloat(calificacion) || 0;
+    const divRating = document.getElementById('estrellas');
+    if(!divRating){
+        return;
     }
-
-    let total = 0;
-    let count = 0;
-
-    const pares = calificaciones.replace(/[{}]/g, '').split(',');
-
-    pares.forEach(par => {
-        if (!par.includes(':')) return;
-
-        const [, estrellas] = par.split(':');
-        total += parseInt(estrellas || 0);
-        count++;
-    });
-
-    const promedio = count > 0 ? total / count : 0;
-
-    const div = document.getElementById('estrellas');
-    div.innerHTML = '';
-
-    for (let i = 1; i <= 5; i++) {
-        div.innerHTML += i <= Math.round(promedio)
-            ? `<i class="bi bi-star-fill"></i>`
-            : `<i class="bi bi-star"></i>`;
+    divRating.innerHTML = '';
+    for(let i = 1; i <= 5; i++){
+        if (rating >= i) {
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star-fill
+                    text-star
+                "></i>
+            `;
+        } else if (rating >= i - 0.5) {
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star-half
+                    text-star
+                "></i>
+            `;
+        } else {
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star
+                    text-star
+                "></i>
+            `;
+        }
     }
 }
 
 function mostrarComentariosEnProducto(comentarios) {
+
     const html = document.getElementById('container-comentaries');
     html.innerHTML = '';
 
     if (comentarios) {
         if (comentarios.length > 0) {
+            comentarios.sort((a, b) => b.id - a.id);
             comentarios.forEach(comentario => {
+
+                // Cantidad de estrellas
+                const calificacion = parseInt(comentario.estrellas) || 0;
+
+                // Estrellas llenas
+                const estrellasLlenas = `
+                    <i class="bi bi-star-fill"></i>
+                `.repeat(calificacion);
+
+                // Estrellas vacías
+                const estrellasVacias = `
+                    <i class="bi bi-star"></i>
+                `.repeat(5 - calificacion);
+
                 html.innerHTML += `
-                    <div class="col-auto px-0 mx-auto">
-                        <div class="card bg-light">
-                            <p class="card-header fw-medium">Usuario ${comentario.idCliente}</p>
-                            <div class="card-body">
-                                <p class="card-text">${comentario.mensaje}</p>
+                    <div class="col-12 mb-3">
+                        <div class="store-comment">
+                            <div class="fw-bold mb-2">
+                                Usuario ${comentario.idCliente}
+                            </div>
+                            <div class="fw-bold mb-2 text-star">
+                                ${estrellasLlenas}
+                                ${estrellasVacias}
+                            </div>
+                            <div>
+                                ${comentario.mensaje}
                             </div>
                         </div>
                     </div>
@@ -844,8 +1464,10 @@ function mostrarComentariosEnProducto(comentarios) {
             });
         } else {
             html.innerHTML += `
-                <div class="col-auto px-0 mx-auto w-100">
-                    <p class="card-text">No hay comentarios</p>
+                <div class="col-12">
+                    <p class="text-center">
+                        No hay comentarios
+                    </p>
                 </div>
             `;
         }
@@ -914,6 +1536,7 @@ function calcularTotal(precio) {
         const total = parseInt(precio) * parseInt(cantidad);
         const string = 'Total: ₡' + total.toString();
         inputTotal.val(total);
+        $('#Total').val(total);
 
         label.innerHTML = string;
     } catch (error) {
@@ -948,11 +1571,16 @@ function obtenerCartasCategorias(nombre) {
                     contenedor.innerHTML = '';
                     categorias.forEach(categoria => {
                         const cardHTML = `
-                            <div class="col" id="card-category-${categoria.id}">
-                                <div class="card mx-auto rounded-0 shadow-sm my-3 card-hover card-categories-sizes">
-                                    <div class="card-body card-body-product card-shadow text-decoration-none">
-                                        <div class="spinner-border spinner-color text-primary m-auto" role="status" style="width: 50px; height: 50px;">
-                                            <span class="visually-hidden">Loading...</span>
+                            <div class="col-12 col-md-6 col-xl-4 mb-4" id="card-category-${categoria.id}">
+                                <div class="product-card-shadow h-100">
+                                    <div class="info-card skeleton-card">
+                                        <div class="card-img-wrapper skeleton-img">
+                                            <div class="skeleton-shimmer"></div>
+                                        </div>
+                                        <div class="card-body-wrapper">
+                                            <div class="skeleton-title skeleton-block"></div>
+                                            <div class="skeleton-category skeleton-block"></div>
+                                            <div class="skeleton-category skeleton-block w-75"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -994,35 +1622,73 @@ function mostrarCartaCategoria(idCategoria) {
 
                 // Crear la tarjeta con spinner y espacio para la imagen
                 const cardHTML = `
-                    <div class="col">
-                        <div class="card mx-auto rounded-0 shadow-sm my-3 card-hover card-categories-sizes position-relative">
-                            <a id="category-card-${idCategoria}" class="card-body p-0 card-body-product card-shadow text-decoration-none d-flex flex-column align-items-center justify-content-between card-categories-body" href="../pages/productos.php?nombreCategoria=${encodeURIComponent(categoria.nombre)}&idCategoria=${encodeURIComponent(idCategoria)}">
-                                <div class="position-relative d-flex justify-content-center align-items-center card-img-categories-container m-auto p-2">
-                                    <div class="spinner-border spinner-color position-absolute" role="status" style="width: 50px; height: 50px;" id="spinner-category-${idCategoria}"></div>
-                                    <img class="d-none product-img-hover" id="img-category-${idCategoria}" alt="Imagen de categoría">
-                                </div>
-                                <div class="w-100 p-0">
-                                    <div class="card-categories-footer p-0 clip-path-height-card-category" style="margin-bottom: -1px; calc(100% + 8px)"></div>
-                                    <div class="card-categories-footer-container px-1 pb-0 pt-0 px-sm-2 pb-sm-2 pt-sm-0">
-                                        <h4 class="card-category-text-h text-center p-0 m-0">${categoria.nombre}</h4>
-                                        <p class="card-category-text-p text-start p-0 m-0">${categoria.cantidad ? (parseInt(categoria.cantidad) != 1 ? "Hay " + categoria.cantidad + " productos" : "Solo hay 1 producto") : ""}</p>
+                    <div class="product-card-shadow h-100">
+                        <a
+                            id="category-card-${idCategoria}"
+                            class="info-card category-card"
+                            href="../pages/productos.php?nombreCategoria=${encodeURIComponent(categoria.nombre)}&idCategoria=${encodeURIComponent(idCategoria)}"
+                        >
+
+                            <!-- Imagen -->
+                            <div class="card-img-wrapper category-img-wrapper">
+                                <div
+                                    class="spinner-border spinner-color position-absolute"
+                                    role="status"
+                                    id="spinner-category-${idCategoria}"
+                                ></div>
+
+                                <img
+                                    class="d-none"
+                                    id="img-category-${idCategoria}"
+                                    alt="${categoria.nombre}"
+                                >
+                            </div>
+
+                            <!-- Body -->
+                            <div class="card-body-wrapper category-body">
+                                <h4 class="card-title">
+                                    ${categoria.nombre}
+                                </h4>
+                                <p class="card-category">
+                                    ${
+                                        categoria.cantidad
+                                        ? (parseInt(categoria.cantidad) != 1
+                                            ? `Hay ${categoria.cantidad} productos`
+                                            : `Solo hay 1 producto`)
+                                        : ''
+                                    }
+                                </p>
+
+                                ${
+                                    categoria.tiene_descuentos_activos == 1 ||
+                                    categoria.tiene_disponibilidad_limitada == 1 ||
+                                    categoria.tiene_existencias_limitadas == 1
+                                    ?
+                                    `
+                                    <div class="category-extra-info">
+                                        ${
+                                            categoria.tiene_descuentos_activos == 1
+                                            ? `<p>¡Hay descuentos!</p>`
+                                            : ''
+                                        }
+
+                                        ${
+                                            categoria.tiene_disponibilidad_limitada == 1
+                                            ? `<p>¡Productos por tiempo limitado!</p>`
+                                            : ''
+                                        }
+
+                                        ${
+                                            categoria.tiene_existencias_limitadas == 1
+                                            ? `<p>¡Existencias limitadas!</p>`
+                                            : ''
+                                        }
                                     </div>
-                                    ${categoria.tiene_descuentos_activos == 1 || categoria.tiene_disponibilidad_limitada == 1 || categoria.tiene_existencias_limitadas == 1 ? `
-                                        <div class="px-1 py-1 px-sm-1 py-sm-1 px-md-1 py-md-1 px-lg-2 py-lg-2 px-xl-2 py-xl-2 px-xxl-2 py-xxl-2 card-categories-footer-extras">
-                                            ${categoria.tiene_descuentos_activos == 1 ? `
-                                                <p class="card-category-text-p text-start text-white fw-bolder p-0 m-0">¡Hay descuentos!</p>
-                                            ` : ""}
-                                            ${categoria.tiene_disponibilidad_limitada == 1 ? `
-                                                <p class="card-category-text-p text-start text-white fw-bolder p-0 m-0">¡Hay productos por tiempo limitado!</p>
-                                            ` : ""}
-                                            ${categoria.tiene_existencias_limitadas == 1 ? `
-                                                <p class="card-category-text-p text-start text-white fw-bolder p-0 m-0">¡Hay productos con existencia limitada!</p>
-                                            ` : ""}
-                                        </div>
-                                    ` : ""}
-                                </div>
-                            </a>
-                        </div>
+                                    `
+                                    : ''
+                                }
+                            </div>
+                        </a>
                     </div>
                 `;
                 document.getElementById(`card-category-${idCategoria}`).innerHTML = cardHTML;
@@ -1106,11 +1772,16 @@ function obtenerCartasUniversos(nombre) {
                     contenedor.innerHTML = '';
                     universos.forEach(universo => {
                         const cardHTML = `
-                            <div class="col" id="card-universo-${universo.id}">
-                                <div class="card mx-auto rounded-0 shadow-sm my-3 card-hover card-categories-sizes">
-                                    <div class="card-body card-body-product card-shadow text-decoration-none">
-                                        <div class="spinner-border spinner-color text-primary m-auto" role="status" style="width: 50px; height: 50px;">
-                                            <span class="visually-hidden">Loading...</span>
+                            <div class="col-6 col-md-4 col-xl-3 mb-4" id="card-universo-${universo.id}">
+                                <div class="product-card-shadow h-100">
+                                    <div class="info-card skeleton-card">
+                                        <div class="card-img-wrapper skeleton-img">
+                                            <div class="skeleton-shimmer"></div>
+                                        </div>
+                                        <div class="card-body-wrapper">
+                                            <div class="skeleton-title skeleton-block"></div>
+                                            <div class="skeleton-category skeleton-block"></div>
+                                            <div class="skeleton-category skeleton-block w-75"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1152,35 +1823,70 @@ function mostrarCartaUniverso(idUniverso) {
 
                 // Crear la tarjeta con spinner y espacio para la imagen
                 const cardHTML = `
-                    <div class="col">
-                        <div class="card mx-auto rounded-0 shadow-sm my-3 card-hover card-categories-sizes position-relative">
-                            <a class="card-body p-0 card-body-product card-shadow text-decoration-none d-flex flex-column align-items-center justify-content-between card-categories-body" href="../pages/productos.php?nombreUniverso=${encodeURIComponent(universo.nombre)}&idUniverso=${encodeURIComponent(idUniverso)}">
-                                <div class="position-relative d-flex justify-content-center align-items-center card-img-categories-container m-auto p-2">
-                                    <div class="spinner-border spinner-color position-absolute" role="status" style="width: 50px; height: 50px;" id="spinner-universo-${idUniverso}"></div>
-                                    <img class="d-none product-img-hover" id="img-universo-${idUniverso}" alt="Imagen de universo">
-                                </div>
-                                <div class="w-100 p-0">
-                                    <div class="card-categories-footer p-0 clip-path-height-card-category" style="margin-bottom: -1px; calc(100% + 8px)"></div>
-                                    <div class="card-categories-footer-container px-1 pb-0 pt-0 px-sm-2 pb-sm-2 pt-sm-0">
-                                        <h4 class="card-category-text-h text-center p-0 m-0">${universo.nombre}</h4>
-                                        <p class="card-category-text-p text-start p-0 m-0">${universo.cantidad ? (parseInt(universo.cantidad) != 1 ? "Hay " + universo.cantidad + " productos" : "Solo hay 1 producto") : ""}</p>
+                    <div class="product-card-shadow h-100">
+                        <a
+                            class="info-card"
+                            href="../pages/productos.php?nombreUniverso=${encodeURIComponent(universo.nombre)}&idUniverso=${encodeURIComponent(idUniverso)}"
+                        >
+
+                            <!-- Imagen -->
+                            <div class="card-img-wrapper">
+                                <div
+                                    class="spinner-border spinner-color position-absolute"
+                                    role="status"
+                                    id="spinner-universo-${idUniverso}"
+                                ></div>
+                                <img
+                                    class="d-none"
+                                    id="img-universo-${idUniverso}"
+                                    alt="${universo.nombre}"
+                                >
+                            </div>
+
+                            <!-- Body -->
+                            <div class="card-body-wrapper">
+                                <h4 class="card-title">
+                                    ${universo.nombre}
+                                </h4>
+                                <p class="card-category">
+                                    ${
+                                        universo.cantidad
+                                        ? (
+                                            parseInt(universo.cantidad) != 1
+                                            ? `Hay ${universo.cantidad} productos`
+                                            : `Solo hay 1 producto`
+                                        )
+                                        : ''
+                                    }
+                                </p>
+                                ${
+                                    universo.tiene_descuentos_activos == 1 ||
+                                    universo.tiene_disponibilidad_limitada == 1 ||
+                                    universo.tiene_existencias_limitadas == 1
+                                    ?
+                                    `
+                                    <div class="universe-extra-info">
+                                        ${
+                                            universo.tiene_descuentos_activos == 1
+                                            ? `<p>¡Hay descuentos!</p>`
+                                            : ''
+                                        }
+                                        ${
+                                            universo.tiene_disponibilidad_limitada == 1
+                                            ? `<p>¡Productos por tiempo limitado!</p>`
+                                            : ''
+                                        }
+                                        ${
+                                            universo.tiene_existencias_limitadas == 1
+                                            ? `<p>¡Existencias limitadas!</p>`
+                                            : ''
+                                        }
                                     </div>
-                                    ${universo.tiene_descuentos_activos == 1 || universo.tiene_disponibilidad_limitada == 1 || universo.tiene_existencias_limitadas == 1 ? `
-                                        <div class="px-1 py-1 px-sm-1 py-sm-1 px-md-1 py-md-1 px-lg-2 py-lg-2 px-xl-2 py-xl-2 px-xxl-2 py-xxl-2 card-categories-footer-extras">
-                                            ${universo.tiene_descuentos_activos == 1 ? `
-                                                <p class="card-category-text-p text-start text-white fw-bolder p-0 m-0">¡Hay descuentos!</p>
-                                            ` : ""}
-                                            ${universo.tiene_disponibilidad_limitada == 1 ? `
-                                                <p class="card-category-text-p text-start text-white fw-bolder p-0 m-0">¡Hay productos por tiempo limitado!</p>
-                                            ` : ""}
-                                            ${universo.tiene_existencias_limitadas == 1 ? `
-                                                <p class="card-category-text-p text-start text-white fw-bolder p-0 m-0">¡Hay productos con existencia limitada!</p>
-                                            ` : ""}
-                                        </div>
-                                    ` : ""}
-                                </div>
-                            </a>
-                        </div>
+                                    `
+                                    : ''
+                                }
+                            </div>
+                        </a>
                     </div>
                 `;
                 document.getElementById(`card-universo-${idUniverso}`).innerHTML = cardHTML;

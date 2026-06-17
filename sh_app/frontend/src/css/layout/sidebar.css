@@ -1,51 +1,346 @@
-.sidebar-header-bg {
-    background-color: #111;
-}
-
-.logo-sidebar-header-container {
-    clip-path: polygon(0 0, 100% 0%, 75% 100%, 0% 100%);
-    background-color: #222;
-    width: 112px;
-    height: 100%;
-}
+/* ========================================= */
+/* SIDEBAR PANEL */
+/* ========================================= */
 
 .sidebar-bg {
-    background-color: #333;
+
+    background: #666;
+
+    overflow: hidden;
 }
 
+/* ========================================= */
+/* SCROLL */
+/* ========================================= */
+
 .sidebar {
+
     max-height: 100vh;
+
     overflow-y: auto;
 }
 
-.sidebar-item {
-    background: #555;
-    color: #00df00;
-    transition: all 0.25s;
+
+
+/* ========================================= */
+/* CABECERA */
+/* ========================================= */
+
+.sidebar-brand-shadow {
+
+    filter:
+        drop-shadow(
+            5px 5px 0 rgba(0,0,0,.25)
+        );
 }
+
+.sidebar-brand {
+
+    padding: 1rem;
+
+    background: #444;
+
+    color: white;
+
+    clip-path: polygon(
+        4% 0,
+        100% 0,
+        96% 100%,
+        0 100%
+    );
+
+    border-top: 4px solid var(--green);
+    border-bottom: 4px solid var(--blue);
+}
+
+.sidebar-brand-title {
+
+    font-weight: 800;
+}
+
+.sidebar-brand-subtitle {
+
+    opacity: .8;
+}
+
+/* ========================================= */
+/* SECCIONES */
+/* ========================================= */
+
+.sidebar-section-title {
+
+    width: 100%;
+
+    font-weight: 700;
+
+    color: white;
+
+    opacity: .7;
+
+    padding-left: .35rem;
+}
+
+/* ========================================= */
+/* ITEMS */
+/* ========================================= */
+
+.sidebar-item {
+
+    position: relative;
+
+    overflow: hidden;
+
+    background: #444;
+
+    color: white;
+
+    min-height: 52px;
+
+    transition:
+        transform .25s ease,
+        color .25s ease;
+
+    clip-path: polygon(
+        0% 0,
+        100% 0,
+        95% 100%,
+        0 100%
+    );
+}
+
+/* ========================================= */
+/* BARRIDO VERDE */
+/* ========================================= */
+
+.sidebar-item::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left: -100%;
+    right: 100%;
+
+    background: var(--green);
+
+    transition:
+        left .35s ease,
+        right .35s ease;
+
+    z-index: 1;
+}
+
+.sidebar-item:hover::after {
+
+    left: 0;
+    right: 0;
+}
+
+.sidebar-item > * {
+
+    position: relative;
+
+    z-index: 2;
+}
+
+/* ========================================= */
+/* HOVER */
+/* ========================================= */
 
 .sidebar-item:hover {
-    background: #666;
-    color: #00df00;
+
+    color: black;
+
+    transform: translateX(4px);
 }
 
-.sidebar-item:active {
-    background: #606060;
-    color: #00a500;
+/* ========================================= */
+/* ICONOS */
+/* ========================================= */
+
+.sidebar-item i {
+
+    font-size: 1.15rem;
+
+    transition:
+        transform .25s ease;
 }
+
+.sidebar-item:hover i {
+
+    transform: scale(1.15);
+}
+
+/* ========================================= */
+/* ITEM ACTIVO */
+/* ========================================= */
 
 .sidebar-item.active {
-    background-color: #202020;
-    color: #fff;
-    border-left: 4px solid #0000c7;
+
+    background: #222;
+
+    color: var(--green);
+
+    font-weight: 700;
+
+    pointer-events: none;
+
+    border-left: 6px solid var(--blue);
+}
+
+.sidebar-item.active::after {
+
+    display: none;
 }
 
 .sidebar-item.active i {
-    color: #0000c7;
+
+    color: var(--green);
 }
 
+/* ========================================= */
+/* SEPARACIÓN */
+/* ========================================= */
+
+#menu {
+
+    gap: .55rem !important;
+}
+
+/* ========================================= */
+/* LOGOUT */
+/* ========================================= */
+
+.sidebar-item[href*="logout"] {
+
+    background: #3f2a2a;
+}
+
+.sidebar-item[href*="logout"]::after {
+
+    background: #ff5252;
+}
+
+/* ========================================= */
+/* TÍTULO */
+/* ========================================= */
+
 .sidebar-title-bg {
-    clip-path: polygon(0 0, 100% 0%, 100% 100%, 0 80%);
-    background-color: #0000c7;
+
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+
+    background: var(--blue);
+
     color: white;
+}
+
+/* ========================================= */
+/* GRUPOS */
+/* ========================================= */
+
+.sidebar-groups {
+
+    width: 100%;
+}
+
+.sidebar-group {
+
+    margin-bottom: .75rem;
+}
+
+/* ========================================= */
+/* CABECERA DEL GRUPO */
+/* ========================================= */
+
+.sidebar-group-btn {
+
+    width: 100%;
+
+    border: none;
+
+    padding: .85rem 1rem;
+
+    background: #333;
+
+    color: white;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    clip-path: polygon(
+        4% 0,
+        100% 0,
+        96% 100%,
+        0 100%
+    );
+
+    transition: .25s ease;
+}
+
+.sidebar-group-btn:hover {
+
+    background: #444;
+}
+
+/* ========================================= */
+/* FLECHA */
+/* ========================================= */
+
+.sidebar-group-btn i {
+
+    transition: transform .3s ease;
+}
+
+.sidebar-group-btn.open i {
+
+    transform: rotate(180deg);
+}
+
+/* ========================================= */
+/* CONTENIDO */
+/* ========================================= */
+
+.sidebar-group-content {
+
+    overflow: hidden;
+
+    max-height: 0;
+
+    transition:
+        max-height .35s ease;
+}
+
+.sidebar-group-content.show {
+
+    max-height: 600px;
+}
+
+/* ========================================= */
+/* ITEMS */
+/* ========================================= */
+
+.sidebar-group-content .sidebar-item {
+
+    margin-top: .5rem;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: .75rem;
+
+    padding: .75rem 1rem;
+
+    text-decoration: none;
+}
+
+.sidebar-group-content .sidebar-item i {
+
+    min-width: 20px;
 }

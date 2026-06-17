@@ -1,5 +1,6 @@
 <?php
 ob_start();
+
 $pageTitle = "Crear cuenta";
 
 $showHeader = false;
@@ -8,140 +9,192 @@ $showFooter = false;
 $showSidebar = false;
 
 session_start();
+
 if (isset($_SESSION['usuario_id'])) {
+
     if ($_SESSION['usuario_rol'] == 'Administrador') {
         header('Location: home.php');
         exit();
-    } elseif ($_SESSION['usuario_rol'] == 'Cliente') {
+    }
+
+    if ($_SESSION['usuario_rol'] == 'Cliente') {
         header('Location: store.php');
         exit();
     }
 }
 ?>
 
-<section class="vh-100">
-    <div class="container h-custom">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-md-9 col-lg-6 col-xl-5 d-flex align-middle align-content-center">
-                <img src="../src/img/app/SH_Logo.png" class="img-fluid m-auto" alt="Sample image">
+<section class="login-page">
+    <div class="register-card-shadow">
+        <div class="register-card">
+            <div class="login-header">
+                <img
+                    src="../src/img/app/SH_Logo.png"
+                    class="login-logo"
+                    alt="Logo"
+                >
+                <h2>
+                    Crear cuenta
+                </h2>
+                <p>
+                    Completa la información requerida
+                </p>
             </div>
-            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form>
-                    <p class="lead fw-bold mb-0 me-3 mb-3">Crear usuario</p>
-
-                    <!-- Grupo de Nombre Completo -->
-                    <div class="form-outline mb-2">
-                        <div class="w-100 py-2 d-flex gap-2">
-                            <label class="form-label m-0" for="Nombre">Nombre completo</label>
-                            <i class="bi bi-person-fill d-flex align-self-center"></i>
+            <form>
+                <!-- DATOS PERSONALES -->
+                <div class="filter-card px-4 px-md-5">
+                    <h6 class="filter-title">
+                        <i class="bi bi-person-fill"></i>
+                        Información personal
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input
+                                type="text"
+                                id="Nombre"
+                                class="form-control filter-input"
+                                placeholder="Primer nombre *"
+                            >
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="text" id="Nombre" class="form-control form-control-md" placeholder="Nombre" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <input type="text" id="segundoNombre" class="form-control form-control-md" placeholder="Segundo Nombre" />
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="text" id="primerApellido" class="form-control form-control-md" placeholder="Primer Apellido" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <input type="text" id="segundoApellido" class="form-control form-control-md" placeholder="Segundo Apellido" />
-                            </div>
+                        <div class="col-md-6">
+                            <input
+                                type="text"
+                                id="segundoNombre"
+                                class="form-control filter-input"
+                                placeholder="Segundo nombre"
+                            >
                         </div>
-                    </div>
-
-                    <!-- Grupo de Ubicación -->
-                    <div class="form-outline mb-2">
-                        <div class="w-100 py-2 d-flex gap-2">
-                            <label class="form-label m-0" for="Nombre">Ubicación</label>
-                            <i class="bi bi-geo-alt-fill d-flex align-self-center"></i>
+                        <div class="col-md-6 mt-3">
+                            <input
+                                type="text"
+                                id="primerApellido"
+                                class="form-control filter-input"
+                                placeholder="Primer apellido *"
+                            >
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="text" id="Provincia" class="form-control form-control-md" placeholder="Provincia" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="text" id="Canton" class="form-control form-control-md" placeholder="Canton" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="text" id="Distrito" class="form-control form-control-md" placeholder="Distrito" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
+                        <div class="col-md-6 mt-3">
+                            <input
+                                type="text"
+                                id="segundoApellido"
+                                class="form-control filter-input"
+                                placeholder="Segundo apellido"
+                            >
                         </div>
                     </div>
-
-                    <!-- Nombre de Usuario -->
-                    <div class="form-outline mb-2">
-                        <div class="w-100 py-2 d-flex gap-2">
-                            <label class="form-label m-0" for="Telefono">Teléfono</label>
-                            <i class="bi bi-telephone-fill d-flex align-self-center"></i>
+                </div>
+                <!-- UBICACIÓN -->
+                <div class="filter-card mt-4 px-4 px-md-5">
+                    <h6 class="filter-title">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        Ubicación
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input
+                                type="text"
+                                id="Provincia"
+                                class="form-control filter-input"
+                                placeholder="Provincia *"
+                            >
                         </div>
-                        <input type="phone" id="Telefono" class="form-control form-control-md" placeholder="Número telefónico" />
-                    </div>
-
-                    <!-- Nombre de Usuario -->
-                    <div class="form-outline mb-2">
-                        <div class="w-100 py-2 d-flex gap-2">
-                            <label class="form-label m-0" for="nombreUsuario">Un nombre de usuario</label>
-                            <i class="bi bi-key-fill d-flex align-self-center"></i>
+                        <div class="col-md-4">
+                            <input
+                                type="text"
+                                id="Canton"
+                                class="form-control filter-input"
+                                placeholder="Cantón *"
+                            >
                         </div>
-                        <div class="input-group">
-                            <input type="text" id="nombreUsuario" class="form-control form-control-md" placeholder="Nombre de usuario" />
-                            <span class="input-group-text input-group-md">*</span>
-                        </div>
-                    </div>
-
-                    <!-- Contraseñas en una Fila -->
-                    <div class="form-outline mb-2">
-                        <div class="w-100 py-2 d-flex gap-2">
-                            <label class="form-label m-0" for="nombreUsuario">Contraseña</label>
-                            <i class="bi bi-lock-fill d-flex align-self-center"></i>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="password" id="Contrasennia" class="form-control form-control-md" placeholder="Contraseña" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <input type="password" id="Contrasennia2" class="form-control form-control-md" placeholder="Repetir Contraseña" />
-                                    <span class="input-group-text input-group-md">*</span>
-                                </div>
-                            </div>
+                        <div class="col-md-4">
+                            <input
+                                type="text"
+                                id="Distrito"
+                                class="form-control filter-input"
+                                placeholder="Distrito *"
+                            >
                         </div>
                     </div>
-
-                    <p class="card-text text-secondary">Los campos con el símbolo (*) son de digitación obligatoria.</p>
-
-                    <!-- Botones de Acción -->
-                    <div class="d-flex justify-content-start gap-3 mt-4 pt-2">
-                        <button type="button" class="btn-details btn-lg fs-5 text-white border-0 rounded-2 px-lg-4 py-lg-3 px-md-3 py-md-2 px-sm-2 py-sm-1 px-2" onclick="registrarUsuario()">Registrar</button>
-                        <button type="button" class="btn-delete btn-lg fs-5 text-white border-0 rounded-2 px-lg-4 py-lg-3 px-md-3 py-md-2 px-sm-2 py-sm-1 px-2" onclick="location.href='login.php'">Volver</button>
+                </div>
+                <!-- CUENTA -->
+                <div class="filter-card mt-4 px-4 px-md-5">
+                    <h6 class="filter-title">
+                        <i class="bi bi-key-fill"></i>
+                        Datos de acceso
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input
+                                type="text"
+                                id="Telefono"
+                                class="form-control filter-input"
+                                placeholder="Teléfono"
+                            >
+                        </div>
+                        <div class="col-md-6">
+                            <input
+                                type="text"
+                                id="nombreUsuario"
+                                class="form-control filter-input"
+                                placeholder="Usuario *"
+                            >
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <input
+                                type="password"
+                                id="Contrasennia"
+                                class="form-control filter-input"
+                                placeholder="Contraseña *"
+                            >
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <input
+                                type="password"
+                                id="Contrasennia2"
+                                class="form-control filter-input"
+                                placeholder="Confirmar contraseña *"
+                            >
+                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+                <p class="text-light opacity-75 mt-4">
+
+                    (*) Campos obligatorios
+                </p>
+                <!-- BOTONES -->
+                <div
+                    class="d-flex justify-content-center gap-3 mt-4 flex-wrap"
+                >
+                    <div class="navbar-btn-shadow">
+                        <button
+                            type="button"
+                            class="store-filter-btn"
+                            onclick="registrarUsuario()"
+                        >
+                            <i class="bi bi-person-plus-fill"></i>
+                            <span>
+                                Registrar
+                            </span>
+                        </button>
+                    </div>
+                    <div class="navbar-btn-shadow">
+                        <button
+                            type="button"
+                            class="store-btn-secondary"
+                            onclick="location.href='login.php'"
+                        >
+                            <i class="bi bi-arrow-left"></i>
+                            <span>
+                                Volver
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </section>
 
 <?php
-$content = ob_get_clean();
+$content=ob_get_clean();
 include 'template.php';
 ?>

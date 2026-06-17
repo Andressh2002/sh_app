@@ -140,19 +140,6 @@
             }
             break;
 
-        case 'contar':
-            $total = contarTodos($conn);
-        
-            if ($total !== 0) {
-                header('Content-Type: application/json');
-                echo json_encode(['total' => $total]);
-            } else {
-                http_response_code(500);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'No se pudo obtener el total']);
-            }
-            break;
-
         case 'insertarSinUsuario':
             if (isset($_POST['clienteNombre']) && isset($_POST['clienteSegundoNombre']) && isset($_POST['clientePrimerApellido']) && isset($_POST['clienteSegundoApellido']) && isset($_POST['clienteProvincia']) && isset($_POST['clienteCanton']) && isset($_POST['clienteDistrito']) && isset($_POST['clienteTelefono']) && isset($_POST['producto']) && isset($_POST['color']) && isset($_POST['cantidad']) && isset($_POST['total'])) {
                 $clienteNombre = $_POST['clienteNombre'];
@@ -178,57 +165,73 @@
             break;
         
         case 'listarIds':
-            $cliente = isset($_POST['cliente']) ? $_POST['cliente'] : '';
-            $ubicacion = isset($_POST['ubicacion']) ? $_POST['ubicacion'] : '';
-            $telefono = isset($_POST['telefono']) ? $_POST['telefono'] : '';
-            $producto = isset($_POST['producto']) ? $_POST['producto'] : '';
-            $categoria = isset($_POST['categoria']) ? $_POST['categoria'] : '';
-            $rareza = isset($_POST['rareza']) ? $_POST['rareza'] : '';
-            $universo = isset($_POST['universo']) ? $_POST['universo'] : '';
-            $color = isset($_POST['color']) ? $_POST['color'] : '';
-            $pagado = isset($_POST['pagado']) ? $_POST['pagado'] : '';
+            $cliente = $_POST['cliente'] ?? '';
+            $ubicacion = $_POST['ubicacion'] ?? '';
+            $telefono = $_POST['telefono'] ?? '';
+            $producto = $_POST['producto'] ?? '';
+            $categoria = $_POST['categoria'] ?? '';
+            $rareza = $_POST['rareza'] ?? '';
+            $universo = $_POST['universo'] ?? '';
+            $color = $_POST['color'] ?? '';
+            $pagado = $_POST['pagado'] ?? '';
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
+            $orden = $_POST['orden'] ?? [];
         
-            $respuesta = listarIds($conn, $cliente, $producto, $categoria, $rareza, $universo, $color, $pagado, $orden);
-            $total = contarIds($conn, $cliente, $producto, $categoria, $rareza, $universo, $color, $pagado);
+            $respuesta = listarIds($conn, $cliente, $producto, $categoria, $rareza, $universo, $color, $pagado, $ubicacion, $telefono, $orden);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
+            echo json_encode($respuesta);
             break;
     
         case 'buscarPorId':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
+            $id = $_POST['id'] ?? '';
+
             $respuesta = buscarPorId($conn, $id);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
+            echo json_encode($respuesta);
             break;
 
         case 'listarIdsCliente':
-            $cliente = isset($_POST['cliente']) ? $_POST['cliente'] : '';
-            $producto = isset($_POST['producto']) ? $_POST['producto'] : '';
-            $categoria = isset($_POST['categoria']) ? $_POST['categoria'] : '';
-            $rareza = isset($_POST['rareza']) ? $_POST['rareza'] : '';
-            $universo = isset($_POST['universo']) ? $_POST['universo'] : '';
-            $color = isset($_POST['color']) ? $_POST['color'] : '';
-            $pagado = isset($_POST['pagado']) ? $_POST['pagado'] : '';
+            $cliente = $_POST['cliente'] ?? '';
+            $producto = $_POST['producto'] ?? '';
+            $categoria = $_POST['categoria'] ?? '';
+            $rareza = $_POST['rareza'] ?? '';
+            $universo = $_POST['universo'] ?? '';
+            $color = $_POST['color'] ?? '';
+            $pagado = $_POST['pagado'] ?? '';
+            $orden = $_POST['orden'] ?? 'pe.id';
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
-        
-            $respuesta = listarIdsCliente($conn, $cliente, $producto, $categoria, $rareza, $universo, $color, $pagado, $orden);
-            $total = contarIdsCliente($conn, $cliente, $producto, $categoria, $rareza, $universo, $color, $pagado);
-        
+            $respuesta = listarIdsCliente(
+                $conn,
+                $cliente,
+                $producto,
+                $categoria,
+                $rareza,
+                $universo,
+                $color,
+                $pagado,
+                $orden
+            );
+
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
+            echo json_encode($respuesta);
             break;
 
         case 'buscarPorIdCliente':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
+            $id = $_POST['id'] ?? 0;
             $respuesta = buscarPorIdCliente($conn, $id);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
+            echo json_encode($respuesta);
+            break;
+
+        case 'actualizarProgresoPedido':
+            $id = $_POST['id'] ?? '';
+            $progreso = $_POST['progreso'] ?? 0;
+
+            $respuesta = actualizarProgresoPedido($conn, $id, $progreso);
+            echo $respuesta;
             break;
 
         default:

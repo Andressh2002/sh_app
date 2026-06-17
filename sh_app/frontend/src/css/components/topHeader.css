@@ -1,0 +1,11 @@
+.top-header {
+    height: clamp(32px, 50%, 64px);
+}
+
+.top-header-logo {
+    width: clamp();
+    clip-path: polygon(0 0, 100% 0%, 75% 100%, 0% 100%);
+    background-color: white;
+    width: clamp(64px, 50vw, 112px);
+    height: 72px;
+}

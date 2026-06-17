@@ -17,126 +17,54 @@
             'label' => 'De la fecha',
             'id' => 'FechaInicio',
             'icon' => 'bi bi-calendar-fill',
-            'input' => 'datepicker',
+            'input' => 'date',
             'onchange' => 'actualizarDashboard()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Hasta la fecha',
             'id' => 'FechaFinal',
             'icon' => 'bi bi-calendar-fill',
-            'input' => 'datepicker',
+            'input' => 'date',
             'onchange' => 'actualizarDashboard()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
-        /* [
-            'label' => 'Del año',
-            'id' => 'AnioInicio',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'select',
-            'options' => [
-                '' => 'Todos',
-                '2023' => '2023',
-                '2024' => '2024',
-                '2025' => '2025',
-            ],
-            'onchange' => 'actualizarDashboard()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ],
-        [
-            'label' => 'Hasta el año',
-            'id' => 'AnioFinal',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'select',
-            'options' => [
-                '' => 'Todos',
-                '2023' => '2023',
-                '2024' => '2024',
-                '2025' => '2025',
-            ],
-            'onchange' => 'actualizarDashboard()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ],
-        [
-            'label' => 'Del mes',
-            'id' => 'MesInicio',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'select',
-            'options' => [
-                '' => 'Todos',
-                '1' => 'Enero',
-                '2' => 'Febrero',
-                '3' => 'Marzo',
-                '4' => 'Abril',
-                '5' => 'Mayo',
-                '6' => 'Junio',
-                '7' => 'Julio',
-                '8' => 'Agosto',
-                '9' => 'Septiembre',
-                '10' => 'Octubre',
-                '11' => 'Noviembre',
-                '12' => 'Diciembre',
-            ],
-            'onchange' => 'actualizarDashboard()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ],
-        [
-            'label' => 'Hasta el mes',
-            'id' => 'MesFinal',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'select',
-            'options' => [
-                '' => 'Todos',
-                '1' => 'Enero',
-                '2' => 'Febrero',
-                '3' => 'Marzo',
-                '4' => 'Abril',
-                '5' => 'Mayo',
-                '6' => 'Junio',
-                '7' => 'Julio',
-                '8' => 'Agosto',
-                '9' => 'Septiembre',
-                '10' => 'Octubre',
-                '11' => 'Noviembre',
-                '12' => 'Diciembre',
-            ],
-            'onchange' => 'actualizarDashboard()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ], */
         [
             'label' => 'Categoría',
             'id' => 'Categoria',
             'icon' => 'bi bi-tools',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => 'actualizarDashboard()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Rareza',
             'id' => 'Rareza',
             'icon' => 'bi bi-tag',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => 'actualizarDashboard()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Universo',
             'id' => 'Universo',
             'icon' => 'bi bi-flag',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => 'actualizarDashboard()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
     ];
+
     $cards = [
         [
             'title' => 'Ganancias',
@@ -144,7 +72,7 @@
             'percent' => '0%',
             'idTitle' => 'cardGanancias',
             'idCant' => 'cantGanancias',
-            'idPercent' => 'percentGanancias',
+            'help' => 'Ingresos totales',
         ],
         [
             'title' => 'Pedidos',
@@ -152,7 +80,7 @@
             'percent' => '0%',
             'idTitle' => 'cardPedidos',
             'idCant' => 'cantPedidos',
-            'idPercent' => 'percentPedidos',
+            'help' => 'Pedidos recibidos',
         ],
         [
             'title' => 'Vendidos',
@@ -160,9 +88,50 @@
             'percent' => '0%',
             'idTitle' => 'cardVendidos',
             'idCant' => 'cantVendidos',
-            'idPercent' => 'percentVendidos',
-        ]
+            'help' => 'Productos vendidos',
+        ],
+        [
+            'title' => 'Ticket Promedio',
+            'cant' => '0',
+            'percent' => '0%',
+            'idTitle' => 'cardTicketPromedio',
+            'idCant' => 'cantTicketPromedio',
+            'help' => 'Ganancia promedio',
+        ],
+        [
+            'title' => 'Productos distintos vendidos',
+            'cant' => '0',
+            'percent' => '0%',
+            'idTitle' => 'cardProductosDistintosVendidos',
+            'idCant' => 'cantProductosDistintosVendidos',
+            'help' => 'Variedad',
+        ],
+        [
+            'title' => 'Conversión venta',
+            'cant' => '0',
+            'percent' => '0%',
+            'idTitle' => 'cardConversiónVenta',
+            'idCant' => 'cantConversiónVenta',
+            'help' => 'Pedidos pagados',
+        ],
+        [
+            'title' => 'Producto top',
+            'cant' => '0',
+            'percent' => '0%',
+            'idTitle' => 'cardProductoTop',
+            'idCant' => 'cantProductoTop',
+            'help' => 'Mejor producto',
+        ],
+        [
+            'title' => 'Crecimiento mensual',
+            'cant' => '0',
+            'percent' => '0%',
+            'idTitle' => 'cardCrecimientoMensual',
+            'idCant' => 'cantCrecimientoMensual',
+            'help' => 'Crece o baja',
+        ],
     ];
+
     $tables = [
         [
             'title' => 'Productos más pedidos',
@@ -180,25 +149,14 @@
             'headers' => ['#', 'Producto', 'Categoría', 'Ganancia'],
         ]
     ];
+
     $grafics = [
         [
             'title' => 'Ganancias por tiempo',
             'id' => 'myChart',
         ]
     ];
-    $tables2 = [
-        [
-            'title' => 'Ganancias por producto',
-            'id' => 'tableMejoresProductosGanancias',
-            'headers' => ['#', 'Producto', 'Categoría', 'Ganancia'],
-        ]
-    ];
-    $grafics2 = [
-        [
-            'title' => 'Mejores productos',
-            'id' => 'myChart2',
-        ]
-    ];
+
     $menuTable = [
         'url' => '',
         'updateMethod' => 'actualizarDashboard()',
@@ -206,79 +164,90 @@
         'pageInfo' => 'dashboard',
         'showAdd' => false,
         'showUpdate' => true,
-        'showInfo' => true,
+        'showInfo' => false,
+        'showCount' => false,
+    ];
+
+    $dashboard = [
+        'inputs'=>$inputs,
+        'cards'=>$cards,
+        'tables'=>$tables,
+        'charts'=>[
+            [
+                'title'=>'Ganancias por tiempo',
+                'id'=>'myChart'
+            ],
+            [
+                'title'=>'Productos más pedidos y vendidos',
+                'id'=>'myChart2'
+            ]
+        ]
     ];
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Dashboard</h4>
-            <i class="bi bi-search fs-4 d-flex align-self-center"></i>
-        </div>
-    </div>
-    <div class="px-3 pb-2">
-        <div class="container-fluid px-0">
-            <div class="card rounded-3 overflow-hidden my-2">
-                <div class="card-body admin-subheader-card-bg py-1">
-                    <div class="d-flex align-items-center gap-2">
-                        <p class="card-title p-0 m-0">Filtros</p>
-                    </div>
-                </div>
-                <div class="row px-3 py-1" id="formulario-filtros">
+<div class="w-100 overflow-hidden p-0">
+
+    <!-- FILTROS -->
+    <section class="dashboard-filters dashboard-shadow mb-4 mx-2">
+        <div class="dashboard-panel">
+
+            <div class="dashboard-panel-header">
+                <i class="bi bi-funnel-fill"></i>
+                <span>Filtros del dashboard</span>
+            </div>
+
+            <div class="dashboard-panel-body">
+
+                <div
+                    class="row"
+                    id="formulario-filtros"
+                >
                     <?php
                     foreach ($inputs as $input) {
+
                         include '../src/components/inputs/input.php';
                     }
                     ?>
                 </div>
+
             </div>
-            
-            <div class="row justify-content-between">
-                <div class="col-auto">
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination"></ul>
-                    </nav>
-                </div>
-                <div class="col-auto d-flex gap-2 mb-4">
-                    <?php include '../src/components/tables/menuTable.php'; ?>
-                </div>
-            </div>
-            <div class="row container-fluid gap-lg-4 gap-md-3 gap-sm-2 gap-1 m-auto p-0 flex-fill mb-lg-4 mb-md-3 mb-sm-2 mb-1">
-                <?php
-                foreach ($cards as $cardDash) {
-                    include '../src/components/dashboard/card.php';
-                }
-                ?>
-            </div>
-            <div class="row container-fluid gap-lg-4 gap-md-3 gap-sm-2 gap-1 m-auto p-0 flex-fill mb-lg-4 mb-md-3 mb-sm-2 mb-1">
-                <?php
-                foreach ($tables as $table) {
-                    include '../src/components/dashboard/table.php';
-                }
-                ?>
-            </div>
-            <div class="row container-fluid gap-lg-4 gap-md-3 gap-sm-2 gap-1 m-auto p-0 flex-fill mb-lg-4 mb-md-3 mb-sm-2 mb-1">
-                <?php
-                foreach ($grafics as $grafic) {
-                    include '../src/components/dashboard/grafic.php';
-                }
-                ?>
-            </div>
+
         </div>
-    </div>
+    </section>
+
+    <!-- MENÚ -->
+    <section class="mb-4">
+
+        <div class="table-menu-responsive">
+            <?php include '../src/components/tables/menuTable.php'; ?>
+        </div>
+
+    </section>
+
+    <!-- KPI -->
+    <section class="dashboard-kpis mb-4 mx-2">
+        <?php foreach ($dashboard['cards'] as $cardDash): ?>
+            <?php include '../src/components/dashboard/card.php'; ?>
+        <?php endforeach; ?>
+    </section>
+
+    <!-- GRÁFICA -->
+    <section class="dashboard-main-grid mb-4 mx-2">
+        <?php foreach ($dashboard['charts'] as $grafic): ?>
+            <?php include '../src/components/dashboard/grafic.php'; ?>
+        <?php endforeach; ?>
+    </section>
+
+    <!-- TABLAS -->
+    <section class="dashboard-tables mx-2">
+        <?php foreach ($dashboard['tables'] as $table): ?>
+            <?php include '../src/components/dashboard/table.php'; ?>
+        <?php endforeach; ?>
+    </section>
+
 </div>
 
 <?php
     $content = ob_get_clean();
     include 'template.php';
 ?>
-
-<script>
-    $(document).ready(function() {
-        actualizarDashboard();
-        obtenerCategoriasParaProductos('Categoria', true);
-        obtenerRarezasParaDashboard('Rareza', true);
-        obtenerUniversosParaDashboard('Universo', true);
-    });
-</script>

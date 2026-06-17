@@ -1,8 +1,8 @@
-function mostrarTotalRegistros(total) {
+function mostrarTotalRegistros(total, elemento = ["registro", "registros"], showing = false) {
     const containerTotal = $('#total-data');
     containerTotal.empty();
     const html = `
-        Hay ${total == 1 ? 'un registro' : (total + ' registros')}
+        ${showing ? 'Mostrando' : 'Hay'} ${total == 1 ? `1 ${elemento[0]}` : (total + ` ${elemento[1]}`)}
     `;
     containerTotal.append(html);
 }
@@ -125,8 +125,6 @@ function irReservar(idProducto, idAccesorio) {
     location.href = `guardarPedido.php?idProducto=${idProducto}&idAccesorio=${idAccesorio}&idColor=${idColor}&idColorAccesorio=${idColorAccesorio}&numColor=${numColor}&numColorAccesorio=${numColorAccesorio}&cantidad=${cantidad}&total=${total}`;
 }
 
-
-
 function formarFecha(date) {
     if (date) {
         const format = date.split('-');
@@ -174,4 +172,141 @@ function formarFecha(date) {
         return format[1] + ' de ' + mes;
     }
     return null;
+}
+
+function obtenerColorProgreso(progreso){
+
+    // limitar entre 0 y 100
+    progreso = Math.max(
+        0,
+        Math.min(100, progreso)
+    );
+
+    // hue:
+    // 0   = rojo
+    // 60  = amarillo
+    // 120 = verde
+
+    const hue =
+        (progreso * 120) / 100;
+
+    return `
+        hsl(
+            ${hue},
+            85%,
+            48%
+        )
+    `;
+}
+
+function eliminarRegistro({
+    id,
+    nombre,
+    entidad,
+    url,
+    callback
+}) {
+
+    abrirModalConfirmacion({
+        titulo: '¿Estás seguro?',
+        texto: `¿De verdad quieres eliminar "${nombre}" de ${entidad[1]}? ¡Si lo haces no se podrá revertir!`,
+        icono: 'bi bi-trash-fill',
+
+        callback: function () {
+
+            abrirModal('modalGuardando');
+
+            cambiarMensajeModal(
+                "#modalGuardando",
+                `Eliminando ${entidad[0]}`,
+                `Se está eliminando ${entidad[2]}`,
+                "bi bi-trash-fill",
+                false
+            );
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    accion: 'eliminar',
+                    id: id
+                },
+
+                success: function () {
+
+                    if (callback) {
+                        callback();
+                    }
+
+                    cambiarMensajeModal(
+                        "#modalGuardando",
+                        "¡Eliminado!",
+                        `${capitalizar(entidad[2])} ha sido eliminado correctamente`,
+                        "bi bi-check-circle-fill",
+                        true
+                    );
+                },
+
+                error: function () {
+
+                    cambiarMensajeModal(
+                        "#modalGuardando",
+                        "¡Error!",
+                        `No se pudo eliminar ${entidad}`,
+                        "bi bi-x-circle-fill",
+                        true
+                    );
+                }
+            });
+
+        }
+    });
+}
+
+function capitalizar(texto) {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function calcularDias(
+    fechaInicial,
+    fechaFinal
+){
+
+    const [mesInicio, diaInicio] =
+        fechaInicial.split('-').map(Number);
+
+    const [mesFinal, diaFinal] =
+        fechaFinal.split('-').map(Number);
+
+    const anioBase = 2024; // bisiesto
+
+    const inicio = new Date(
+        anioBase,
+        mesInicio - 1,
+        diaInicio
+    );
+
+    let final = new Date(
+        anioBase,
+        mesFinal - 1,
+        diaFinal
+    );
+
+    // Cruza de año
+    if(final < inicio){
+
+        final = new Date(
+            anioBase + 1,
+            mesFinal - 1,
+            diaFinal
+        );
+    }
+
+    const diferencia =
+        final.getTime() -
+        inicio.getTime();
+
+    return Math.floor(
+        diferencia / (1000 * 60 * 60 * 24)
+    ) + 1;
 }

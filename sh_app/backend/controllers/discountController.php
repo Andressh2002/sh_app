@@ -15,7 +15,7 @@
                 return [
                     'title' => "¡No se guardó!",
                     'text' => "El descuento " . htmlspecialchars($nombre) . " ya existe. Pruebe con otro nombre",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
     
@@ -29,7 +29,7 @@
                 return [
                     'title' => "¡Guardado!",
                     'text' => "El descuento se ha guardado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -37,7 +37,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -88,7 +88,7 @@
                 return [
                     'title' => "¡No se actualizó!",
                     'text' => "Ya existe un descuento con ese nombre",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
     
@@ -107,7 +107,7 @@
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "El descuento se ha actualizado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -115,7 +115,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el descuento: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -153,99 +153,132 @@
         
         return $descuentos;
     }
-    
-    function contar($conn, $nombre) {
-        $query = "SELECT COUNT(*) as total FROM descuentos WHERE 1=1 AND estado=1";
-        
-        if ($nombre !== null && $nombre !== '') {
-            $query .= " AND nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
-        }
-    
-        $result = $conn->query($query);
-        $row = $result->fetch_assoc();
-        
-        return $row['total'];
-    }
 
-    function contarTodos($conn) {
-        $query = "SELECT COUNT(*) as total FROM descuentos WHERE estado=1";
-    
-        if ($result = $conn->query($query)) {
-            if ($row = $result->fetch_assoc()) {
-                return $row['total'];
-            }
-        }
+    function listarIds(
+        $conn,
+        $nombre,
+        $orden
+    ){
 
-        return 0;
-    }
-
-    function listarIds($conn, $nombre, $orden) {
         $query = "
-            SELECT id FROM descuentos
-            WHERE estado = 1";
-        
-        if ($nombre !== null && $nombre !== '') {
-            $query .= " AND nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
+            SELECT
+                d.id
+            FROM descuentos d
+            WHERE d.estado = 1
+        ";
+
+        if(!empty($nombre)){
+
+            $query .= "
+                AND d.nombre LIKE '%" .
+                $conn->real_escape_string($nombre) .
+                "%'
+            ";
         }
-    
-        $query .= " GROUP BY id";
-        $query .= " ORDER BY " . $conn->real_escape_string($orden);
-        
-        $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+
+        $columnasPermitidas = [
+            'id',
+            'nombre',
+            'descuento'
+        ];
+
+        $formasPermitidas = [
+            'ASC',
+            'DESC'
+        ];
+
+        $campoOrden = 'id';
+        $formaOrden = 'DESC';
+
+        if(
+            is_array($orden)
+            &&
+            isset($orden['orden'])
+            &&
+            in_array(
+                $orden['orden'],
+                $columnasPermitidas
+            )
+        ){
+            $campoOrden = $orden['orden'];
         }
-        
-        return $datas;
+
+        if(
+            is_array($orden)
+            &&
+            isset($orden['forma'])
+            &&
+            in_array(
+                strtoupper(
+                    $orden['forma']
+                ),
+                $formasPermitidas
+            )
+        ){
+            $formaOrden =
+                strtoupper(
+                    $orden['forma']
+                );
+        }
+
+        $query .= "
+            ORDER BY
+            d.$campoOrden
+            $formaOrden
+        ";
+
+        $result =
+            $conn->query($query);
+
+        $ids = [];
+
+        while(
+            $row =
+            $result->fetch_assoc()
+        ){
+
+            $ids[] =
+                $row['id'];
+        }
+
+        return $ids;
     }
 
-    function contarIds($conn, $nombre) {
-        $query = "
-            SELECT 
-                COUNT(DISTINCT id) AS total
-            FROM descuentos 
-            WHERE estado = 1";
-        
-            if ($nombre !== null && $nombre !== '') {
-                $query .= " AND nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
-            }
+    function buscarPorId(
+        $conn,
+        $id
+    ){
 
-        $query .= " GROUP BY id";
-        
-        $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
-        }
-        
-        return $datas;
-    }
-
-    function buscarPorId($conn, $id) {
         $stmt = $conn->prepare("
-            SELECT * FROM descuentos
-            WHERE estado=1 AND id=?
+            SELECT
+                id,
+                nombre,
+                descuento,
+                descripcion,
+                fecha_inicial,
+                fecha_final,
+                fecha_registro
+            FROM descuentos
+            WHERE estado = 1
+            AND id = ?
         ");
 
-        $stmt->bind_param("i", $id);
+        $stmt->bind_param(
+            "i",
+            $id
+        );
+
         $stmt->execute();
-    
-        $result = $stmt->get_result();
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+
+        $result =
+            $stmt->get_result();
+
+        if(
+            $result->num_rows <= 0
+        ){
+            return null;
         }
-        
-        return $datas;
+
+        return $result->fetch_assoc();
     }
 ?>

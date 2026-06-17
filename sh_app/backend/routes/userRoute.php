@@ -81,7 +81,6 @@
             $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
         
             $respuesta = seleccionar($conn, $nombre, $rol, $limit, $offset);
-            $total = contar($conn, $nombre, $rol);
         
             header('Content-Type: application/json');
             echo json_encode(['datos' => $respuesta, 'total' => $total]);
@@ -113,19 +112,6 @@
             }
             break;
 
-        case 'contar':
-            $total = contarTodos($conn);
-        
-            if ($total !== 0) {
-                header('Content-Type: application/json');
-                echo json_encode(['total' => $total]);
-            } else {
-                http_response_code(500);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'No se pudo obtener el total']);
-            }
-            break;
-
         case 'listarIds':
             $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
             $rol = isset($_POST['rol']) ? $_POST['rol'] : '';
@@ -145,6 +131,86 @@
         
             header('Content-Type: application/json');
             echo json_encode(['datos' => $respuesta]);
+            break;
+
+        case 'cambiarContrasennia':
+            if (isset($_POST['id']) && isset($_POST['contrasenniaActual']) && isset($_POST['contrasenniaNueva'])) {
+                $id = $_POST['id'];
+                $contrasenniaActual = $_POST['contrasenniaActual'];
+                $contrasenniaNueva = $_POST['contrasenniaNueva'];
+
+                $respuesta = cambiarContrasennia($conn, $id, $contrasenniaActual, $contrasenniaNueva);
+                echo json_encode($respuesta);
+            } else {
+                echo "Faltan datos para actualizar la contraseña del usuario";
+            }
+            break;
+
+        case 'cambiarContrasenniaAdmin':
+            if (isset($_POST['id']) && isset($_POST['contrasenniaNueva'])) {
+                $id = $_POST['id'];
+                $contrasenniaNueva = $_POST['contrasenniaNueva'];
+
+                $respuesta = cambiarContrasenniaAdmin($conn, $id, $contrasenniaNueva);
+                echo json_encode($respuesta);
+            } else {
+                echo "Faltan datos para actualizar la contraseña del usuario";
+            }
+            break;
+
+        case 'listarIdsAdmin':
+
+            $nombre =
+                $_POST['nombre']
+                ?? '';
+
+            $rol =
+                $_POST['rol']
+                ?? '';
+
+            $orden =
+                $_POST['orden']
+                ?? [];
+
+            $respuesta =
+                listarIdsAdmin(
+                    $conn,
+                    $nombre,
+                    $rol,
+                    $orden
+                );
+
+            header(
+                'Content-Type: application/json'
+            );
+
+            echo json_encode(
+                $respuesta
+            );
+
+            break;
+
+
+        case 'buscarPorIdAdmin':
+
+            $id =
+                $_POST['id']
+                ?? '';
+
+            $respuesta =
+                buscarPorIdAdmin(
+                    $conn,
+                    $id
+                );
+
+            header(
+                'Content-Type: application/json'
+            );
+
+            echo json_encode(
+                $respuesta
+            );
+
             break;
         
         default:

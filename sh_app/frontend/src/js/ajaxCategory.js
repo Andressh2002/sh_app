@@ -1,7 +1,6 @@
 function guardarCategoria() {
     const id = document.getElementById('Id').value || null;
     const nombre = $('#Nombre').val();
-    const descripcion = $('#Descripcion').val();
     const imagen = $('#hiddenImagenCategoria').val();
 
     if (!validarCampos(
@@ -11,7 +10,9 @@ function guardarCategoria() {
         return;
     }
     
-    
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Guardando...", 'Espere un momento...', "bi bi-wifi", false);
+
     guardarDatos();
 
     function guardarDatos() {
@@ -19,7 +20,6 @@ function guardarCategoria() {
         const data = {
             accion: accion,
             nombre: nombre,
-            descripcion: descripcion,
             imagen: imagen
         };
 
@@ -33,97 +33,25 @@ function guardarCategoria() {
             data: data,
             success: function(response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
+                cambiarMensajeModal(
+                    "#modalGuardando",
                     data.title,
                     data.text,
                     data.icon,
-                    'Aceptar'
+                    true,
                 );
             },
-            error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al guardar la categoría.',
-                    'error',
-                    'Aceptar'
+            error: function(error) {
+                cambiarMensajeModal(
+                    "#modalGuardando",
+                    error.title,
+                    error.text,
+                    error.icon,
+                    true,
                 );
             }
         });
     }
-}
-
-function obtenerCategorias(nombre) {
-    $.ajax({
-        url: backend + urlCategory,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre
-        },
-        success: function(response) {
-            try {
-                const categorias = typeof response === 'string' ? JSON.parse(response) : response;
-                mostrarCategorias(categorias);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function() {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
-function mostrarCategorias(categorias) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-
-    categorias = ordenar(categorias, order);
-
-    if (!Array.isArray(categorias) || categorias.length === 0) {
-        container.append('<tr><td class="text-center" colspan="4">No se encontraron categorías.</td></tr>');
-        return;
-    }
-
-    categorias.forEach((categoria, index) => {
-        const json = encodeURIComponent(JSON.stringify(categoria));
-        const html = `
-            <tr>
-                <td class="align-middle">${startIndex + index + 1}</td>
-                <td class="align-middle">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${categoria.id}" 
-                            style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${categoria.id}" class="d-none product-img-hover" alt="Imagen">
-                    </div>
-                </td>
-                <td class="align-middle">${categoria.nombre}</td>
-                <td class="align-middle text-center" style="width: 1px;">
-                    <div class="d-flex gap-2 justify-content-start">
-                        <button onclick="location.href='addCategory.php?id=${categoria.id}&accion=actualizar'" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Editar<i class="bi bi-pencil-square ms-2"></i>
-                        </button>
-                        <button onclick="eliminarCategoria(${categoria.id}, '${categoria.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesCategoria('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        container.append(html);
-        buscarImagenCategoria(categoria.id);
-    });
 }
 
 function buscarImagenCategoria(id) {
@@ -188,52 +116,21 @@ function buscarCategoria(id) {
 function mostrarCategoria(categoria) {
     if (categoria) {
         $('#Nombre').val(categoria.nombre);
-        $('#Descripcion').val(categoria.descripcion);
 
         cargarImagenGuardada(categoria.imagen, '#vistaImagenCategoria');
         $('#hiddenImagenCategoria').val(categoria.imagen);
     }
 }
 
-function eliminarCategoria(id, nombre, eliminar) {
-    if (!eliminar) {
-        dialogAlert(
-            '¿Estás seguro?',
-            '¿De verdad quiere eliminar "' + nombre + '" de las categorías? ¡Si lo haces no se podrá revertir!',
-            'warning',
-            'Si, estoy seguro',
-            'No',
-            function() {
-                eliminarCategoria(id, '', true);
-            }
-        );
-    } else {
-        $.ajax({
-            url: backend + urlCategory,
-            type: 'POST',
-            data: {
-                accion: 'eliminar',
-                id: id
-            },
-            success: function(response) {
-                aplicarFiltrosCategoria()
-                alert(
-                    '¡Categoría eliminada!',
-                    response,
-                    'success',
-                    'Aceptar'
-                );
-            },
-            error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al eliminar la categoría.',
-                    'error',
-                    'Aceptar'
-                );
-            }
-        });
-    }
+function eliminarCategoria(id, nombre) {
+
+    eliminarRegistro({
+        id,
+        nombre,
+        entidad: ['categoría', 'categorías' , 'la categoría'],
+        url: backend + urlCategory,
+        callback: aplicarFiltrosCategoria
+    });
 }
 
 function aplicarFiltrosCategoria() {
@@ -241,205 +138,307 @@ function aplicarFiltrosCategoria() {
     seleccionarCategorias(nombre);
 }
 
-function verDetallesCategoria(json) {
-    const categoria = JSON.parse(decodeURIComponent(json)); // Decodificar y parsear el JSON
-    alertDetails(
-        'Detalles de la categoría',
-        categoria,
-        ['nombre', 'imagen', 'descripcion'],
-        'info',
-        'Cerrar'
-    );
-}
+let tokenCargaCategorias = 0;
 
-function seleccionarCategorias(nombre) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
+async function seleccionarCategorias(nombre){
+
+    const currentToken = ++tokenCargaCategorias;
+
+    const container = $('#list-container');
+
     container.empty();
-    const colspan = 4;
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
-    `);
-    
-    cancelarCargaSecuencial = true;
 
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
+    const order = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    };
 
-    cancelarCargaSecuencial = false;
+    try{
 
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlCategory,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            nombre: nombre,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const categorias = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
+        const response = await $.ajax({
 
-                if (categorias.length > 0) {
-                    procesarCategoriasSecuencialmente(categorias, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron categorias.</td></tr>`);
-                }
-                
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
+            url: backend + urlCategory,
+
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: {
+                accion: 'listarIds',
+                nombre: nombre || '',
+                orden: order
             }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
+        });
+
+        if(currentToken !== tokenCargaCategorias){
+            return;
         }
-    });
-}
 
-function procesarCategoriasSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
+        const ids = response || [];
 
-    const categoria = lista[index];
-    const container = $('#data-container');
+        mostrarTotalRegistros(
+            ids.length,
+            ['categoría', 'categorías']
+        );
 
-    try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" style="max-width: 256px; min-width: 140px;">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 140px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${categoria.id}" style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${categoria.id}" class="d-none product-img-hover" alt="Imagen">
-                    </div>
-                </td>
-                <td class="align-middle" id="informacion-${categoria.id}"></td>
-                <td class="align-middle text-center" id="opciones-${categoria.id}" style="width: 1px;"></td>
-            </tr>
-        `;
-        container.append(html);
-    } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Esta categoría no se pudo cargar.</td></tr>`);
-    }
+        if(ids.length === 0){
 
-    cargarCategoriaSeleccionada(categoria.id, function () {
-        procesarCategoriasSecuencialmente(lista, index + 1, colspan);
-    });
-}
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron categorías.
+                </div>
+            `);
 
-function cargarCategoriaSeleccionada(id, callback) {
-    const tdInformacion = $(`#informacion-${id}`);
-    const tdOpciones = $(`#opciones-${id}`);
-
-    const liClasses = "list-group-item border-0 bg-transparent px-0 py-0";
-
-    $.ajax({
-        url: backend + urlCategory,
-        type: 'POST',
-        data: {
-            accion: 'buscarPorId',
-            id: id
-        },
-        success: function (response) {
-            try {
-                const categoria = typeof response.datos[0] === 'string' ? JSON.parse(response.datos[0]) : response.datos[0];
-                const json = encodeURIComponent(JSON.stringify(categoria));
-                
-                tdInformacion.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 248px;">
-                        <li class="${liClasses}">${categoria.nombre || 'Sin nombre'}</li>
-                    </ul>
-                `);
-                tdOpciones.append(`
-                    <div class="d-flex gap-2 justify-content-start">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center" type="button" id="dropdownMenuButton${categoria.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                Editar<i class="bi bi-pencil-square ms-2"></i>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${categoria.id}">
-                                <li><a class="dropdown-item" href="addCategory.php?id=${categoria.id}&accion=actualizar">En esta pestaña</a></li>
-                                <li><a class="dropdown-item" href="addCategory.php?id=${categoria.id}&accion=actualizar" target="_blank">En otra pestaña</a></li>
-                            </ul>
-                        </div>
-                        <button onclick="eliminarCategoria(${categoria.id}, '${categoria.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesCategoria('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                `);
-
-                buscarImagenCategoria(categoria.id);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-
-            if (typeof callback === 'function') callback();
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-            if (typeof callback === 'function') callback();
+            return;
         }
-    });
-}
 
-function actualizarPaginacionCategoria(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+        await cargarCategoriasProgresivamente(
+            ids,
+            currentToken
+        );
 
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
+    }
+    catch(error){
 
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaCategoria(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
+        console.error(error);
 
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaCategoria(${i})">${i}</a>
-                </li>
+        if(currentToken === tokenCargaCategorias){
+
+            container.html(`
+                <div class="orders-empty">
+                    Error al cargar categorías.
+                </div>
             `);
         }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaCategoria(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
     }
 }
 
-function cambiarPaginaCategoria(pagina) {
-    currentPage = pagina;
-    seleccionarCategorias('');
+async function cargarCategoriasProgresivamente(
+    ids,
+    currentToken
+){
+
+    $('#list-container').empty();
+
+    for(const item of ids){
+
+        renderCategoriaSkeleton(item);
+
+        if(currentToken !== tokenCargaCategorias){
+            return;
+        }
+
+        try{
+
+            const response = await $.ajax({
+
+                url: backend + urlCategory,
+
+                type: 'POST',
+
+                dataType: 'json',
+
+                data: {
+                    accion: 'buscarPorId',
+                    id: item
+                }
+            });
+
+            if(currentToken !== tokenCargaCategorias){
+                return;
+            }
+
+            const categoria = response;
+
+            if(!categoria){
+                continue;
+            }
+
+            const categoriaFinal =
+                typeof categoria === 'string'
+                    ? JSON.parse(categoria)
+                    : categoria;
+
+            $(`#categoria-skeleton-${categoriaFinal.id}`)
+                .replaceWith(
+                    renderCategoriaCard(
+                        categoriaFinal,
+                        true
+                    )
+                );
+
+            buscarImagenCategoria(
+                categoriaFinal.id
+            );
+        }
+        catch(error){
+
+            console.error(
+                'Error cargando categoría',
+                item.id,
+                error
+            );
+        }
+    }
+}
+
+function renderCategoriaCard(
+    categoria,
+    returnHtml = false
+){
+
+    const json = encodeURIComponent(
+        JSON.stringify(categoria)
+    );
+
+    const html = `
+
+        <div
+            class="product-admin-card"
+            id="categoria-${categoria.id}"
+        >
+
+            <div class="product-admin-header">
+
+                <div>
+
+                    <p class="product-number">
+                        Registrado el ${formatearFechaConHora(categoria.fecha_registro)}
+                    </p>
+
+                    <h5 class="product-title">
+                        ${categoria.nombre}
+                    </h5>
+
+                </div>
+
+            </div>
+
+            <div class="product-admin-body">
+
+                <div class="product-admin-image">
+
+                    <img
+                        id="img-${categoria.id}"
+                        class="product-image"
+                        src="../src/img/app/no_image.png"
+                        alt="${categoria.nombre}"
+                    >
+
+                </div>
+
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <span>Nombre:</span>
+                            <strong>
+                                ${categoria.nombre}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Productos relacionados:</span>
+                            <strong>
+                                ${categoria.total_productos}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="order-actions">
+
+                    <a
+                        href="addCategory.php?id=${categoria.id}&accion=actualizar"
+                        class="store-filter-btn px-4 justify-content-center text-decoration-none"
+                    >
+                        <i class="bi bi-pencil-square"></i>
+                        Editar
+                    </a>
+
+                    <button
+                        class="store-filter-btn px-4 justify-content-center"
+                        onclick="
+                            eliminarCategoria(
+                                ${categoria.id},
+                                '${categoria.nombre}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-trash3-fill"></i>
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    if(returnHtml){
+        return html;
+    }
+
+    $('#list-container').append(html);
+}
+
+function renderCategoriaSkeleton(id){
+
+    $('#list-container').append(`
+
+        <div
+            class="product-admin-card product-skeleton"
+            id="categoria-skeleton-${id}"
+        >
+
+            <div class="product-admin-header">
+
+                <div>
+
+                    <div class="skeleton-line skeleton-subtitle"></div>
+
+                    <div class="skeleton-line skeleton-title"></div>
+
+                </div>
+
+            </div>
+
+            <div class="product-admin-body">
+
+                <div
+                    class="product-admin-image skeleton-box"
+                ></div>
+
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="product-admin-actions">
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `);
 }
 
 function limpiarFiltrosCategoria() {

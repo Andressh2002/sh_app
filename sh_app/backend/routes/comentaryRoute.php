@@ -14,8 +14,9 @@
                 $idProducto = $_POST['idProducto'];
                 $idCliente = $_POST['idCliente'];
                 $mensaje = $_POST['mensaje'];
+                $estrellas = $_POST['estrellas'];
 
-                $respuesta = insertar($conn, $idProducto, $idCliente, $mensaje);
+                $respuesta = insertar($conn, $idProducto, $idCliente, $mensaje, $estrellas);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos";
@@ -28,8 +29,9 @@
                 $idProducto = $_POST['idProducto'];
                 $idCliente = $_POST['idCliente'];
                 $mensaje = $_POST['mensaje'];
+                $estrellas = $_POST['estrellas'];
 
-                $respuesta = actualizar($conn, $id, $idProducto, $idCliente, $mensaje);
+                $respuesta = actualizar($conn, $id, $idProducto, $idCliente, $mensaje, $estrellas);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos para actualizar el mensaje";
@@ -89,24 +91,26 @@
             break;
 
         case 'listarIds':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+            $respuesta =
+                listarIds($conn, $_POST['nombre'] ?? '', $_POST['orden'] ?? []);
+            header(
+                'Content-Type: application/json'
+            );
+            echo json_encode(
+                $respuesta
+            );
+        break;
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
-        
-            $respuesta = listarIds($conn, $nombre, $orden);
-            $total = contarIds($conn, $nombre);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
-            break;
-    
         case 'buscarPorId':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = buscarPorId($conn, $id);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
-            break;
+            $respuesta = buscarPorId($conn, $_POST['id'] ?? '');
+            header(
+                'Content-Type: application/json'
+            );
+            echo json_encode(
+                $respuesta
+            );
+
+        break;
         
         default:
             echo 'ERROR, falta una acción';

@@ -26,10 +26,10 @@ function guardarProducto() {
     const imagen2 = $('#hiddenImagen2Producto').val();
     const descripcion = $('#Descripcion').val();
     const advertencia = $('#Advertencia').val();
-    const festividad = $('#hiddenFestividad').val();
-    const rareza = $('#hiddenRareza').val();
-    const universo = $('#hiddenUniverso').val();
-    const accesorio = $('#hiddenAccesorio').val();
+    const festividad = $('#Festividad').val();
+    const rareza = $('#Rareza').val();
+    const universo = $('#Universo').val();
+    const accesorio = $('#Accesorio').val();
     const vectColores = colores_almacenados.map(color => color.imagen);
     const tiempo = $('#Tiempo').val();
     const comida = $('#Comida').prop('checked');
@@ -38,11 +38,8 @@ function guardarProducto() {
     // Rellena con cadenas vacías hasta alcanzar un total de 20 elementos
     const imagenColores = Array.from({ length: 20 }, (_, i) => vectColores[i] || '');
 
-    alertLoading(
-        id ? '¡Cambiando imágenes!' : '¡Guardando imágenes!',
-        'Se están guardando las imágenes, espere a que el proceso termine.',
-        'info'
-    );
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Guardando...", 'Espere un momento...', "bi bi-wifi", false);
 
     let arrayResponse = [];
 
@@ -83,7 +80,7 @@ function guardarProducto() {
                 success: function (response) {
                     const data = typeof response === 'string' ? JSON.parse(response) : response;
                     arrayResponse = data;
-                    if (data.icon === 'success' && data.producto_id) {
+                    if (data.icon === 'bi bi-check-circle' && data.producto_id) {
                         resolve(data.producto_id); // Devuelve el ID del producto
                     } else {
                         reject('Error al guardar el producto: ' + data.text);
@@ -113,7 +110,7 @@ function guardarProducto() {
                 processData: false,
                 success: function (response) {
                     const data = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (data.icon === 'success') {
+                    if (data.icon === 'bi bi-check-circle') {
                         resolve(); // La imagen se guardó correctamente
                     } else {
                         reject('Error al guardar la imagen: ' + data.text);
@@ -125,10 +122,6 @@ function guardarProducto() {
             });
         });
     }
-
-    // Mostrar y actualizar la barra de progreso
-    $('#container-progress-bar').show(); // Asegura que el contenedor sea visible
-    $('#container-progress-bar .progress-bar').css('width', '0%'); // Inicializa la barra al 0%
 
     // Llamada a las funciones y actualización de la barra de progreso
     guardarDatos()
@@ -142,8 +135,6 @@ function guardarProducto() {
                     if (imagen) { // Solo intenta guardar si hay una imagen presente
                         try {
                             await guardarImagen(productId, imagen, `imagen_color${index + 1}`);
-                            const progressPercentage = ((index + 1) / totalColores) * 100;
-                            $('#container-progress-bar .progress-bar').css('width', `${progressPercentage}%`);
                         } catch (error) {
                             console.error(`Error al guardar la imagen ${index + 1}: ${error}`);
                         }
@@ -156,174 +147,86 @@ function guardarProducto() {
         })
         .then(() => {
             // Mensaje de éxito después de que se guarden todas las imágenes
-            alert(
+            cambiarMensajeModal(
+                "#modalGuardando",
                 arrayResponse.title,
                 arrayResponse.text,
                 arrayResponse.icon,
-                'Aceptar'
+                true,
             );
             $('#container-progress-bar').hide(); // Oculta la barra de progreso al terminar
         })
         .catch(error => {
-            alert(
+            cambiarMensajeModal(
+                "#modalGuardando",
                 arrayResponse.title,
                 arrayResponse.text,
                 arrayResponse.icon,
-                'Cerrar'
+                true,
             );
             console.error(error);
         });
 }
 
-function obtenerProductos(nombre) {
-    toggleLoadingIcon('data-container', true, 6);
-    $.ajax({
-        url: backend + urlProduct,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre
-        },
-        success: function (response) {
-            try {
-                const productos = typeof response === 'string' ? JSON.parse(response) : response;
-                mostrarProductos(productos);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            toggleLoadingIcon('data-container', false, 6);
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
+function cargarEstrellasProducto(
+    calificacion,
+    idElement
+){
 
-function mostrarProductos(productos) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
+    // convertir a número
+    const rating =
+        parseFloat(calificacion) || 0;
 
-    // Verificar si currentPage e itemsPerPage están definidos
-    if (typeof currentPage === 'undefined' || typeof itemsPerPage === 'undefined') {
-        console.error('Error: currentPage o itemsPerPage no están definidos.');
+    const divRating =
+        document.getElementById(
+            'container-product-stars' +
+            idElement.toString()
+        );
+
+    if(!divRating){
         return;
     }
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
-
-    // Ordenar productos y verificar que sean un array
-    try {
-        productos = ordenar(productos, order);
-    } catch (error) {
-        console.error('Error al ordenar los productos:', error);
-        return;
-    }
-
-    if (!Array.isArray(productos) || productos.length === 0) {
-        container.append('<tr><td class="text-center" colspan="6">No se encontraron productos.</td></tr>');
-        return;
-    }
-
-    productos.forEach((producto, index) => {
-        try {
-            const json = encodeURIComponent(JSON.stringify(producto));
-            const countColores = producto.idColores.split(',').length;
-            const html = `
-                <tr>
-                    <td class="align-middle">${startIndex + index + 1}</td>
-                    <td class="align-middle" style="width: 256px;">
-                        <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
-                            <!-- Spinner mientras se carga la imagen -->
-                            <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${producto.id}" 
-                                style="width: 50px; height: 50px;"></div>
-                            <!-- Imagen (oculta por defecto) -->
-                            <img id="img-${producto.id}" class="d-none product-img-hover" alt="Imagen">
-                        </div>
-                    </td>
-                    <td class="align-middle">
-                        <ul class="list-group border-0 px-0">
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Nombre: </strong>${producto.nombre || 'Sin nombre'}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Categoría: </strong>${producto.categoria || 'Sin categoría'}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Precio: </strong>₡${producto.precio || 0}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Paletas: </strong>${countColores < 20 || 0 ? countColores + ' de 20' : 'Las 20'}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Estrellas: </strong><span id="container-product-stars${producto.id}"></span></li>
-                        </ul>
-                    </td>
-                    <td class="align-middle">
-                        <ul class="list-group border-0 px-0">
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Festividad: </strong>${producto.idFestividad == 0 ? 'Ninguna' : producto.festividad || 'Desconocida'}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Rareza: </strong>${producto.idRareza == 0 ? 'Ninguna' : producto.rareza || 'Desconocida'}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Universo: </strong>${producto.idUniverso == 0 ? 'Ninguno' : producto.universo || 'Desconocido'}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Descuentos: </strong>${producto.idDescuentos ? (producto.idDescuentos.split(',').length == 1 ? 'Solo 1 aplicado' : producto.idDescuentos.split(',').length + ' aplicados') : 'No aplicados'}</li>
-                        </ul>
-                    </td>
-                    <td class="align-middle">
-                        <ul class="list-group border-0 px-0">
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Pedidos: </strong>${producto.pedidos || 0}</li>
-                            <li class="list-group-item border-0 bg-transparent px-0"><strong>Vendidos: </strong>${producto.vendidos || 0}</li>
-                        </ul>
-                    </td>
-                    <td class="align-middle text-center" style="width: 1px;">
-                        <div class="d-flex gap-2 justify-content-start">
-                            <button onclick="window.open('addProduct.php?id=${producto.id}&accion=actualizar')" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Editar<i class="bi bi-pencil-square ms-2"></i>
-                            </button>
-                            <button onclick="cambiarVisibilidadProducto(${producto.visible == 0 ? 1 : 0}, '${producto.id}')" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                ${producto.visible == 0 ? 'Publicar' : 'Ocultar'}<i class="bi ${producto.visible == 0 ? 'bi-cloud-arrow-up-fill' : 'bi-lock-fill'} ms-2"></i>
-                            </button>
-                            <button onclick="eliminarProducto(${producto.id}, '${producto.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Eliminar
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                                </svg>
-                            </button>
-                            <button onclick="verDetallesProducto('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Detalles<i class="bi bi-three-dots ms-2"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            container.append(html);
-            cargarEstrellasProducto(producto.calificaciones_estrellas, producto.id);
-            buscarImagenProducto(producto.id);
-        } catch (error) {
-            console.error(`Error al procesar el producto con id ${producto.id}:`, error);
-        }
-    });
-}
-
-function cargarEstrellasProducto(calificaciones, idElement) {
-    if (!calificaciones) {
-        calificaciones = '';
-    }
-    let totalEstrellas = 0;
-    let contador = 0;
-
-    const pares = calificaciones.replace(/[{}]/g, '').split(',');
-
-    pares.forEach(par => {
-        const [clave, estrellas] = par.split(':');
-        totalEstrellas += parseInt(estrellas);
-        contador++;
-    });
-
-    const promedioEstrellas = contador > 0 ? totalEstrellas / contador : 0;
-
-    const divRating = document.getElementById('container-product-stars' + idElement.toString());
     divRating.innerHTML = '';
 
-    for (let i = 1; i <= 5; i++) {
-        if (i <= Math.round(promedioEstrellas)) {
-            divRating.innerHTML += `<i class="bi bi-star-fill text-star"></i>`;
-        } else {
-            divRating.innerHTML += `<i class="bi bi-star text-star"></i>`;
+    for(let i = 1; i <= 5; i++){
+
+        // estrella completa
+        if(rating >= i){
+
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star-fill
+                    text-star
+                "></i>
+            `;
+        }
+
+        // media estrella
+        else if(rating >= i - 0.5){
+
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star-half
+                    text-star
+                "></i>
+            `;
+        }
+
+        // estrella vacía
+        else{
+
+            divRating.innerHTML += `
+                <i class="
+                    bi bi-star
+                    text-star
+                "></i>
+            `;
         }
     }
 }
 
-function buscarImagenProducto(idProducto) {
+function buscarImagenProducto(idProducto, idExtra = null) {
     $.ajax({
         url: backend + urlProduct,
         type: 'POST',
@@ -335,8 +238,8 @@ function buscarImagenProducto(idProducto) {
             try {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
                 const imagenURL = data[0].imagen_portada && data[0].imagen_portada !== '' ? data[0].imagen_portada : '../src/img/app/no_image.png';
-
-                const imgElement = document.getElementById(`img-${idProducto}`);
+                
+                const imgElement = document.getElementById(`img-${idProducto}${idExtra ? (`-${idExtra}`) : ''}`);
                 const spinnerElement = document.getElementById(`spinner-${idProducto}`);
 
                 imgElement.src = imagenURL;
@@ -386,6 +289,10 @@ function mostrarProducto(producto) {
     if (producto) {
         $('#Nombre').val(producto.nombre);
         $('#Categorias').val(producto.idCategoria);
+        $('#Rareza').val(producto.idRareza);
+        $('#Universo').val(producto.idUniverso);
+        $('#Festividad').val(producto.idFestividad);
+        $('#Accesorio').val(producto.idAccesorio);
         $('#Precio').val(producto.precio);
         $('#Altura').val(producto.altura);
         $('#Anchura').val(producto.anchura);
@@ -401,30 +308,6 @@ function mostrarProducto(producto) {
         }
         if (producto.existencia == 1) {
             $('#input-col-Festividad').addClass('d-none');
-        }
-        if (producto.festividad) {
-            $('#textFestividad').val(producto.festividad);
-            $('#hiddenFestividad').val(producto.idFestividad);
-        } else {
-            $('#textFestividad').val('Ninguno');
-        }
-        if (producto.rareza) {
-            $('#textRareza').val(producto.rareza);
-            $('#hiddenRareza').val(producto.idRareza);
-        } else {
-            $('#textRareza').val('Ninguno');
-        }
-        if (producto.universo) {
-            $('#textUniverso').val(producto.universo);
-            $('#hiddenUniverso').val(producto.idUniverso);
-        } else {
-            $('#textUniverso').val('Ninguno');
-        }
-        if (producto.accesorio) {
-            $('#textAccesorio').val(producto.accesorio);
-            $('#hiddenAccesorio').val(producto.idAccesorio);
-        } else {
-            $('#textAccesorio').val('Ninguno');
         }
 
         cargarImagenGuardada(producto.imagen_portada, '#vistaImagen1Producto');
@@ -467,45 +350,15 @@ function mostrarProducto(producto) {
     }
 }
 
-function eliminarProducto(id, nombre, eliminar) {
-    if (!eliminar) {
-        dialogAlert(
-            '¿Estás seguro?',
-            '¿De verdad quiere eliminar "' + nombre + '" de los productos? ¡Si lo haces no se podrá revertir!',
-            'warning',
-            'Si, estoy seguro',
-            'No',
-            function () {
-                eliminarProducto(id, '', true);
-            }
-        );
-    } else {
-        $.ajax({
-            url: backend + urlProduct,
-            type: 'POST',
-            data: {
-                accion: 'eliminar',
-                id: id
-            },
-            success: function (response) {
-                aplicarFiltrosProducto()
-                alert(
-                    '¡Producto eliminado!',
-                    response,
-                    'success',
-                    'Aceptar'
-                );
-            },
-            error: function () {
-                alert(
-                    'Error',
-                    'Hubo un problema al eliminar el producto.',
-                    'error',
-                    'Aceptar'
-                );
-            }
-        });
-    }
+function eliminarProducto(id, nombre) {
+
+    eliminarRegistro({
+        id,
+        nombre,
+        entidad: ['producto', 'productos' , 'el producto'],
+        url: backend + urlProduct,
+        callback: aplicarFiltrosProducto
+    });
 }
 
 function aplicarFiltrosProducto() {
@@ -516,278 +369,519 @@ function aplicarFiltrosProducto() {
     seleccionarProductos(nombre, categoria, rareza, universo);
 }
 
-function verDetallesProducto(json) {
-    const producto = JSON.parse(decodeURIComponent(json));
-    alertDetails(
-        'Detalles del producto',
-        producto,
-        ['nombre', 'categoria', 'precio', 'pedidos', 'vendidos', 'especial', 'festividad', 'descripcion', 'fecha_registro'],
-        'info',
-        'Cerrar'
-    );
-}
+// CONTROL GLOBAL
+let tokenCargaProductos = 0;
 
-function seleccionarProductos(nombre, categoria, rareza, universo) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    const colspan = 5;
+async function seleccionarProductos(
+    nombre,
+    categoria,
+    rareza,
+    universo
+){
+
+    const currentToken = ++tokenCargaProductos;
+
+    const container = $('#list-container');
 
     container.empty();
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
-    `);
-    
-    if (!nombre) {
-        nombre = '';
-    }
-    if (!categoria) {
-        categoria = '';
-    }
-    if (!rareza) {
-        rareza = '';
-    }
-    if (!universo) {
-        universo = '';
-    }
 
-    cancelarCargaSecuencial = true;
+    const order = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    };
 
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
+    const textElement = ["producto", "productos"];
 
-    cancelarCargaSecuencial = false;
-    
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlProduct,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            nombre: nombre,
-            categoria: categoria,
-            rareza: rareza,
-            universo: universo,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const productos = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
+    try{
 
-                if (productos.length > 0) {
-                    procesarProductosSecuencialmente(productos, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron productos.</td></tr>`);
-                }
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
+        const response = await $.ajax({
+
+            url: backend + urlProduct,
+
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: {
+                accion: 'listarIds',
+                nombre: nombre || '',
+                categoria: categoria || '',
+                rareza: rareza || '',
+                universo: universo || '',
+                orden: order
             }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
+        });
+
+        if(currentToken !== tokenCargaProductos){
+            return;
         }
-    });
-}
 
-function procesarProductosSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
+        const ids = response || [];
 
-    const producto = lista[index];
-    const container = $('#data-container');
+        mostrarTotalRegistros(
+            ids.length,
+            ['producto', 'productos']
+        );
 
-    try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" style="max-width: 256px; min-width: 140px;">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 140px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${producto.id}" style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${producto.id}" class="d-none product-img-hover" alt="Imagen">
-                    </div>
-                </td>
-                <td class="align-middle" id="resumen-${producto.id}"></td>
-                <td class="align-middle" id="asignaciones-${producto.id}"></td>
-                <td class="align-middle text-center" id="opciones-${producto.id}" style="width: 1px;"></td>
-            </tr>
-        `;
-        container.append(html);
-    } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Este producto no se pudo cargar.</td></tr>`);
-    }
+        if(ids.length === 0){
 
-    cargarProductoSeleccionado(producto.id, function () {
-        procesarProductosSecuencialmente(lista, index + 1, colspan);
-    });
-}
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron productos.
+                </div>
+            `);
 
-function cargarProductoSeleccionado(id, callback) {
-    const tdResumen = $(`#resumen-${id}`);
-    const tdAsignaciones = $(`#asignaciones-${id}`);
-    const tdOpciones = $(`#opciones-${id}`);
-
-    const liClasses = "list-group-item border-0 bg-transparent px-0 py-0";
-
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-    }
-
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlProduct,
-        type: 'POST',
-        data: {
-            accion: 'buscarPorId',
-            id: id
-        },
-        success: function (response) {
-            if (cancelarCargaSecuencial) return;
-
-            try {
-                const producto = typeof response.datos[0] === 'string' ? JSON.parse(response.datos[0]) : response.datos[0];
-                const json = encodeURIComponent(JSON.stringify(producto));
-                const countColores = producto.idColores.split(',').length;
-                const p_comida = producto.comida;
-
-                let isDestacado = false;
-                if (producto.fecha_destacado != null) {
-                    const fechaActual = new Date();
-                    const fechaDestacado = new Date(producto.fecha_destacado.split(" ")[0]);
-                    const diffTime = Math.abs(fechaActual - fechaDestacado);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    if (diffDays <= 7) {
-                        isDestacado = true;
-                    }
-                }
-                
-                let validarComida = false;
-                if (p_comida == null || p_comida == 0) {
-                    validarComida = true;
-                }
-                
-                tdResumen.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 248px;">
-                        <li class="${liClasses}"><strong>Nombre: </strong>${producto.nombre || 'Sin nombre'}</li>
-                        <li class="${liClasses}"><strong>Categoría: </strong>${producto.categoria || 'Sin categoría'}</li>
-                        <li class="${liClasses}"><strong>Precio: </strong>₡${producto.precio || 0}</li>
-                        ${validarComida ? `
-                            <li class="${liClasses}"><strong>Paletas: </strong>${countColores < 20 || 0 ? countColores + ' de 20' : 'Las 20'}</li>
-                        `:''}
-                        <li class="${liClasses}"><strong>Estrellas: </strong><span id="container-product-stars${producto.id}"></span></li>
-                    </ul>
-                `);
-                tdAsignaciones.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 254px;">
-                        <li class="${liClasses}"><strong>Festividad: </strong>${producto.idFestividad == 0 ? 'Ninguna' : producto.festividad || 'Desconocida'}</li>
-                        <li class="${liClasses}"><strong>Rareza: </strong>${producto.idRareza == 0 ? 'Ninguna' : producto.rareza || 'Desconocida'}</li>
-                        <li class="${liClasses}"><strong>Universo: </strong>${producto.idUniverso == 0 ? 'Ninguno' : producto.universo || 'Desconocido'}</li>
-                        <li class="${liClasses}"><strong>Descuentos: </strong>${producto.idDescuentos ? (producto.idDescuentos.split(',').length == 1 ? 'Solo 1 aplicado' : producto.idDescuentos.split(',').length + ' aplicados') : 'No aplicados'}</li>
-                        <li class="${liClasses} ${producto.visible == 0 ? 'text-danger' :'text-success'}"><strong>Visibilidad: </strong>${producto.visible == 0 ? 'Oculto al público' :'Todo público'}</li>
-                        <li class="${liClasses} ${isDestacado == false ? 'text-danger' :'text-success'}"><strong>Destacado: </strong>${isDestacado == false ? 'No' :'Si'}</li>
-                    </ul>   
-                `);
-                tdOpciones.append(`
-                    <div class="d-flex gap-2 justify-content-start">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                Editar<i class="bi bi-pencil-square ms-2"></i>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <li><a class="dropdown-item" href="addProduct.php?id=${producto.id}&accion=actualizar">En esta pestaña</a></li>
-                                <li><a class="dropdown-item" href="addProduct.php?id=${producto.id}&accion=actualizar" target="_blank">En otra pestaña</a></li>
-                            </ul>
-                        </div>
-                        <button onclick="cambiarVisibilidadProducto(${producto.visible == 0 ? 1 : 0}, '${producto.id}')" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            ${producto.visible == 0 ? 'Publicar' : 'Ocultar'}<i class="bi ${producto.visible == 0 ? 'bi-cloud-arrow-up-fill' : 'bi-lock-fill'} ms-2"></i>
-                        </button>
-                        <button onclick="cambiarDestacacidadProducto(${isDestacado == false ? 1 : 0}, '${producto.id}')" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            ${isDestacado == false ? 'Destacar' : 'Desestacar'}<i class="bi ${isDestacado == false ? 'bi-cloud-arrow-up-fill' : 'bi-lock-fill'} ms-2"></i>
-                        </button>
-                        <button onclick="eliminarProducto(${producto.id}, '${producto.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesProducto('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                `);
-
-                cargarEstrellasProducto(producto.calificaciones_estrellas, producto.id);
-                buscarImagenProducto(producto.id);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-
-            if (typeof callback === 'function') callback();
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-            if (typeof callback === 'function') callback();
+            return;
         }
-    });
-}
 
-function actualizarPaginacionProducto(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+        await cargarProductosProgresivamente(
+            ids,
+            currentToken
+        );
 
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
+    }
+    catch(error){
 
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaProducto(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
+        console.error(error);
 
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaProducto(${i})">${i}</a>
-                </li>
+        if(currentToken === tokenCargaProductos){
+
+            container.html(`
+                <div class="orders-empty">
+                    Error al cargar productos.
+                </div>
             `);
         }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaProducto(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
     }
 }
 
-function cambiarPaginaProducto(pagina) {
-    currentPage = pagina;
-    seleccionarProductos('', '', '', '');
+async function cargarProductosProgresivamente(
+    ids,
+    currentToken
+){
+
+    const container = $('#list-container');
+
+    container.empty();
+
+    for(const item of ids){
+
+        renderProductoSkeleton(item);
+
+        if(currentToken !== tokenCargaProductos){
+            return;
+        }
+
+        try{
+
+            const response = await $.ajax({
+
+                url: backend + urlProduct,
+
+                type: 'POST',
+
+                dataType: 'json',
+
+                data: {
+                    accion: 'buscarPorId',
+                    id: item
+                }
+            });
+
+            if(currentToken !== tokenCargaProductos){
+                return;
+            }
+
+            const producto = response;
+
+            if(!producto){
+                continue;
+            }
+
+            const productoFinal =
+                typeof producto === 'string'
+                    ? JSON.parse(producto)
+                    : producto;
+
+            $(`#producto-skeleton-${productoFinal.id}`)
+                .replaceWith(
+                    renderProductoCard(
+                        productoFinal,
+                        true
+                    )
+                );
+                
+            cargarEstrellasProducto(
+                productoFinal.calificacion_estrellas,
+                productoFinal.id
+            );
+            
+            buscarImagenProducto(
+                productoFinal.id
+            );
+        }
+        catch(error){
+
+            console.error(
+                'Error cargando producto',
+                item.id,
+                error
+            );
+        }
+    }
 }
 
-function limpiarFiltrosProducto() {
-    $('#Nombre').val('');
+function renderProductoCard(
+    producto,
+    returnHtml = false
+){
+
+    const json = encodeURIComponent(
+        JSON.stringify(producto)
+    );
+
+    const countColores =
+        producto.idColores
+        ? producto.idColores.split(',').length
+        : 0;
+
+    const totalDescuentos =
+        producto.idDescuentos
+        ? producto.idDescuentos.split(',').length
+        : 0;
+
+    let destacado = false;
+
+    if(producto.fecha_destacado){
+
+        const hoy = new Date();
+
+        const fecha = new Date(
+            producto.fecha_destacado.split(' ')[0]
+        );
+
+        const dias = Math.ceil(
+            Math.abs(hoy - fecha)
+            /
+            (1000 * 60 * 60 * 24)
+        );
+
+        destacado = dias <= 7;
+    }
+
+    const html = `
+
+        <div
+            class="product-admin-card"
+            id="producto-${producto.id}"
+        >
+
+            <!-- HEADER -->
+            <div class="product-admin-header">
+
+                <div>
+
+                    <p class="product-number">
+                        Registrado el ${formatearFechaConHora(producto.fecha_registro)}
+                    </p>
+
+                    <h5 class="product-title">
+                        ${producto.nombre || 'Sin nombre'}
+                    </h5>
+
+                </div>
+
+                <div
+                    class="
+                        product-status
+                        ${
+                            producto.visible == 1
+                            ? 'product-status-visible'
+                            : 'product-status-hidden'
+                        }
+                    "
+                >
+                    ${
+                        producto.visible == 1
+                        ? 'Visible'
+                        : 'Oculto'
+                    }
+                </div>
+
+            </div>
+
+            <!-- BODY -->
+            <div class="product-admin-body">
+
+                <!-- IMAGEN -->
+                <div class="product-admin-image">
+
+                    <img
+                        id="img-${producto.id}"
+                        class="product-image"
+                        src="../src/img/app/no_image.png"
+                        alt="${producto.nombre}"
+                    >
+
+                </div>
+
+                <!-- INFORMACIÓN -->
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <span>Categoría:</span>
+                            <strong>
+                                ${producto.categoria || '-'}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Rareza:</span>
+                            <strong>
+                                ${producto.rareza || '-'}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Universo:</span>
+                            <strong>
+                                ${producto.universo || '-'}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Precio:</span>
+                            <strong>
+                                ₡${producto.precio || 0}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Paletas:</span>
+                            <strong>
+                                ${countColores}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Descuentos:</span>
+                            <strong>
+                                ${totalDescuentos}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Existencias:</span>
+                            <strong>
+                                ${producto.existencia == 0 ? 'Por fabricación' : producto.disponibles}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Destacado:</span>
+
+                            <strong
+                                class="
+                                    ${
+                                        destacado
+                                        ? 'text-success'
+                                        : 'text-danger'
+                                    }
+                                "
+                            >
+                                ${
+                                    destacado
+                                    ? 'Sí'
+                                    : 'No'
+                                }
+                            </strong>
+
+                        </div>
+
+                        <div>
+
+                            <span>Calificación:</span>
+
+                            <strong
+                                id="container-product-stars${producto.id}"
+                            ></strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="order-actions">
+
+                    <a
+                        href="addProduct.php?id=${producto.id}&accion=actualizar"
+                        class="store-filter-btn px-4 px-md-5 px-lg-4 justify-content-center text-decoration-none"
+                    >
+                        <i class="bi bi-pencil-square"></i>
+                        Editar
+                    </a>
+
+                    <button
+                        class="store-filter-btn px-4 px-md-5 px-lg-4 justify-content-center text-decoration-none"
+                        onclick="
+                            cambiarVisibilidadProducto(
+                                ${producto.visible == 0 ? 1 : 0},
+                                '${producto.id}'
+                            )
+                        "
+                    >
+                        <i class="bi ${
+                            producto.visible == 0
+                            ? 'bi-cloud-arrow-up-fill'
+                            : 'bi-lock-fill'
+                        }"></i>
+
+                        ${
+                            producto.visible == 0
+                            ? 'Publicar'
+                            : 'Ocultar'
+                        }
+                    </button>
+
+                    <button
+                        class="store-filter-btn px-4 px-md-5 px-lg-4 justify-content-center text-decoration-none"
+                        onclick="
+                            cambiarDestacacidadProducto(
+                                ${destacado ? 0 : 1},
+                                '${producto.id}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-star-fill"></i>
+
+                        ${
+                            destacado
+                            ? 'Desestacar'
+                            : 'Destacar'
+                        }
+                    </button>
+
+                    <button
+                        class="store-filter-btn px-4 px-md-5 px-lg-4 justify-content-center text-decoration-none"
+                        onclick="
+                            eliminarProducto(
+                                ${producto.id},
+                                '${producto.nombre}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-trash3-fill"></i>
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    if(returnHtml){
+        return html;
+    }
+
+    $('#list-container').append(html);
 }
 
-function obtenerCategoriasParaProductos(select, all, isImagen = true) {
+function renderProductoSkeleton(id){
+
+    $('#list-container').append(`
+
+        <div
+            class="product-admin-card product-skeleton"
+            id="producto-skeleton-${id}"
+        >
+
+            <!-- HEADER -->
+            <div class="product-admin-header">
+
+                <div>
+
+                    <div class="skeleton-line skeleton-subtitle"></div>
+
+                    <div class="skeleton-line skeleton-title"></div>
+
+                </div>
+
+                <div class="skeleton-badge"></div>
+
+            </div>
+
+            <!-- BODY -->
+            <div class="product-admin-body">
+
+                <!-- IMAGEN -->
+                <div class="product-admin-image skeleton-box"></div>
+
+                <!-- INFO -->
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="product-admin-actions">
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `);
+}
+
+function obtenerCategoriasParaProductos(select, all, isImagen = true, acceptNull = false) {
     $.ajax({
         url: backend + urlCategory,
         type: 'POST',
@@ -806,6 +900,72 @@ function obtenerCategoriasParaProductos(select, all, isImagen = true) {
 
                 const selectElement = $('#' + select);
                 selectElement.empty();
+
+                if (acceptNull === true) {
+                    selectElement.append(
+                        $('<option>', {
+                            value: '',
+                            text: 'Ninguno'
+                        })
+                    );
+                }
+
+                if (all === true) {
+                    selectElement.append(
+                        $('<option>', {
+                            value: '',
+                            text: 'Todos'
+                        })
+                    );
+                }
+
+                categorias.forEach(function (categoria) {
+                    selectElement.append(
+                        $('<option>', {
+                            value: all ? categoria.nombre : categoria.id,
+                            text: categoria.nombre
+                        })
+                    );
+                });
+
+            } catch (error) {
+                console.error('Error al procesar la respuesta:', error);
+            }
+        },
+        error: function () {
+            console.error('Error al procesar la solicitud.');
+        }
+    });
+}
+
+function obtenerCategoriasParaProductos(select, all, isImagen = true, acceptNull = false) {
+    $.ajax({
+        url: backend + urlCategory,
+        type: 'POST',
+        data: {
+            accion: 'obtener',
+            nombre: '',
+            isImagen,
+        },
+        success: function (response) {
+            try {
+                const categorias = typeof response === 'string' ? JSON.parse(response) : response;
+
+                categorias.sort(function (a, b) {
+                    return a.nombre.localeCompare(b.nombre);
+                });
+
+                const selectElement = $('#' + select);
+                selectElement.empty();
+
+                if (acceptNull === true) {
+                    selectElement.append(
+                        $('<option>', {
+                            value: '',
+                            text: 'Ninguno'
+                        })
+                    );
+                }
 
                 if (all === true) {
                     selectElement.append(
@@ -871,28 +1031,48 @@ function obtenerColoresParaProductos(table, nombre, familia) {
                 if (colores_filtrados.length > 0) {
                     colores_filtrados.forEach((color, index) => {
                         const rowHtml = `
-                            <tr>
-                                <td class="align-middle">${index + 1}</td>
-                                <td class="align-middle">${color.nombre}</td>
-                                <td class="align-middle">${color.color_familia}</td>
-                                <td class="align-middle">
-                                    <div class="position-relative btn-palette border border-2 border-dark rounded rounded-2" style="background: ${color.codigo_color_principal};">
-                                        <div class="position-absolute btn-palette border border-2 border-dark rounded rounded-2 ${!color.codigo_color_terciario ? 'btn-palette-bg-color-2-A' : 'btn-palette-bg-color-2-B'}" style="background: ${color.codigo_color_secundario};"></div>
-                                        <div class="position-absolute btn-palette border border-2 border-dark rounded rounded-2 ${!color.codigo_color_terciario ? 'visually-hidden' : 'btn-palette-bg-color-3'}" style="background: ${color.codigo_color_terciario};"></div>
+                            <div class="palette-selection-card px-3 px-lg-4 px-xl-5 mb-2">
+
+                                <div class="palette-selection-info">
+
+                                    <strong>${color.nombre}</strong>
+
+                                    <span class="palette-family">
+                                        ${color.color_familia}
+                                    </span>
+
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <div
+                                        class="position-relative btn-palette border border-2 border-dark rounded-2"
+                                        style="background:${color.codigo_color_principal};"
+                                    >
+                                        <div
+                                            class="position-absolute btn-palette border border-2 border-dark rounded-2
+                                            ${!color.codigo_color_terciario ? 'btn-palette-bg-color-2-A' : 'btn-palette-bg-color-2-B'}"
+                                            style="background:${color.codigo_color_secundario};"
+                                        ></div>
+
+                                        <div
+                                            class="position-absolute btn-palette border border-2 border-dark rounded-2
+                                            ${!color.codigo_color_terciario ? 'visually-hidden' : 'btn-palette-bg-color-3'}"
+                                            style="background:${color.codigo_color_terciario};"
+                                        ></div>
                                     </div>
-                                </td>
-                                ${colores_almacenados.length < 20 ? `
-                                    <td class="align-middle text-center" style="width: 1px;">
-                                    <button onclick="seleccionarColor('${color.id}', '${color.codigo_color_principal}', '${color.codigo_color_secundario}', '${color.codigo_color_terciario}', '', '${color.color_familia}')" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                        Seleccionar
+
+                                    <button
+                                        class="store-btn-secondary"
+                                        onclick="seleccionarColor('${color.id}', '${color.codigo_color_principal}', '${color.codigo_color_secundario}', '${color.codigo_color_terciario}', '', '${color.color_familia}')"
+                                    >
+                                        Agregar
                                     </button>
-                                </td>
-                                ` : `
-                                <td class="align-middle text-center" style="width: 1px;">
-                                    Ya tienes las 16 paletas
-                                </td>
-                                `}
-                            </tr>`;
+
+                                </div>
+
+                            </div>
+                        `;
 
                         tableElement.append(rowHtml);
                     });
@@ -927,167 +1107,22 @@ function cargarFiltrosParaTablaUniversosModal(tabla) {
     obtenerUniversosParaProductos(tabla, nombre);
 }
 
+let filtroDescuento = '';
 function cargarFiltrosParaTablaDescuentosModal(tabla) {
+
     const nombre = $('#NombreDescuentoModal').val();
-    obtenerDescuentosParaProductos(tabla, nombre);
+
+    filtroDescuento = nombre;
+
+    obtenerDescuentosParaProductos(
+        tabla,
+        nombre
+    );
 }
 
 function cargarFiltrosParaTablaAccesoriosModal(tabla) {
     const nombre = $('#NombreAccesorioModal').val();
     obtenerDescuentosParaProductos(tabla, nombre);
-}
-
-function obtenerFestividadesParaProductos(table, nombre) {
-    toggleLoadingIcon(table, true, 4, 28);
-    $.ajax({
-        url: backend + urlHoliday,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre
-        },
-        success: function (response) {
-            try {
-                const festividades = typeof response === 'string' ? JSON.parse(response) : response;
-
-                festividades.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                const tableElement = $('#' + table);
-                tableElement.empty();
-
-                if (festividades.length > 0) {
-                    festividades.forEach((festividad, index) => {
-                        const rowHtml = `
-                            <tr>
-                                <td class="align-middle">${index + 1}</td>
-                                <td class="align-middle">${festividad.nombre}</td>
-                                <td class="align-middle">${'Del ' + formarFecha(festividad.fecha_inicial) + ' al ' + formarFecha(festividad.fecha_final)}</td>
-                                <td class="align-middle text-center" style="width: 1px;">
-                                    <button onclick="seleccionarFestividad('${festividad.id}', '${festividad.nombre}')" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                        Seleccionar
-                                    </button>
-                                </td>
-                            </tr>`;
-
-                        tableElement.append(rowHtml);
-                    });
-                } else {
-                    tableElement.append('<tr><td class="text-center" colspan="4">No se encontraron festividades.</td></tr>');
-                }
-
-            } catch (error) {
-                toggleLoadingIcon(table, false, 4, 28);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            toggleLoadingIcon(table, false, 4, 28);
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
-function obtenerRarezasParaProductos(table, nombre) {
-    toggleLoadingIcon(table, true, 4, 28);
-    $.ajax({
-        url: backend + urlRarity,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre
-        },
-        success: function (response) {
-            try {
-                const rarezas = typeof response === 'string' ? JSON.parse(response) : response;
-
-                rarezas.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                const tableElement = $('#' + table);
-                tableElement.empty();
-
-                if (rarezas.length > 0) {
-                    rarezas.forEach((rareza, index) => {
-                        const rowHtml = `
-                            <tr>
-                                <td class="align-middle">${index + 1}</td>
-                                <td class="align-middle">${rareza.nombre}</td>
-                                <td class="align-middle">
-                                    <div class="position-relative btn-palette border border-2 border-dark rounded rounded-2" style="background: ${rareza.color};"></div>
-                                </td>
-                                <td class="align-middle text-center" style="width: 1px;">
-                                    <button onclick="seleccionarRareza('${rareza.id}', '${rareza.nombre}')" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                        Seleccionar
-                                    </button>
-                                </td>
-                            </tr>`;
-
-                        tableElement.append(rowHtml);
-                    });
-                } else {
-                    tableElement.append('<tr><td class="text-center" colspan="4">No se encontraron rarezas.</td></tr>');
-                }
-
-            } catch (error) {
-                toggleLoadingIcon(table, false, 4, 28);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            toggleLoadingIcon(table, false, 4, 28);
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
-function obtenerUniversosParaProductos(table, nombre, isImagen = true) {
-    toggleLoadingIcon(table, true, 3, 28);
-    $.ajax({
-        url: backend + urlUniverse,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre,
-            isImagen
-        },
-        success: function (response) {
-            try {
-                const universos = typeof response === 'string' ? JSON.parse(response) : response;
-
-                universos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                const tableElement = $('#' + table);
-                tableElement.empty();
-
-                if (universos.length > 0) {
-                    universos.forEach((universo, index) => {
-                        const rowHtml = `
-                            <tr>
-                                <td class="align-middle">${index + 1}</td>
-                                <td class="align-middle">${universo.nombre}</td>
-                                <td class="align-middle text-center" style="width: 1px;">
-                                    <button onclick="seleccionarUniverso('${universo.id}', '${universo.nombre}')" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                        Seleccionar
-                                    </button>
-                                </td>
-                            </tr>`;
-
-                        tableElement.append(rowHtml);
-                        //buscarImagenUniverso(universo.id);
-                    });
-                } else {
-                    tableElement.append('<tr><td class="text-center" colspan="3">No se encontraron universos.</td></tr>');
-                }
-
-            } catch (error) {
-                toggleLoadingIcon(table, false, 3, 28);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            toggleLoadingIcon(table, false, 3, 28);
-            console.error('Error al procesar la solicitud.');
-        }
-    });
 }
 
 function obtenerDescuentosParaProductos(table, nombre) {
@@ -1115,17 +1150,44 @@ function obtenerDescuentosParaProductos(table, nombre) {
                 if (descuentos_filtrados.length > 0) {
                     descuentos_filtrados.forEach((descuento, index) => {
                         const rowHtml = `
-                            <tr>
-                                <td class="align-middle">${index + 1}</td>
-                                <td class="align-middle">${descuento.nombre}</td>
-                                <td class="align-middle">${descuento.descuento}%</td>
-                                <td class="align-middle">${'Del ' + formarFecha(descuento.fecha_inicial) + ' al ' + formarFecha(descuento.fecha_final)}</td>
-                                <td class="align-middle text-center" style="width: 1px;">
-                                    <button onclick="seleccionarDescuento('${descuento.id}', '${descuento.nombre}', '${'Del ' + formarFecha(descuento.fecha_inicial) + ' al ' + formarFecha(descuento.fecha_final)}', '${descuento.descuento}')" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
+                            <div class="palette-selection-card px-3 px-lg-4 px-xl-5">
+
+                                <div class="discount-info">
+
+                                    <div class="discount-name">
+                                        ${descuento.nombre}
+                                    </div>
+
+                                    <div class="discount-date">
+                                        Del ${formarFecha(descuento.fecha_inicial)}
+                                        al
+                                        ${formarFecha(descuento.fecha_final)}
+                                    </div>
+
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <div class="discount-badge">
+                                        ${descuento.descuento}%
+                                    </div>
+
+                                    <button
+                                        onclick="seleccionarDescuento(
+                                            '${descuento.id}',
+                                            '${descuento.nombre}',
+                                            '${'Del ' + formarFecha(descuento.fecha_inicial) + ' al ' + formarFecha(descuento.fecha_final)}',
+                                            '${descuento.descuento}'
+                                        )"
+                                        class="store-btn-secondary"
+                                    >
                                         Seleccionar
                                     </button>
-                                </td>
-                            </tr>`;
+
+                                </div>
+
+                            </div>
+                        `;
 
                         tableElement.append(rowHtml);
                     });
@@ -1145,67 +1207,8 @@ function obtenerDescuentosParaProductos(table, nombre) {
     });
 }
 
-function obtenerAccesoriosParaProductos(table, nombre) {
-    toggleLoadingIcon(table, true, 4, 28);
-    $.ajax({
-        url: backend + urlAccesory,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre
-        },
-        success: function (response) {
-            try {
-                const accesorios = typeof response === 'string' ? JSON.parse(response) : response;
-
-                accesorios.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                const tableElement = $('#' + table);
-                tableElement.empty();
-
-                if (accesorios.length > 0) {
-                    accesorios.forEach((accesorio, index) => {
-                        const rowHtml = `
-                            <tr>
-                                <td class="align-middle">${index + 1}</td>
-                                <td class="align-middle">${accesorio.nombre}</td>
-                                <td class="align-middle">
-                                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
-                                        <!-- Spinner mientras se carga la imagen -->
-                                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${accesorio.id + 'accesorio'}" 
-                                            style="width: 50px; height: 50px;"></div>
-                                        <!-- Imagen (oculta por defecto) -->
-                                        <img id="img-${accesorio.id + 'accesorio'}" class="d-none product-img-hover" alt="Imagen">
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center" style="width: 1px;">
-                                    <button onclick="seleccionarAccesorio('${accesorio.id}', '${accesorio.nombre}')" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                        Seleccionar
-                                    </button>
-                                </td>
-                            </tr>`;
-
-                        tableElement.append(rowHtml);
-                        buscarImagenAccesorio(accesorio.id);
-                    });
-                } else {
-                    tableElement.append('<tr><td class="text-center" colspan="4">No se encontraron accesorios.</td></tr>');
-                }
-
-            } catch (error) {
-                toggleLoadingIcon(table, false, 4, 28);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            toggleLoadingIcon(table, false, 4, 28);
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
 function seleccionarColor(id, color1, color2, color3, imagen, familia) {
-    if (colores_almacenados.length <= 20) {
+    if (colores_almacenados.length < 20) {
         colores_almacenados.push({
             'id': id,
             'color1': color1,
@@ -1246,17 +1249,34 @@ function seleccionarUniverso(id, value) {
     $('#modalUniverses').modal('hide');
 }
 
-function seleccionarDescuento(id, nombre, fecha, descuento) {
+function seleccionarDescuento(
+    id,
+    nombre,
+    fecha,
+    descuento
+) {
+
+    const existe = descuentos_almacenados.some(
+        d => d.id == id
+    );
+
+    if(existe){
+        return;
+    }
+
     descuentos_almacenados.push({
-        'id': id,
-        'nombre': nombre,
-        'fecha': fecha,
-        'descuento': descuento,
+        id,
+        nombre,
+        fecha,
+        descuento
     });
+
     actualizarDescuentosSeleccionados();
 
-    // Actualizar la lista de descuentos en la tabla
-    obtenerDescuentosParaProductos('discounts-data-container', '');
+    obtenerDescuentosParaProductos(
+        'discounts-data-container',
+        filtroDescuento
+    );
 }
 
 function seleccionarAccesorio(id, value) {
@@ -1274,7 +1294,10 @@ function eliminarColorSeleccionado(id) {
 function eliminarDescuentoSeleccionado(id) {
     descuentos_almacenados = descuentos_almacenados.filter(descuento => descuento.id.toString() !== id.toString());
     actualizarDescuentosSeleccionados();
-    obtenerDescuentosParaProductos('discounts-data-container', '');
+        obtenerDescuentosParaProductos(
+        'discounts-data-container',
+        filtroDescuento
+    );
 }
 
 function actualizarColoresSeleccionados() {
@@ -1297,35 +1320,105 @@ function actualizarColoresSeleccionados() {
 
     colores_almacenados.forEach((color, index) => {
         const html = `
-            <div class="col">
-                <div class="card mx-auto p-lg-2 p-sm-1 d-flex flex-column align-items-center gap-1" style="min-width: 256px; height: 256px;">
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <button onclick="moverColorIzquierda(${index})" type="button" class="btn-details text-white border-0 rounded-pill d-flex align-items-center ${index != 0 ? '' : 'bg-secondary'}" ${index != 0 ? '' : 'disabled'} style="width: 22px; height: 22px;">
-                            <i class="bi bi-arrow-left-short d-flex align-self-center m-auto"></i>
+            <div class="color-admin-card mb-2">
+
+                <div class="color-admin-header">
+
+                    <p class="color-admin-title">
+                        Paleta #${index + 1}
+                    </p>
+
+                    <div class="color-admin-actions">
+
+                        <button
+                            onclick="moverColorArriba(${index})"
+                            class="btn-details text-white border-0 px-2 py-1"
+                            ${index === 0 ? 'disabled' : ''}
+                        >
+                            <i class="bi bi-arrow-up"></i>
                         </button>
-                        <button onclick="eliminarColorSeleccionado('${color.id}')" type="button" class="btn-delete text-white border-0 rounded-pill d-flex align-items-center" style="width: 22px; height: 22px;">
-                            <i class="bi bi-x d-flex align-self-center m-auto"></i>
+
+                        <button
+                            onclick="moverColorAbajo(${index})"
+                            class="btn-details text-white border-0 px-2 py-1"
+                            ${index === colores_almacenados.length - 1 ? 'disabled' : ''}
+                        >
+                            <i class="bi bi-arrow-down"></i>
                         </button>
-                        <button onclick="moverColorDerecha(${index})" type="button" class="btn-details text-white border-0 rounded-pill d-flex align-items-center ${index != colores_almacenados.length - 1 != 0 ? '' : 'bg-secondary'}" ${index != colores_almacenados.length - 1 != 0 ? '' : 'disabled'} style="width: 22px; height: 22px;">
-                            <i class="bi bi-arrow-right-short d-flex align-self-center m-auto"></i>
+
+                        <button
+                            onclick="eliminarColorSeleccionado('${color.id}')"
+                            class="btn-delete text-white border-0 px-2 py-1"
+                        >
+                            <i class="bi bi-x-lg"></i>
                         </button>
+
                     </div>
-                    <div class="card overflow-hidden rounded-3" style="width: 100%; height: 100%;">
-                        <input type="file" class="form-control" id="imageInput${color.id}" />
-                        <div class="overflow-x-auto overflow-y-auto w-100 h-100">
-                            <img class="p-1" id="vista${color.id}" src="${color.imagen ? color.imagen : ''}" alt="" style="width: 100%; height: auto; display: ${color.imagen ? 'block' : 'none'};">
-                        </div>
-                        <input type="hidden" id="hidden${color.id}" value="${color.imagen ? color.imagen : ''}">
-                    </div>
-                    <div class="py-2 d-flex gap-2 m-auto align-items-center">
-                        <div class="position-relative btn-palette border border-2 border-dark rounded rounded-2" style="background: ${color.color1};">
-                            <div class="position-absolute btn-palette border border-2 border-dark rounded rounded-2 ${!color.color3 ? 'btn-palette-bg-color-2-A' : 'btn-palette-bg-color-2-B'}" style="background: ${color.color2};"></div>
-                            <div class="position-absolute btn-palette border border-2 border-dark rounded rounded-2 ${!color.color3 ? 'visually-hidden' : 'btn-palette-bg-color-3'}" style="background: ${color.color3};"></div>
-                        </div>
-                        <p class="m-0">${color.familia}</p>
-                    </div>
+
                 </div>
-            </div>`;
+
+                <div class="color-admin-body">
+
+                    <div class="color-admin-preview">
+
+                        <img
+                            id="vista${color.id}"
+                            class="p-1 p-sm-2 p-md-3"
+                            src="${color.imagen || ''}"
+                            style="
+                                display:${color.imagen ? 'block' : 'none'};
+                            "
+                        >
+
+                    </div>
+
+                    <input
+                        type="file"
+                        id="imageInput${color.id}"
+                        class="form-control"
+                    >
+
+                    <div class="color-admin-footer">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div
+                                class="position-relative btn-palette border border-2 border-dark rounded-2"
+                                style="background:${color.color1};"
+                            >
+
+                                <div
+                                    class="position-absolute btn-palette border border-2 border-dark rounded-2
+                                    ${!color.color3 ? 'btn-palette-bg-color-2-A' : 'btn-palette-bg-color-2-B'}"
+                                    style="background:${color.color2};"
+                                ></div>
+
+                                <div
+                                    class="position-absolute btn-palette border border-2 border-dark rounded-2
+                                    ${!color.color3 ? 'visually-hidden' : 'btn-palette-bg-color-3'}"
+                                    style="background:${color.color3};"
+                                ></div>
+
+                            </div>
+
+                            <span class="color-family">
+                                ${color.familia}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        id="hidden${color.id}"
+                        value="${color.imagen || ''}"
+                    >
+
+                </div>
+
+            </div>
+        `;
 
         div.append(html);
         
@@ -1364,6 +1457,12 @@ function actualizarColoresSeleccionados() {
 
 function actualizarDescuentosSeleccionados() {
     const div = $('#discounts-selected-data-container');
+
+    $('#labelDiscountCant').text(
+        descuentos_almacenados.length +
+        ' descuentos seleccionados'
+    );
+
     div.empty();
 
     if (descuentos_almacenados.length > 1) {
@@ -1373,23 +1472,37 @@ function actualizarDescuentosSeleccionados() {
     if (descuentos_almacenados.length > 0) {
         descuentos_almacenados.forEach((descuento, index) => {
             const html = `
-                <tr>
-                    <td class="align-middle">${index + 1}</td>
-                    <td class="align-middle">${descuento.nombre}</td>
-                    <td class="align-middle">${descuento.fecha}</td>
-                    <td class="align-middle">${descuento.descuento}%</td>
-                    <td class="text-center" style="width: 1px;">
-                        <div class="d-flex gap-2 justify-content-start">
-                            <button onclick="eliminarDescuentoSeleccionado(${descuento.id})" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Eliminar
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                                </svg>
-                            </button>
+                <div class="discount-card mb-2">
+
+                    <div class="discount-info">
+
+                        <div class="discount-name">
+                            ${descuento.nombre}
                         </div>
-                    </td>
-                </tr>
-                `;
+
+                        <div class="discount-date">
+                            ${descuento.fecha}
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="discount-badge">
+                            ${descuento.descuento}%
+                        </div>
+
+                        <button
+                            onclick="eliminarDescuentoSeleccionado('${descuento.id}')"
+                            class="btn-delete text-white border-0 px-3 py-2"
+                        >
+                            Eliminar
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
     
             div.append(html);
         });
@@ -1405,18 +1518,30 @@ function actualizarDescuentosSeleccionados() {
     
 }
 
-function moverColorIzquierda(index) {
-    if (index > 0) {
-        [colores_almacenados[index - 1], colores_almacenados[index]] =
-            [colores_almacenados[index], colores_almacenados[index - 1]];
+function moverColorArriba(index) {
+    if(index > 0){
+        [
+            colores_almacenados[index - 1],
+            colores_almacenados[index]
+        ] =
+        [
+            colores_almacenados[index],
+            colores_almacenados[index - 1]
+        ];
         actualizarColoresSeleccionados();
     }
 }
 
-function moverColorDerecha(index) {
-    if (index < colores_almacenados.length - 1) {
-        [colores_almacenados[index], colores_almacenados[index + 1]] =
-            [colores_almacenados[index + 1], colores_almacenados[index]];
+function moverColorAbajo(index) {
+    if(index < colores_almacenados.length - 1){
+        [
+            colores_almacenados[index],
+            colores_almacenados[index + 1]
+        ] =
+        [
+            colores_almacenados[index + 1],
+            colores_almacenados[index]
+        ];
         actualizarColoresSeleccionados();
     }
 }
@@ -1493,27 +1618,20 @@ function cambiarVisibilidadProducto(estado, id) {
         visible: estado,
     };
 
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Cambiando visibilidad", "Se está cambiando la visibilidad del producto", "bi bi-arrow-clockwise", false);
+
     $.ajax({
         url: backend + urlProduct,
         type: 'POST',
         data: data,
         success: function (response) {
             const data = typeof response === 'string' ? JSON.parse(response) : response;
-            alert(
-                data.title,
-                data.text,
-                data.icon,
-                'Aceptar'
-            );
+            cambiarMensajeModal("#modalGuardando", "Visibilidad cambiada", "Se ha cambiado la visibilidad del producto", "bi bi-check-circle", true);
             aplicarFiltrosProducto();
         },
         error: function () {
-            alert(
-                'Error',
-                'Hubo un problema al cambiar el estado de visibilidad del producto.',
-                'error',
-                'Aceptar'
-            );
+            cambiarMensajeModal("#modalGuardando", "¡Error!", "Ha ocurrido un error al tratar de cambiar la visibilidad del producto", "bi bi-x-circle", true);
         }
     });
 }
@@ -1526,27 +1644,20 @@ function cambiarDestacacidadProducto(estado, id) {
         isDestacacidad: estado,
     };
 
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Cambiando estado de destacamiento", "Se está cambiando el estado de destacamiento del producto", "bi bi-arrow-clockwise", false);
+
     $.ajax({
         url: backend + urlProduct,
         type: 'POST',
         data: data,
         success: function (response) {
             const data = typeof response === 'string' ? JSON.parse(response) : response;
-            alert(
-                data.title,
-                data.text,
-                data.icon,
-                'Aceptar'
-            );
+            cambiarMensajeModal("#modalGuardando", "Estado de destacamiento cambiado", "Se ha cambiado el estado de destacamiento del producto", "bi bi-check-circle", true);
             aplicarFiltrosProducto();
         },
         error: function () {
-            alert(
-                'Error',
-                'Hubo un problema al cambiar la destacacidad del producto.',
-                'error',
-                'Aceptar'
-            );
+            cambiarMensajeModal("#modalGuardando", "¡Error!", "Ha ocurrido un error al tratar de cambiar el estado de destacamiento del producto", "bi bi-x-circle", true);
         }
     });
 }

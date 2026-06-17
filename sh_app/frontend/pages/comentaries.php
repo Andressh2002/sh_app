@@ -1,121 +1,183 @@
 <?php
-    include '../src/components/login/access.php';
-    checkAccess('Administrador');
 
-    ob_start();
-    $pageTitle = "Comentarios";
-    $pageIcon = 'bi-chat-fill';
-    $type = 'color';
+include '../src/components/login/access.php';
 
-    $showHeader = false;
-    $showNavbar = false;
-    $showFooter = false;
-    $showSidebar = true;
+checkAccess('Administrador');
 
-    $updateColor = false;
+ob_start();
 
-    $inputs = [
-        [
-            'label' => 'Nombre del producto',
-            'id' => 'Producto',
-            'icon' => 'bi bi-card-text',
-            'input' => 'text',
-            'onchange' => 'currentPage = 1; aplicarFiltrosComentario()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ]
-    ];
-    $orders = [
-        [
-            'label' => 'Ordenar por:',
-            'id' => 'Ordenar_por',
-            'icon' => '',
-            'input' => 'select',
-            'options' => [
-                'c.id' => 'Fecha de creación',
-                'p.nombre' => 'Nombre del producto'
-            ],
-            'onchange' => 'aplicarFiltrosComentario()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ]
-    ];
-    $menuTable = [
-        'url' => 'addColor.php',
-        'updateMethod' => 'seleccionarComentarios('.''.')',
-        'clearMethod' => 'aplicarFiltrosComentario()',
-        'pageInfo' => 'comentarios',
-        'showAdd' => false,
-        'showUpdate' => true,
-        'showInfo' => true,
-    ];
-    $headers = ['#', 'Producto', 'Mensaje', 'Opciones'];
+$pageTitle = "Comentarios";
+$pageIcon = 'bi-chat-fill';
+
+$showHeader = false;
+$showNavbar = false;
+$showFooter = false;
+$showSidebar = true;
+
+$inputs = [
+
+    [
+        'label' => 'Producto',
+        'id' => 'Producto',
+        'icon' => 'bi bi-search',
+        'input' => 'text',
+        'btnHelp' => false,
+        'placeholder' => 'Buscar producto...',
+        'spans' => [null, null],
+        'col' => 'col-12 col-md-6 col-xl-3'
+    ]
+
+];
+
+$orders = [
+
+    [
+        'label' => 'Ordenar por:',
+        'id' => 'Ordenar_por',
+        'icon' => 'bi bi-arrow-down-up',
+        'input' => 'select',
+
+        'options' => [
+
+            'c.fecha_registro' => 'Fecha de creación',
+            'p.nombre' => 'Producto'
+
+        ],
+
+        'btnHelp' => false,
+        'spans' => [null, null],
+        'col' => 'col-12 col-md-6 col-xl-3'
+
+    ],
+
+    [
+
+        'label' => 'De forma:',
+        'id' => 'Ordenar_en',
+
+        'input' => 'select',
+
+        'options' => [
+
+            'DESC' => 'Descendente',
+            'ASC' => 'Ascendente'
+
+        ],
+
+        'btnHelp' => false,
+        'spans' => [null, null],
+        'col' => 'col-12 col-md-6 col-xl-3'
+
+    ]
+
+];
+
+$menuTable = [
+
+    'url' => '',
+    'updateMethod' => 'seleccionarComentarios()',
+    'clearMethod' => 'limpiarFiltrosComentario()',
+    'pageInfo' => 'comentarios',
+
+    'showAdd' => false,
+    'showUpdate' => true,
+    'showInfo' => false,
+    'showCount' => true
+
+];
+
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Comentarios</h4>
-            <i class="bi bi-search fs-4 d-flex align-self-center"></i>
-        </div>
+<div class="w-100 overflow-hidden">
+
+    <div class="row px-0 py-1" id="formulario-filtros">
+
+        <?php
+        foreach($inputs as $input){
+
+            include '../src/components/inputs/input.php';
+
+        }
+        ?>
+
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Filtros</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros">
-                <?php
-                foreach ($inputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Orden</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros-orden">
-                <?php
-                foreach ($orders as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
-        <div class="row justify-content-between">
-            <div class="col-auto">
-                <p class="card-text mb-3" id="total-data"></p>
-            </div>
-        </div>
-        <div class="row justify-content-between">
-            <div class="col-auto">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination"></ul>
-                </nav>
-            </div>
-            <div class="col-auto d-flex gap-2 mb-4">
+
+    <div class="row px-0 py-1">
+
+        <?php
+        foreach($orders as $input){
+
+            include '../src/components/inputs/input.php';
+
+        }
+        ?>
+
+    </div>
+
+    <div class="px-0">
+
+        <div class="row">
+
+            <div class="col-auto mb-4">
+
                 <?php include '../src/components/tables/menuTable.php'; ?>
+
             </div>
+
         </div>
-        <div class="border border-1 border-light rounded-2 overflow-hidden">
-            <?php include '../src/components/tables/dataTable.php'; ?>
-        </div>
+
+        <div
+            id="list-container"
+            class="products-admin-grid"
+        ></div>
+
     </div>
+
 </div>
 
 <?php
-    $content = ob_get_clean();
-    include 'template.php';
+
+$content = ob_get_clean();
+
+include 'template.php';
+
 ?>
 
 <script>
-    $(document).ready(function() {
-        seleccionarComentarios('');
-    });
+
+$(document).ready(function(){
+
+    seleccionarComentarios();
+
+});
+
+let typingTimer;
+
+function actualizarDatosComentarios(){
+
+    seleccionarComentarios(
+        $('#Producto').val()
+    );
+
+}
+
+$('#Producto').on(
+    'input',
+    function(){
+
+        clearTimeout(typingTimer);
+
+        typingTimer = setTimeout(
+            actualizarDatosComentarios,
+            400
+        );
+
+    }
+);
+
+$('#Ordenar_por, #Ordenar_en').on(
+    'change',
+    actualizarDatosComentarios
+);
+
 </script>

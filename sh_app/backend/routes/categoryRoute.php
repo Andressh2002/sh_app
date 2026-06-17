@@ -10,12 +10,11 @@
 
     switch ($accion) {
         case 'insertar':
-            if (isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['imagen'])) {
+            if (isset($_POST['nombre']) && isset($_POST['imagen'])) {
                 $nombre = $_POST['nombre'];
-                $descripcion = $_POST['descripcion'];
                 $imagen = $_POST['imagen'];
 
-                $respuesta = insertar($conn, $nombre, $descripcion, $imagen);
+                $respuesta = insertar($conn, $nombre, $imagen);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos";
@@ -23,13 +22,12 @@
             break;
 
         case 'actualizar':
-            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['imagen'])) {
+            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['imagen'])) {
                 $id = $_POST['id'];
                 $nombre = $_POST['nombre'];
-                $descripcion = $_POST['descripcion'];
                 $imagen = $_POST['imagen'];
 
-                $respuesta = actualizar($conn, $id, $nombre, $descripcion, $imagen);
+                $respuesta = actualizar($conn, $id, $nombre, $imagen);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos para actualizar la categoría";
@@ -81,37 +79,23 @@
             echo json_encode($respuesta);
             break;
 
-        case 'contar':
-            $total = contarTodos($conn);
-        
-            if ($total !== 0) {
-                header('Content-Type: application/json');
-                echo json_encode(['total' => $total]);
-            } else {
-                http_response_code(500);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'No se pudo obtener el total']);
-            }
-            break;
-
         case 'listarIds':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+            $nombre = $_POST['nombre'] ?? '';
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
+            $orden = $_POST['orden'] ?? [];
         
             $respuesta = listarIds($conn, $nombre, $orden);
-            $total = contarIds($conn, $nombre);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
+            echo json_encode($respuesta);
             break;
     
         case 'buscarPorId':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
+            $id = $_POST['id'] ?? '';
             $respuesta = buscarPorId($conn, $id);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
+            echo json_encode($respuesta);
             break;
         
         default:

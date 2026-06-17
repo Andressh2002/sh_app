@@ -42,101 +42,158 @@ function aplicarFiltrosInteraccion() {
     seleccionarInteracciones(nombre);
 }
 
-function seleccionarInteracciones(accionInteraccion) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
+let tokenCargaInteracciones = 0;
+
+async function seleccionarInteracciones(accion = '') {
+    const token = ++tokenCargaInteracciones;
+    const container = $('#list-container');
 
     container.empty();
 
-    container.append(`
-        <tr><td class="text-center" colspan="4">
-            <div class="spinner-border spinner-color"></div>
-        </td></tr>
-    `);
-
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlInteraction,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            filtros: {
-                accion: accionInteraccion,
-                ordenarPor: order,
-                orden: order != "id" ? 'ASC' : 'DESC'
-            }
-        },
-        success: function (response) {
-            try {
-                const res = typeof response === 'string' ? JSON.parse(response) : response;
-
-                const lista = res.list || [];
-
-                container.empty();
-
-                if (lista.length > 0) {
-                    procesarInteraccionesSecuencialmente(lista, 0, 4);
-                } else {
-                    container.append(`<tr><td colspan="4">No hay datos</td></tr>`);
-                }
-
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    });
-}
-
-function procesarInteraccionesSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
-
-    const interaccion = lista[index];
-    const container = $('#data-container');
+    const orden = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    };
 
     try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" id="accion-${interaccion}"></td>
-                <td class="align-middle" id="url-${interaccion}"></td>
-                <td class="align-middle" id="fecha-${interaccion}"></td>
-            </tr>
-        `;
-        container.append(html);
+        const ids = await $.ajax({
+            url: backend + urlInteraction,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                accion: 'listarIds',
+                accionInteraccion: accion,
+                orden: orden,
+                limite: $('#Limite').val(),
+            }
+        });
+
+        if (token !== tokenCargaInteracciones) {
+            return;
+        }
+
+        mostrarTotalRegistros(ids.length, [
+            'interacción',
+            'interacciones'
+        ], true);
+
+        if (ids.length === 0) {
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron interacciones.
+                </div>
+            `);
+
+            return;
+        }
+
+        await cargarInteracciones(ids, token);
+
     } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Esta interacción no se pudo cargar.</td></tr>`);
+        console.error(error);
     }
-    
-    cargarInteraccionSeleccionada(interaccion, function () {
-        procesarInteraccionesSecuencialmente(lista, index + 1, colspan);
-    });
 }
 
-function cargarInteraccionSeleccionada(id, callback) {
-    $.ajax({
-        url: backend + urlInteraction,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            id: id
-        },
-        success: function (response) {
-            try {
-                const res = typeof response === 'string' ? JSON.parse(response) : response;
-                const interaccion = res.data;
+async function cargarInteracciones(ids, token) {
+    for (const id of ids) {
+        renderInteraccionSkeleton(id);
 
-                if (!interaccion) return;
+        try {
+            const data = await $.ajax({
+                url: backend + urlInteraction,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    accion: 'obtener',
+                    id
+                }
+            });
 
-                $(`#accion-${id}`).html(interaccion.accion);
-                $(`#url-${id}`).html(interaccion.url);
-                $(`#fecha-${id}`).html(interaccion.fecha_registro);
-
-            } catch (error) {
-                console.error(error);
+            if (token !== tokenCargaInteracciones) {
+                return;
             }
 
-            if (callback) callback();
+            $(`#interaction-${id}`)
+                .replaceWith(
+                    renderInteraccionCard(data, true)
+                );
+
+        } catch (error) {
+            console.error(error);
         }
-    });
+    }
+}
+
+function renderInteraccionCard(item, returnHtml = false) {
+    const html = `
+        <div class="product-admin-card">
+            <div class="product-admin-header">
+                <div>
+                    <p class="product-number">
+                        ${formatearFechaConHora(item.fecha_registro)}
+                    </p>
+
+                    <h5 class="product-title">
+                        ${item.accion}
+                    </h5>
+                </div>
+            </div>
+
+            <div class="product-admin-body">
+                <div class="product-admin-image">
+                    <img
+                        id="img-${item.id}"
+                        class="product-image"
+                        src="../src/img/app/no_image.png"
+                        alt="${item.id}"
+                    >
+                </div>
+                <div class="product-info">
+                    <div class="product-info-grid">
+                        <div>
+                            <span>URL:</span>
+                            <strong>
+                                ${item.url}
+                            </strong>
+                        </div>
+                        <div>
+                            <span>Usuario:</span>
+                            <strong>
+                                ${item.cliente ?? 'Invitado'}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-actions">
+                </div>
+            </div>
+        </div>
+    `;
+
+    return returnHtml
+        ? html
+        : $('#list-container').append(html);
+}
+
+function renderInteraccionSkeleton(id) {
+    $('#list-container').append(`
+        <div
+            id="interaction-${id}"
+            class="product-admin-card product-skeleton"
+        >
+            <div class="product-admin-body">
+                <div class="product-info">
+                    <div class="product-info-grid">
+                        <div>
+                            <div class="skeleton-line"></div>
+
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
 }
 
 function limpiarFiltrosInteraccion() {

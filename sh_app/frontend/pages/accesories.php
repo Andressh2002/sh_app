@@ -23,90 +23,94 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Buscar accesorio...',
         ]
     ];
+
     $orders = [
         [
             'label' => 'Ordenar por:',
             'id' => 'Ordenar_por',
-            'icon' => '',
+            'icon' => 'bi bi-arrow-down-up',
             'input' => 'select',
             'options' => [
+                'ac.id' => 'Fecha de creación',
                 'ac.nombre' => 'Nombre',
-                'ac.id' => 'Fecha de creación'
             ],
             'onchange' => 'aplicarFiltrosAccesorio()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+        ],
+        [
+            'label' => 'De forma:',
+            'id' => 'Ordenar_en',
+            'icon' => 'bi bi-arrow-down-up',
+            'input' => 'select',
+            'options' => [
+                'DESC' => 'Descendente',
+                'ASC' => 'Ascendente',
+            ],
+            'onchange' => 'aplicarFiltrosAccesorio()',
+            'btnHelp' => false,
+            'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ]
     ];
+
     $menuTable = [
         'url' => 'addAccesory.php',
-        'updateMethod' => 'seleccionarAccesorios('.')',
+        'updateMethod' => 'seleccionarAccesorios(' . '' . ')',
         'clearMethod' => 'limpiarFiltrosAccesorio()',
         'pageInfo' => 'accesorios',
         'showAdd' => true,
         'showUpdate' => true,
-        'showInfo' => true,
+        'showInfo' => false,
+        'showCount' => true,
     ];
+
     $headers = ['#', 'Imagen', 'Información', 'Opciones'];
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Accesorios</h4>
-            <i class="bi bi-search fs-4 d-flex align-self-center"></i>
-        </div>
+<div class="w-100 overflow-hidden p-0">
+
+    <!-- FILTROS -->
+    <div class="row px-0 py-1" id="formulario-filtros">
+        <?php
+        foreach ($inputs as $input) {
+            include '../src/components/inputs/input.php';
+        }
+        ?>
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Filtros</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros">
-                <?php
-                foreach ($inputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Orden</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros-orden">
-                <?php
-                foreach ($orders as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
+
+    <!-- ORDEN -->
+    <div class="row px-0 py-1" id="formulario-filtros-orden">
+        <?php
+        foreach ($orders as $input) {
+            include '../src/components/inputs/input.php';
+        }
+        ?>
+    </div>
+
+    <div class="px-0 pb-2">
+
+        <!-- MENÚ DE ACCIONES -->
         <div class="row justify-content-between">
-            <div class="col-auto">
-                <p class="card-text mb-3" id="total-data"></p>
-            </div>
-        </div>
-        <div class="row justify-content-between">
-            <div class="col-auto">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination"></ul>
-                </nav>
-            </div>
+
             <div class="col-auto d-flex gap-2 mb-4">
                 <?php include '../src/components/tables/menuTable.php'; ?>
             </div>
+
         </div>
-        <div class="border border-1 border-light rounded-2 overflow-hidden">
-            <?php include '../src/components/tables/dataTable.php'; ?>
+
+        <!-- TABLA -->
+        <div class="overflow-hidden p-0">
+            <div id="list-container" class="products-admin-grid p-0"></div>
         </div>
+
     </div>
+
 </div>
 
 <?php
@@ -118,4 +122,48 @@
     $(document).ready(function() {
         seleccionarAccesorios('');
     });
+
+    let typingTimer;
+
+    function actualizarDatosConFiltros(){
+        seleccionarAccesorios(
+            $('#Nombre').val(),
+        );
+    }
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function(){
+            $('#Nombre').on(
+                'input',
+                function(){
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(
+                        () => {
+                            actualizarDatosConFiltros();
+                        },
+                        400
+                    );
+                }
+            );
+
+            // SELECTS INMEDIATOS
+
+            $(
+                '#Categoria,' +
+                '#Rareza,' +
+                '#Universo,' +
+                '#Ordenar_por,' +
+                '#Ordenar_en'
+            ).on(
+                'change',
+                function(){
+
+                    currentPage = 1;
+
+                    actualizarDatosConFiltros();
+                }
+            );
+        }
+    );
 </script>

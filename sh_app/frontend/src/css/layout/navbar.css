@@ -1,201 +1,180 @@
-.navbar-item {
-    background-color: #00000000;
-    color: white;
-    clip-path: polygon(2% 0, 100% 0%, 98% 100%, 0% 100%);
-    transition: all 0.25s;
-}
-
-.navbar-item:hover {
-    background-color: #0000c7;
-    clip-path: polygon(10% 5%, 100% 0, 90% 97%, 0 100%);
-    cursor: pointer;
-}
-
-.navbar-item-active {
-    background-color: #00df00;
-    color: black;
-    clip-path: polygon(10% 0, 100% 0%, 90% 100%, 0% 100%);
-}
-
-.navbar-bg {
-    background-color: #777;
+.navbar {
+    background-color: #666;
+    border-top: var(--green) 6px solid;
+    border-bottom: var(--blue) 6px solid;
 }
 
 .navbar-list {
-    display: flex;
+    gap: clamp(.5rem, 1vw, 1rem);
     list-style: none;
 }
 
 .navbar-item {
-    flex: 1 1 auto; /* Los elementos ocupan el mismo ancho disponible */
-    max-width: 150px; /* Opcional: establece un ancho máximo para cada ítem */
-    text-align: center; /* Centra el contenido dentro de cada ítem */
-    margin: 5px; /* Añade espacio entre los ítems */
+    display: flex;
 }
 
-.navbar-login-item {
-    background-color: #fff;
-    color: #000;
-    transition: all 0.25s;
+.navbar-btn {
+    position: relative;
+    overflow: hidden;
+
+    clip-path: polygon(
+        6% 0,
+        100% 0,
+        94% 100%,
+        0% 100%
+    );
+
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+
+    padding: clamp(.65rem, 1vw, .9rem)
+             clamp(1rem, 2vw, 1.4rem);
+
+    background: #444;
+
+    color: white;
+
+    text-decoration: none;
+
+    z-index: 1;
+
+    transition:
+        transform .25s ease,
+        color .35s ease;
 }
 
-.navbar-login-item:hover {
-    background-color: #0000c7;
-    cursor: pointer;
-}
-
-.navbar-login-item-active {
-    background-color: #00df00;
+.navbar-btn:hover {
     color: black;
+    text-shadow: 1px 1px 2px #00000025;
 }
 
-.navbar-border {
-    border-top: #1cff1c solid 4px;
-    border-bottom: #1f1fff solid 4px;
+.navbar-btn::after {
+    content: "";
+
+    position: absolute;
+
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+
+    z-index: -2;
+
+    background: var(--green);
+
+    transition: all .35s ease;
+
+    clip-path: polygon(
+        6% 0,
+        100% 0,
+        94% 100%,
+        0% 100%
+    );
 }
 
-.navbar-item-font-size {
-    font-size: 16px;
+.navbar-btn::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: -20%;
+
+    height: 20%;
+
+    background: white;
+
+    z-index: -1;
+
+    transition: bottom .35s ease;
+
+    clip-path: polygon(0 30%, 100% 0, 100% 100%, 0% 100%);
 }
 
-.navbar-item-icon-size {
-    font-size: 32px;
+.navbar-btn:hover::before {
+    bottom: 0;
 }
 
-@media (max-width: 991px) {
-    .navbar-item {
-        flex: 1 1 100%; /* En móviles, los elementos ocupan toda la fila */
-        max-width: none; /* Quita el ancho máximo en pantallas pequeñas */
-    }
-
-    .navbar-item {
-        background-color: #00000000;
-        color: white;
-        clip-path: polygon(0% 0, 100% 0%, 100% 100%, 0% 100%);
-        transition: all 0.25s;
-        padding: 0.25rem 1rem !important; 
-    }
-    
-    .navbar-item:hover {
-        background-color: #0000c7;
-        clip-path: polygon(1% 0, 100% 0%, 99% 100%, 0% 100%);
-    }
-
-    .navbar-login-item {
-        flex: 1 1 100%; /* En móviles, los elementos ocupan toda la fila */
-        max-width: none; /* Quita el ancho máximo en pantallas pequeñas */
-    }
-
-    .navbar-login-item {
-        background-color: #00000000;
-        color: white;
-        clip-path: polygon(0% 0, 100% 0%, 100% 100%, 0% 100%);
-        transition: all 0.25s;
-        padding: 0.25rem 1rem !important; 
-    }
-    
-    .navbar-login-item:hover {
-        background-color: #0084F000;
-        clip-path: polygon(1% 0, 100% 0%, 99% 100%, 0% 100%);
-    }
+.navbar-btn,
+.navbar-btn::after {
+    clip-path: polygon(
+        10% 0,
+        100% 0,
+        95% 100%,
+        0% 100%
+    );
 }
 
-@media (max-width: 1646px) {
-    .navbar-item-font-size {
-        font-size: 14px;
-    }
-    
-    .navbar-item-icon-size {
-        font-size: 28px;
-    }
+.slide_from_left::after {
+    top: 0;
+    bottom: 0;
 
-    .navbar-item {
-        max-width: 140px;
-        margin: 0px 4px;
-    }
-
-    /* filterbar.css */
-    .filterbar-font-size {
-        font-size: 15px;
-    }
+    left: -100%;
+    right: 100%;
 }
 
-@media (max-width: 1523px) {
-    .navbar-item-font-size {
-        font-size: 13px;
-    }
-    
-    .navbar-item-icon-size {
-        font-size: 26px;
-    }
-
-    .navbar-item {
-        max-width: 135px;
-        margin: 0px 3px;
-    }
-
-    /* filterbar.css */
-    .filterbar-font-size {
-        font-size: 14px;
-    }
+.slide_from_left:hover::after {
+    left: 0;
+    right: 0;
 }
 
-@media (max-width: 1399px) {
-    .navbar-item-font-size {
-        font-size: 12px;
-    }
-    
-    .navbar-item-icon-size {
-        font-size: 24px;
-    }
+.slide_from_right::after {
+    top: 0;
+    bottom: 0;
 
-    .navbar-item {
-        max-width: 128px;
-        margin: 0px 2px;
-    }
+    left: 100%;
+    right: -100%;
 }
 
-@media (max-width: 991px) {
-    .navbar-item-font-size {
-        font-size: 11px;
-    }
-    
-    .navbar-item-icon-size {
-        font-size: 22px;
-    }
-
-    .navbar-item {
-        max-width: 100%;
-        margin: 6px 0px;
-    }
+.slide_from_right:hover::after {
+    left: 0;
+    right: 0;
 }
 
-@media (max-width: 664px) {
-    .navbar-item-font-size {
-        font-size: 10px;
-    }
-    
-    .navbar-item-icon-size {
-        font-size: 20px;
-    }
+.slide_from_top::after {
+    left: 0;
+    right: 0;
 
-    .navbar-item {
-        max-width: 100%;
-        margin: 6px 0px;
-    }
+    top: -100%;
+    bottom: 100%;
 }
 
-@media (max-width: 320px) {
-    .navbar-item-font-size {
-        font-size: 9px;
-    }
-    
-    .navbar-item-icon-size {
-        font-size: 18px;
-    }
-
-    .navbar-item {
-        max-width: 100%;
-        margin: 7px 0px;
-    }
+.slide_from_top:hover::after {
+    top: 0;
+    bottom: 0;
 }
+
+.navbar-btn-active {
+    background: #222;
+    color: var(--green);
+
+    cursor: default;
+    pointer-events: none;
+
+    font-weight: 700;
+}
+
+.navbar-btn i {
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+}
+
+.navbar-btn-shadow {
+    display: inline-block;
+
+    width: fit-content;
+
+    filter: drop-shadow(4px 4px 0px rgba(0,0,0,.2));
+
+    transition:
+        transform .25s ease,
+        filter .25s ease;
+}
+
+.navbar-btn-shadow:hover {
+    transform: translateY(-2px);
+
+    filter: drop-shadow(6px 6px 0px rgba(0,0,0,.5));
+}
+

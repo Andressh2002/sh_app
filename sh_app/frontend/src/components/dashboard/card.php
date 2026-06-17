@@ -1,11 +1,35 @@
-<div class="col p-0">
-    <div class="card overflow-hidden rounded-3" style="background: #DDDDDD;">
-        <div class="admin-indicator-card-card-bg w-100 px-2 py-1">
-            <h6 class="card-title fw-semibold" id="<?php echo $cardDash['idTitle']; ?>"><?php echo $cardDash['title']; ?></h6>
+<div class="col p-0 dashboard-shadow">
+
+    <div class="dashboard-kpi-card">
+
+        <div class="dashboard-kpi-header">
+
+            <h6
+                class="dashboard-kpi-title"
+                id="<?php echo $cardDash['idTitle']; ?>"
+            >
+                <?php echo $cardDash['title']; ?>
+            </h6>
+
         </div>
-        <div class="card-body pt-1">
-            <h4 class="card-title fw-bolder" id="<?php echo $cardDash['idCant']; ?>"><?php echo $cardDash['cant']; ?></h4>
-            <p class="card-text" id="<?php echo $cardDash['idPercent']; ?>"><?php echo $cardDash['percent']; ?></p>
+
+        <div class="dashboard-kpi-body">
+
+            <h2
+                class="dashboard-kpi-value"
+                id="<?php echo $cardDash['idCant']; ?>"
+            >
+                <?php echo $cardDash['cant']; ?>
+            </h2>
+
+            <div
+                class="dashboard-kpi-percent"
+            >
+                <?php echo $cardDash['help'] ?? ''; ?>
+            </div>
+
         </div>
+
     </div>
+
 </div>

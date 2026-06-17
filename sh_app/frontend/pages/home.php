@@ -12,15 +12,57 @@
     $showSidebar = true;
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden mb-3" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4 mb-2">
-        <h4 class="card-title">Pantalla de inicio</h4>
-    </div>
-    <p class="card-text px-3 pb-2"> Bienvenido a <span class="fw-bold">SH APP</span>, <?php echo $_SESSION["usuario_nombre"] ?></p>
-</div>
+<div class="w-100 overflow-hidden p-0">
+    <div class="px-0 pb-2">
+        <div class="overflow-hidden p-0">
+            <div
+                id="list-container"
+                class="products-admin-grid p-0"
+            >
 
-<div class="w-100 p-2 rounded-3" style="background-color: #f9fafb;">
-    <p class="card-text">Use la barra de navegación situado en el lado izquierdo de la pantalla para navegar por las distintas páginas de administración</p>
+                <div class="product-admin-card">
+
+                    <div class="product-admin-header">
+                        <div>
+                            <p class="product-number">
+                                Bienvenido a <span class="fw-bold">SH APP</span>, <?php echo $_SESSION["usuario_nombre"] ?></p>
+                            </p>
+
+                            <h5 class="product-title">
+                                Esta es la pantalla de inicio
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="product-admin-body">
+
+                        <div class="product-admin-image">
+                            <img
+                                id="img"
+                                class="product-image"
+                                src="../src/img/app/SH_Logo.png"
+                                alt="${usuario.nombre_usuario}"
+                            >
+                        </div>
+
+                        <div class="product-info">
+                            <div class="product-info-grid">
+
+                                <div>
+                                    <span>Usa la barra de navegación (lado izquierdo de la pantalla) para navegar por los diferentes módulos de administración.</span>
+                                </div>
+                            
+                            </div>
+                        </div>
+
+                        <div class="order-actions"></div>
+
+                    </div>
+            
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php

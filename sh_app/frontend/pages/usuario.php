@@ -10,87 +10,318 @@
     $showSidebar = false;
 ?>
 
-<div class="row my-3 p-4 mx-0">
-    <div class="d-flex align-items-center gap-2 mb-4 px-0">
-        <h4 class="mb-0">Tu usuario</h4>
-        <i class="bi bi-person-fill fs-4 d-flex align-self-center"></i>
-    </div>
-    <div class="border border-2 rounded rounded-3 overflow-hidden">
-        <div class="form-outline mb-2">
-            <div class="w-100 py-2 d-flex gap-2">
-                <label class="form-label m-0" for="Nombre">Nombre completo</label>
-                <i class="bi bi-person-fill d-flex align-self-center"></i>
+<div class="profile-page container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="profile-hero">
+
+        <div class="profile-hero-content">
+
+            <div class="profile-avatar">
+                <i class="bi bi-person-fill"></i>
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-2">
+
+            <div>
+                <h2 class="profile-title">
+                    Tu perfil
+                </h2>
+
+                <p class="profile-subtitle">
+                    Administra tu información personal y los datos de tu usuario.
+                </p>
+            </div>
+        </div>
+
+        <div class="profile-security-card">
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-shield-lock-fill"></i>
+
+                <strong>
+                    Seguridad
+                </strong>
+            </div>
+
+            <p class="profile-subtitle m-0">
+                Tu contraseña se administra desde una sección separada para mayor seguridad.
+            </p>
+
+            <div class="navbar-btn-shadow my-4">
+                <button
+                    class="store-filter-btn slide_from_left"
+                    onclick="abrirModalCambiarContrasennia()"
+                >
+                    <i class="bi bi-key-fill"></i>
+                    <span>Cambiar contraseña</span>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="profile-card">
+
+        <!-- DATOS PERSONALES -->
+        <div class="profile-section">
+
+            <div class="profile-section-title">
+                <div class="profile-section-icon">
+                    <i class="bi bi-person-vcard-fill"></i>
+                </div>
+
+                <div>
+                    <h5>
+                        Información personal
+                    </h5>
+
+                    <p>
+                        Datos básicos del usuario.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-6">
+                    <label class="profile-label">
+                        Nombre
+                    </label>
+
                     <div class="input-group">
-                        <input type="text" id="Nombre" class="form-control form-control-md" placeholder="Nombre" />
-                        <span class="input-group-text input-group-md">*</span>
+                        <span class="input-group-text">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="Nombre"
+                            class="form-control"
+                            placeholder="Nombre"
+                        >
                     </div>
                 </div>
-                <div class="col-md-6 mb-2">
-                    <input type="text" id="segundoNombre" class="form-control form-control-md" placeholder="Segundo Nombre" />
-                </div>
-                <div class="col-md-6 mb-2">
+
+                <div class="col-12 col-md-6">
+                    <label class="profile-label">
+                        Segundo nombre
+                    </label>
+
                     <div class="input-group">
-                        <input type="text" id="primerApellido" class="form-control form-control-md" placeholder="Primer Apellido" />
-                        <span class="input-group-text input-group-md">*</span>
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="segundoNombre"
+                            class="form-control"
+                            placeholder="Segundo nombre"
+                        >
                     </div>
                 </div>
-                <div class="col-md-6 mb-2">
-                    <input type="text" id="segundoApellido" class="form-control form-control-md" placeholder="Segundo Apellido" />
+
+                <div class="col-12 col-md-6">
+                    <label class="profile-label">
+                        Primer apellido
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="primerApellido"
+                            class="form-control"
+                            placeholder="Primer apellido"
+                        >
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="profile-label">
+                        Segundo apellido
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="segundoApellido"
+                            class="form-control"
+                            placeholder="Segundo apellido"
+                        >
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Grupo de Ubicación -->
-        <div class="form-outline mb-2">
-            <div class="w-100 py-2 d-flex gap-2">
-                <label class="form-label m-0" for="Nombre">Ubicación</label>
-                <i class="bi bi-geo-alt-fill d-flex align-self-center"></i>
+        <!-- UBICACIÓN -->
+        <div class="profile-section">
+
+            <div class="profile-section-title">
+                <div class="profile-section-icon">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+
+                <div>
+                    <h5>
+                        Ubicación
+                    </h5>
+
+                    <p>
+                        Información de residencia.
+                    </p>
+                </div>
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-2">
-                    <input type="text" id="Provincia" class="form-control form-control-md" placeholder="Provincia" />
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-4">
+                    <label class="profile-label">
+                        Provincia
+                    </label>
+
+                    <input
+                        type="text"
+                        id="Provincia"
+                        class="form-control"
+                        placeholder="Provincia"
+                    >
                 </div>
-                <div class="col-md-6 mb-2">
-                    <input type="text" id="Canton" class="form-control form-control-md" placeholder="Canton" />
+
+                <div class="col-12 col-md-4">
+                    <label class="profile-label">
+                        Cantón
+                    </label>
+
+                    <input
+                        type="text"
+                        id="Canton"
+                        class="form-control"
+                        placeholder="Cantón"
+                    >
                 </div>
-                <div class="col-md-6 mb-2">
-                    <input type="text" id="Distrito" class="form-control form-control-md" placeholder="Distrito" />
+
+                <div class="col-12 col-md-4">
+                    <label class="profile-label">
+                        Distrito
+                    </label>
+
+                    <input
+                        type="text"
+                        id="Distrito"
+                        class="form-control"
+                        placeholder="Distrito"
+                    >
                 </div>
             </div>
         </div>
 
-        <!-- Nombre de Usuario -->
-        <div class="form-outline mb-2">
-            <div class="w-100 py-2 d-flex gap-2">
-                <label class="form-label m-0" for="Telefono">Teléfono</label>
-                <i class="bi bi-telephone-fill d-flex align-self-center"></i>
+        <!-- CONTACTO -->
+        <div class="profile-section">
+
+            <div class="profile-section-title">
+                <div class="profile-section-icon">
+                    <i class="bi bi-telephone-fill"></i>
+                </div>
+
+                <div>
+                    <h5>
+                        Contacto
+                    </h5>
+
+                    <p>
+                        Datos para comunicación.
+                    </p>
+                </div>
             </div>
-            <input type="phone" id="Telefono" class="form-control form-control-md" placeholder="Número telefónico" />
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-6">
+                    <label class="profile-label">
+                        Teléfono
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-phone-fill"></i>
+                        </span>
+
+                        <input
+                            type="tel"
+                            id="Telefono"
+                            class="form-control"
+                            placeholder="Número telefónico"
+                        >
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="profile-label">
+                        Usuario
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-at"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="nombreUsuario"
+                            class="form-control"
+                            placeholder="Nombre de usuario"
+                        >
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Nombre de Usuario -->
-        <div class="form-outline mb-2">
-            <div class="w-100 py-2 d-flex gap-2">
-                <label class="form-label m-0" for="nombreUsuario">Un nombre de usuario</label>
-                <i class="bi bi-key-fill d-flex align-self-center"></i>
+        <!-- FOOTER -->
+        <div class="profile-footer">
+
+            <div class="profile-required">
+                <i class="bi bi-info-circle-fill"></i>
+
+                <span>
+                    Los campos importantes deben mantenerse actualizados.
+                </span>
             </div>
-            <div class="input-group">
-                <input type="text" id="nombreUsuario" class="form-control form-control-md" placeholder="Nombre de usuario" />
-                <span class="input-group-text input-group-md">*</span>
+
+            <div class="profile-actions">
+
+                <div class="navbar-btn-shadow my-4">
+                    <button
+                        class="store-filter-btn slide_from_left"
+                        onclick="guardarUsuario()"
+                    >
+                        <i class="bi bi-floppy-fill"></i>
+                        <span>Guardar cambios</span>
+                    </button>
+                </div>
+
             </div>
         </div>
-
-        <p class="card-text text-secondary pb-2">Los campos con el símbolo (*) son de digitación obligatoria.</p>
     </div>
 
-    <div class="d-flex justify-content-start gap-3 mt-4 py-2">
-        <button type="button" class="btn-details btn-lg fs-5 text-white border-0 rounded-2 px-lg-4 py-lg-3 px-md-3 py-md-2 px-sm-2 py-sm-1 px-2 mx-auto" onclick="guardarUsuario()">Guardar</button>
-    </div>
-    <input type="hidden" id="Rol" class="hidden" />
-    <input type="hidden" id="Id" class="hidden" value="<?php echo $_SESSION['usuario_id']; ?>" />
+    <!-- HIDDEN -->
+    <input
+        type="hidden"
+        id="Rol"
+    >
+
+    <input
+        type="hidden"
+        id="Id"
+        value="<?php echo $_SESSION['usuario_id']; ?>"
+    >
 </div>
 
 <?php

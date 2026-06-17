@@ -1,122 +1,181 @@
 <?php
-    include '../src/components/login/access.php';
-    checkAccess('Administrador');
+include '../src/components/login/access.php';
+checkAccess('Administrador');
 
-    ob_start();
-    $pageTitle = "Festividades";
-    $pageIcon = 'bi-calendar-fill';
-    $type = 'festividad';
+ob_start();
 
-    $showHeader = false;
-    $showNavbar = false;
-    $showFooter = false;
-    $showSidebar = true;
+$pageTitle = "Festividades";
+$pageIcon = 'bi-calendar-fill';
+$type = 'festividad';
 
-    $updateHoliday = false;
+$showHeader = false;
+$showNavbar = false;
+$showFooter = false;
+$showSidebar = true;
 
-    $inputs = [
-        [
-            'label' => 'Nombre',
-            'id' => 'Nombre',
-            'icon' => 'bi bi-card-text',
-            'input' => 'text',
-            'onchange' => 'currentPage = 1; aplicarFiltrosFestividad()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ]
-    ];
-    $orders = [
-        [
-            'label' => 'Ordenar por:',
-            'id' => 'Ordenar_por',
-            'icon' => '',
-            'input' => 'select',
-            'options' => [
-                'nombre' => 'Nombre',
-                'id' => 'Fecha de creación'
-            ],
-            'onchange' => 'currentPage = 1; aplicarFiltrosFestividad()',
-            'btnHelp' => false,
-            'spans' => [null, null],
-        ]
-    ];
-    $menuTable = [
-        'url' => 'addHoliday.php',
-        'updateMethod' => 'seleccionarFestividades('.')',
-        'clearMethod' => 'limpiarFiltrosFestividad()',
-        'pageInfo' => 'festividades',
-        'showAdd' => true,
-        'showUpdate' => true,
-        'showInfo' => true,
+$inputs = [
+
+    [
+        'label' => 'Nombre',
+        'id' => 'Nombre',
+        'icon' => 'bi bi-card-text',
+        'input' => 'text',
+        'btnHelp' => false,
         'spans' => [null, null],
-    ];
-    $headers = ['#', 'Nombre', 'Tiempo', 'Opciones'];
+        'col' => 'col-12 col-md-6 col-xl-3',
+        'placeholder' => 'Buscar festividad...',
+    ]
+
+];
+
+$orders = [
+
+    [
+        'label' => 'Ordenar por:',
+        'id' => 'Ordenar_por',
+        'icon' => 'bi bi-arrow-down-up',
+        'input' => 'select',
+        'options' => [
+            'f.fecha_registro' => 'Fecha de creación',
+            'f.nombre' => 'Nombre',
+            'f.fecha_inicial' => 'Fecha de inicio',
+            'f.fecha_final' => 'Fecha de finalización'
+        ],
+        'btnHelp' => false,
+        'spans' => [null, null],
+        'col' => 'col-12 col-md-6 col-xl-3',
+    ],
+
+    [
+        'label' => 'De forma:',
+        'id' => 'Ordenar_en',
+        'icon' => 'bi bi-arrow-down-up',
+        'input' => 'select',
+        'options' => [
+            'DESC' => 'Descendente',
+            'ASC' => 'Ascendente'
+        ],
+        'btnHelp' => false,
+        'spans' => [null, null],
+        'col' => 'col-12 col-md-6 col-xl-3',
+    ]
+
+];
+
+$menuTable = [
+    'url' => 'addHoliday.php',
+    'updateMethod' => 'seleccionarFestividades('.')',
+    'clearMethod' => 'limpiarFiltrosFestividad()',
+    'pageInfo' => 'festividades',
+    'showAdd' => true,
+    'showUpdate' => true,
+    'showInfo' => false,
+    'showCount' => true,
+];
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Festividades</h4>
-            <i class="bi bi-search fs-4 d-flex align-self-center"></i>
-        </div>
+<div class="w-100 overflow-hidden p-0">
+
+    <div class="row px-0 py-1" id="formulario-filtros">
+
+        <?php
+        foreach ($inputs as $input) {
+            include '../src/components/inputs/input.php';
+        }
+        ?>
+
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Filtros</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros">
-                <?php
-                foreach ($inputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Orden</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros-orden">
-                <?php
-                foreach ($orders as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
+
+    <div class="row px-0 py-1" id="formulario-filtros-orden">
+
+        <?php
+        foreach ($orders as $input) {
+            include '../src/components/inputs/input.php';
+        }
+        ?>
+
+    </div>
+
+    <div class="px-0 pb-2">
+
         <div class="row justify-content-between">
-            <div class="col-auto">
-                <p class="card-text mb-3" id="total-data"></p>
-            </div>
-        </div>
-        <div class="row justify-content-between">
-            <div class="col-auto">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination"></ul>
-                </nav>
-            </div>
+
             <div class="col-auto d-flex gap-2 mb-4">
+
                 <?php include '../src/components/tables/menuTable.php'; ?>
+
             </div>
+
         </div>
-        <div class="border border-1 border-light rounded-2 overflow-hidden">
-            <?php include '../src/components/tables/dataTable.php'; ?>
-        </div>
+
+        <div
+            id="list-container"
+            class="products-admin-grid p-0"
+        ></div>
+
     </div>
+
 </div>
 
 <?php
-    $content = ob_get_clean();
-    include 'template.php';
+$content = ob_get_clean();
+include 'template.php';
 ?>
 
 <script>
-    $(document).ready(function() {
-        seleccionarFestividades('');
-    });
+
+$(document).ready(function(){
+
+    seleccionarFestividades();
+
+});
+
+let typingTimer;
+
+function actualizarDatosConFiltros(){
+
+    seleccionarFestividades(
+        $('#Nombre').val()
+    );
+
+}
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function(){
+
+        $('#Nombre').on(
+            'input',
+            function(){
+
+                clearTimeout(typingTimer);
+
+                typingTimer = setTimeout(
+                    () => {
+
+                        currentPage = 1;
+
+                        actualizarDatosConFiltros();
+
+                    },
+                    400
+                );
+
+            }
+        );
+
+        $('#Ordenar_por, #Ordenar_en').on(
+            'change',
+            function(){
+
+                currentPage = 1;
+
+                actualizarDatosConFiltros();
+
+            }
+        );
+
+    }
+);
+
 </script>

@@ -1,0 +1,489 @@
+/* ========================================= */
+/* DASHBOARD */
+/* ========================================= */
+
+.dashboard-page{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:28px;
+
+    padding:20px;
+
+    background:
+    linear-gradient(
+        145deg,
+        #f8f8f8,
+        #ececec
+    );
+}
+
+/* ========================================= */
+/* PANEL BASE */
+/* ========================================= */
+
+.dashboard-panel{
+
+    overflow:hidden;
+
+    background:
+    linear-gradient(
+        145deg,
+        #1f1f1f,
+        #151515
+    );
+
+    color:white;
+
+    border-top:6px solid var(--green);
+
+    border-bottom:6px solid var(--blue);
+
+    clip-path:polygon(
+        1% 0,
+        100% 0,
+        99% 100%,
+        0 100%
+    );
+
+    box-shadow:
+        10px 10px 0 rgba(0,0,0,.18);
+}
+
+.dashboard-panel-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:18px 24px;
+
+    background:#111;
+
+    font-weight:700;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.08);
+}
+
+.dashboard-panel-body{
+
+    padding:24px;
+}
+
+/* ========================================= */
+/* TOOLBAR */
+/* ========================================= */
+
+.dashboard-toolbar{
+
+    display:flex;
+
+    justify-content:flex-end;
+}
+
+/* ========================================= */
+/* KPI */
+/* ========================================= */
+
+.dashboard-kpis{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(260px,1fr)
+        );
+
+    gap:24px;
+}
+
+/* ========================================= */
+/* REESTILIZAR KPIS */
+/* ========================================= */
+
+.dashboard-kpis .card{
+
+    background:
+    linear-gradient(
+        145deg,
+        #1f1f1f,
+        #151515
+    );
+
+    color:white;
+
+    border:none;
+
+    overflow:hidden;
+
+    clip-path:polygon(
+        2% 0,
+        100% 0,
+        98% 100%,
+        0 100%
+    );
+
+    border-top:
+        6px solid var(--green);
+
+    border-bottom:
+        6px solid var(--blue);
+
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,.18);
+}
+
+.dashboard-kpis .card-title{
+
+    color:
+        rgba(255,255,255,.7);
+}
+
+.dashboard-kpis h2{
+
+    font-size:
+        clamp(
+            1.2rem,
+            1.2vw,
+            3rem
+        );
+
+    font-weight:800;
+
+    color:
+        var(--green);
+}
+
+/* ========================================= */
+/* GRÁFICAS */
+/* ========================================= */
+
+.dashboard-main-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            1fr
+        );
+
+    gap:24px;
+}
+
+.dashboard-chart{
+
+    background:white;
+
+    padding:20px;
+
+    overflow:hidden;
+
+    clip-path:polygon(
+        1% 0,
+        100% 0,
+        99% 100%,
+        0 100%
+    );
+
+    border-top:
+        6px solid var(--green);
+
+    border-bottom:
+        6px solid var(--blue);
+
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,.14);
+}
+
+/* ========================================= */
+/* TABLAS */
+/* ========================================= */
+
+.dashboard-tables{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(420px,1fr)
+        );
+
+    gap:24px;
+}
+
+.dashboard-tables .card{
+
+    border:none;
+
+    overflow:hidden;
+
+    background:white;
+
+    clip-path:
+        polygon(
+            2% 0,
+            100% 0,
+            98% 100%,
+            0 100%
+        );
+
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,.16);
+}
+
+/* ========================================= */
+/* RESPONSIVE */
+/* ========================================= */
+
+@media(max-width:768px){
+
+    .dashboard-page{
+
+        padding:12px;
+    }
+
+    .dashboard-panel{
+
+        clip-path:none;
+    }
+
+    .dashboard-chart{
+
+        clip-path:none;
+    }
+
+    .dashboard-tables{
+
+        grid-template-columns:1fr;
+    }
+}
+
+/* ========================================= */
+/* DASHBOARD */
+/* ========================================= */
+
+.dashboard-kpi-card,
+.dashboard-chart-card,
+.dashboard-table-card{
+
+    overflow:hidden;
+
+    background:
+    linear-gradient(
+        145deg,
+        #1f1f1f,
+        #151515
+    );
+
+    color:white;
+
+    border-top:
+        6px solid var(--green);
+
+    border-bottom:
+        6px solid var(--blue);
+
+    clip-path:
+        polygon(
+            1% 0,
+            100% 0,
+            99% 100%,
+            0 100%
+        );
+
+    box-shadow:
+        10px 10px 0 rgba(0,0,0,.18);
+}
+
+/* ========================================= */
+/* HEADERS */
+/* ========================================= */
+
+.dashboard-kpi-header,
+.dashboard-section-header{
+
+    background:#111;
+
+    padding:
+        18px
+        24px;
+
+    border-bottom:
+        1px solid rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+}
+
+.dashboard-kpi-title,
+.dashboard-section-header h6{
+
+    margin:0;
+
+    font-weight:700;
+
+    color:white;
+}
+
+/* ========================================= */
+/* KPI */
+/* ========================================= */
+
+.dashboard-kpi-body{
+
+    padding:28px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:14px;
+}
+
+.dashboard-kpi-value{
+
+    margin:0;
+
+    font-size:
+        clamp(
+            2rem,
+            4vw,
+            3rem
+        );
+
+    color:
+        var(--green);
+
+    font-weight:800;
+}
+
+.dashboard-kpi-percent{
+
+    display:inline-flex;
+
+    width:max-content;
+
+    padding:
+        .5rem
+        1rem;
+
+    background:
+        rgba(
+            0,
+            255,
+            120,
+            .14
+        );
+
+    color:
+        var(--green);
+
+    clip-path:
+        polygon(
+            10% 0,
+            100% 0,
+            90% 100%,
+            0 100%
+        );
+
+    font-weight:700;
+}
+
+/* ========================================= */
+/* CHART */
+/* ========================================= */
+
+.dashboard-chart-body{
+
+    padding:28px;
+
+    min-height:420px;
+}
+
+.dashboard-chart-canvas{
+
+    width:100% !important;
+
+    min-height:340px;
+}
+
+/* ========================================= */
+/* TABLE */
+/* ========================================= */
+
+.dashboard-table-body{
+
+    padding:0;
+}
+
+.dashboard-table{
+
+    margin:0;
+
+}
+
+.dashboard-table thead{
+
+    background:black;
+}
+
+.dashboard-table th{
+
+    padding:16px;
+}
+
+.dashboard-table td{
+
+    padding:16px;
+}
+
+.dashboard-table tbody tr:hover{
+
+    background:
+        rgba(
+            0,
+            255,
+            120,
+            .08
+        );
+}
+
+/* ========================================= */
+/* RESPONSIVE */
+/* ========================================= */
+
+@media(max-width:768px){
+
+    .dashboard-kpi-card,
+    .dashboard-chart-card,
+    .dashboard-table-card{
+
+        clip-path:none;
+    }
+
+    .dashboard-kpi-body,
+    .dashboard-chart-body{
+
+        padding:18px;
+    }
+
+}
+
+/* ========================================= */
+/* SHADOW */
+/* ========================================= */
+
+.dashboard-shadow {
+    filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, .2));
+
+}

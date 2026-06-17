@@ -20,21 +20,25 @@
             'label' => '¿Es comida?',
             'id' => 'Comida',
             'icon' => 'bi bi-basket-fill',
-            'input' => 'check',
+            'input' => 'checkbox',
             'onchange' => '',
             'btnHelp' => true,
             'inputInfo' => "Aquí se marca si el producto es una fruta o no.",
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => '¿Comida?',
         ],
         [
             'label' => '¿Existencias límitadas?',
             'id' => 'Existencia',
             'icon' => 'bi bi-hourglass-split',
-            'input' => 'check',
+            'input' => 'checkbox',
             'onchange' => '',
             'btnHelp' => true,
             'inputInfo' => "Aquí se marca si el producto es de agotar existencias.",
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => '¿Tiene existencias?',
         ],
     ];
 
@@ -48,6 +52,8 @@
             'btnHelp' => true,
             'inputInfo' => "Aquí se escribe el nombre del producto.",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Escribir nombre',
         ],
         [
             'label' => 'Precio',
@@ -59,18 +65,24 @@
             'btnHelp' => true,
             'inputInfo' => "Aquí se escribe el precio del producto.",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Escribir precio',
         ],
         [
             'label' => 'Accesorio',
             'id' => 'Accesorio',
             'icon' => 'bi bi-palette-fill',
-            'input' => 'accesory',
+            'input' => 'select',
             'title' => 'Tabla de accesorios',
             'body' => 'Hola!',
             'header' => ['#', 'Nombre', 'Imagen', 'Opción'],
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona un producto accesorio. Es para ligar un producto con otro que sea complemento, es decir, un accesorio que forma parte de un producto. Esto permite a los clientes poder escojer un color tanto en el producto como al accesorio.",
             'spans' => [null, 'Solo puedes seleccionar 1'],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'options' => [
+                0 => 'Buscando...',
+            ]
         ],
         [
             'label' => 'Descripcion',
@@ -80,15 +92,19 @@
             'btnHelp' => true,
             'inputInfo' => "Aquí se escribe una descripción del producto. Puede ser de que material está hecho, sus usos, o algún dato que consideres necesario mencionar.",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-lg-6',
+            'placeholder' => 'Escribir detalles o datos útiles',
         ],
         [
-            'label' => 'Advertencias    ',
+            'label' => 'Advertencias',
             'id' => 'Advertencia',
             'icon' => 'bi bi-exclamation-triangle-fill',
             'input' => 'textarea',
             'btnHelp' => true,
             'inputInfo' => "Aquí se escribe una serie de advertencias sobre el producto. Puede ser que sea frágil, o que probablemente no se vea igual que en la imagen por ser hecho a mano, o también que no es apto para algunas edades, o cualquier cosa que consideres una advertencia.",
             'spans' => [null, null],
+            'col' => 'col-12 col-lg-6',
+            'placeholder' => 'Escribir consideraciones o cuidados especiales',
         ]
     ];
 
@@ -97,47 +113,63 @@
             'label' => 'Categoría',
             'id' => 'Categorias',
             'icon' => 'bi bi-tools',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => '',
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona una categoría para el producto. Es para clasificar el producto por algo.",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'options' => [
+                0 => 'Buscando...',
+            ]
         ],
         [
             'label' => 'Rareza',
             'id' => 'Rareza',
             'icon' => 'bi bi-tag-fill',
-            'input' => 'rarity',
+            'input' => 'select',
             'title' => 'Tabla de rarezas',
             'body' => 'Hola!',
             'header' => ['#', 'Nombre', 'Color', 'Opción'],
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona una rareza para el producto. Es para clasificar tu producto por algo.",
             'spans' => ['Obligatorio', 'Solo puedes seleccionar 1'],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'options' => [
+                0 => 'Buscando...',
+            ]
         ],
         [
             'label' => 'Universo',
             'id' => 'Universo',
             'icon' => 'bi bi-flag-fill',
-            'input' => 'universe',
+            'input' => 'select',
             'title' => 'Tabla de universos',
             'body' => 'Hola!',
             'header' => ['#', 'Nombre', 'Opción'],
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona un universo para el producto. Es para clasificar por alguna serie tu producto.",
             'spans' => ['Obligatorio', 'Solo puedes seleccionar 1'],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'options' => [
+                0 => 'Buscando...',
+            ]
         ],
         [
             'label' => 'Festividad',
             'id' => 'Festividad',
             'icon' => 'bi bi-calendar-fill',
-            'input' => 'holiday',
+            'input' => 'select',
             'title' => 'Tabla de festividades',
             'body' => 'Hola!',
             'header' => ['#', 'Nombre', 'Fecha', 'Opción'],
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona una festividad para el producto. Es para hacer visible tu producto en la tienda por un tiempo predeterminado.",
             'spans' => [null, 'Solo puedes seleccionar 1'],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'options' => [
+                0 => 'Buscando...',
+            ]
         ],
     ];
 
@@ -146,13 +178,17 @@
             'label' => 'Ver descuentos',
             'id' => 'Descuento',
             'icon' => 'bi bi-percent',
-            'input' => 'discount',
+            'input' => 'discounts',
             'title' => 'Tabla de descuentos',
             'body' => 'Hola!',
             'header' => ['#', 'Nombre', 'Descuento', 'Fecha', 'Opción'],
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona una o varias promociones de descuento para el producto. Es para asignar un descuento a tu producto en la tienda por tiempos predeterminados.",
             'spans' => [null, null],
+            'col' => 'col-12 col-md-10 col-xl-8',
+            'options' => [
+                0 => 'Buscando...',
+            ]
         ],
     ];
 
@@ -161,34 +197,40 @@
             'label' => 'Alto',
             'id' => 'Altura',
             'icon' => 'bi bi-rulers',
-            'input' => 'long',
+            'input' => 'text',
             'symbol' => 'cm',
             'onchange' => '',
             'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe la altura del producto.",
+            'help' => "Medido en cm",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Escribir altura',
         ],
         [
             'label' => 'Peso',
             'id' => 'Peso',
             'icon' => 'bi bi-hammer',
-            'input' => 'long',
+            'input' => 'text',
             'symbol' => 'kg',
             'onchange' => '',
             'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe el peso del producto.",
+            'help' => "Medido en kg",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Escribir peso',
         ],
         [
             'label' => 'Tiempo',
             'id' => 'Tiempo',
             'icon' => 'bi bi-alarm-fill',
-            'input' => 'long',
+            'input' => 'text',
             'symbol' => 'días',
             'onchange' => '',
             'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe la duración en la fabricación del producto en días.",
+            'help' => "Medido en días aproximados de fabricación",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Escribir tiempo',
         ],
     ];
 
@@ -200,10 +242,11 @@
             'idHidden' => 'hiddenImagen1Producto',
             'value' => '<%= producto.imagen_portada %>',
             'icon' => 'bi bi-image-fill',
-            'input' => 'image',
+            'input' => 'file',
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona la imagen de portada del producto. Es la imagen del producto que verán los clientes en la tienda.",
             'spans' => ['Obligatorio', 'Máximo un 1 MB (1000 KB) de tamaño'],
+            'col' => 'col-12 col-lg-6',
         ],
         [
             'label' => 'Imágen de galería',
@@ -212,10 +255,11 @@
             'idHidden' => 'hiddenImagen2Producto',
             'value' => '<%= producto.imagen_galeria %>',
             'icon' => 'bi bi-image-fill',
-            'input' => 'image',
+            'input' => 'file',
             'btnHelp' => true,
             'inputInfo' => "Aquí se selecciona la imagen que se usará como galería del producto.",
             'spans' => ['Obligatorio', 'Máximo un 1 MB (1000 KB) de tamaño'],
+            'col' => 'col-12 col-lg-6',
         ],
     ];
 
@@ -224,13 +268,15 @@
             'label' => 'Colores',
             'id' => 'Colores',
             'icon' => 'bi bi-palette-fill',
-            'input' => 'colors',
+            'input' => 'palettes',
             'title' => 'Tabla de colores',
             'body' => 'Hola!',
             'header' => ['#', 'Nombre', 'Familia', 'Color', 'Opción'],
             'btnHelp' => true,
             'inputInfo' => "Aquí seleccionas las paletas de colores que tendrá el producto. Puedes seleccionar un máximo de 16 variantes.",
             'spans' => ['Obligatorio (mínimo 1)', 'Máximo un 1 MB (1000 KB) de tamaño para cada imagen'],
+            'col' => 'col-12 col-xl-8',
+            'help' => 'Puedes solo seleccionar 20 paletas',
         ]
     ];
 
@@ -242,111 +288,103 @@
     $type = 'producto';
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Agregar producto</h4>
-            <i class="bi bi-file-earmark-plus fs-4 d-flex align-self-center"></i>
+<div class="w-100">
+    <div class="overflow-hidden my-2">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Tipo de producto</p>
+            </div>
+        </div>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($classesInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
         </div>
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Tipo del producto</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($classesInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+    <div class="overflow-hidden my-2">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Información básica</p>
             </div>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Información</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($informationInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($informationInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+        </div>
+    </div>
+    <div class="overflow-hidden my-2">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Clasificadores</p>
             </div>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Clasificaciones</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($classificationsInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($classificationsInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+        </div>
+    </div>
+    <div class="overflow-hidden my-2">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Descuentos aplicados</p>
             </div>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Descuentos</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($discountsInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($discountsInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+        </div>
+    </div>
+    <div class="overflow-hidden my-2">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Características</p>
             </div>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Medidas</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($measuresInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($measuresInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+        </div>
+    </div>
+    <div class="overflow-hidden my-2">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Imágenes</p>
             </div>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Imágenes</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($imagesInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($imagesInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+        </div>
+    </div>
+    <div class="overflow-hidden my-2" id="col-container-colors">
+        <div class="card-body admin-subheader-card-bg">
+            <div class="d-flex align-items-center gap-2">
+                <p class="card-title p-0 m-0">Paletas de colores</p>
             </div>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2" id="col-container-colors">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Paletas</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($colorsInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
+        <div class="row px-3 py-1">
+            <?php
+            foreach ($colorsInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
         </div>
     </div>
     <div class="container-fluid mb-3">
@@ -367,37 +405,18 @@
             buscarProducto(<?php echo $productId; ?>);
         }
         obtenerCategoriasParaProductos('Categorias', false, "false");
+        obtenerRarezasParaDashboard('Rareza', false, "false");
+        obtenerUniversosParaDashboard('Universo', false, "false");
+        obtenerFestividadesParaDashboard('Festividad', false, true);
+        obtenerAccesoriosParaDashboard('Accesorio', false, true);
     });
 
     $('#modalColors').on('shown.bs.modal', function () {
         obtenerColoresParaProductos('colors-data-container', '', '');
     });
-    $('#modalHolidays').on('shown.bs.modal', function () {
-        obtenerFestividadesParaProductos('holidays-data-container', '');
-    });
-    $('#modalRarities').on('shown.bs.modal', function () {
-        obtenerRarezasParaProductos('rarities-data-container', '');
-    });
-    $('#modalUniverses').on('shown.bs.modal', function () {
-        obtenerUniversosParaProductos('universes-data-container', '');
-    });
     $('#modalDiscounts').on('shown.bs.modal', function () {
         obtenerDescuentosParaProductos('discounts-data-container', '');
     });
-    $('#modalAccesories').on('shown.bs.modal', function () {
-        obtenerAccesoriosParaProductos('accesories-data-container', '');
-    });
-
-    if (<?php echo $updateProduct ? 'false' : 'true'; ?>) {
-        $('#textFestividad').val('Ninguno');
-        $('#hiddenFestividad').val('0');
-        $('#textRareza').val('Ninguno');
-        $('#hiddenRareza').val('0');
-        $('#textUniverso').val('Ninguno');
-        $('#hiddenUniverso').val('0');
-        $('#textAccesorio').val('Ninguno');
-        $('#hiddenAccesorio').val('0');
-    }
 
     const maxSizeInKB = 1000; // Tamaño máximo en KB
     const maxSizeInBytes = maxSizeInKB * 1024; // Convertir a bytes
@@ -424,5 +443,75 @@
             }
         });
     });
+
+    // Para colores
+    let typingColorTimer;
+    function actualizarColoresConFiltros(){
+        obtenerColoresParaProductos(
+            'colors-data-container',
+            $('#NombreColorModal').val(),
+            $('#FamiliaColorModal').val(),
+        );
+    }
+    document.addEventListener(
+        'DOMContentLoaded',
+        function(){
+            $('#NombreColorModal, #FamiliaColorModal').on(
+                'input',
+                function(){
+                    clearTimeout(typingColorTimer);
+                    typingColorTimer = setTimeout(
+                        () => {
+                            actualizarColoresConFiltros();
+                        },
+                        400
+                    );
+                }
+            );
+            $(
+                '#NombreColorModal,' +
+                '#FamiliaColorModal,' 
+            ).on(
+                'change',
+                function(){
+                    actualizarColoresConFiltros();
+                }
+            );
+        }
+    );
+
+    // Para descuentos
+    let typingDiscountTimer;
+    function actualizarDescuentosConFiltros(){
+        obtenerDescuentosParaProductos(
+            'discounts-data-container',
+            $('#NombreDescuentoModal').val(),
+        );
+    }
+    document.addEventListener(
+        'DOMContentLoaded',
+        function(){
+            $('#NombreDescuentoModal').on(
+                'input',
+                function(){
+                    clearTimeout(typingDiscountTimer);
+                    typingDiscountTimer = setTimeout(
+                        () => {
+                            actualizarDescuentosConFiltros();
+                        },
+                        400
+                    );
+                }
+            );
+            $(
+                '#NombreDescuentoModal,'
+            ).on(
+                'change',
+                function(){
+                    actualizarDescuentosConFiltros();
+                }
+            );
+        }
+    );
 </script>
 

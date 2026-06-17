@@ -21,38 +21,98 @@
     $orden = isset($_POST['orden']) ? $_POST['orden'] : 'DESC';
 
     switch ($accion) {
-        case 'buscarProductos':
-            $respuesta = buscarProductos($conn, $anioInicial, $anioFinal, $mesInicial, $mesFinal, $diaInicial, $diaFinal, $categoria, $rareza, $universo, $orden);
-        
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
+
+        case 'buscarKPIs':
+
+            $respuesta =
+                buscarKPIs(
+                    $conn,
+                    $anioInicial,
+                    $anioFinal,
+                    $mesInicial,
+                    $mesFinal,
+                    $diaInicial,
+                    $diaFinal,
+                    $categoria,
+                    $rareza,
+                    $universo
+                );
+
             break;
 
-        case 'buscarGananciasProductos':
-            $respuesta = buscarGananciasPorProducto($conn, $anioInicial, $anioFinal, $mesInicial, $mesFinal, $diaInicial, $diaFinal, $categoria, $rareza, $universo, $orden);
-        
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
+        case 'buscarProductos':
+
+            $respuesta =
+                buscarProductos(
+                    $conn,
+                    $anioInicial,
+                    $anioFinal,
+                    $mesInicial,
+                    $mesFinal,
+                    $diaInicial,
+                    $diaFinal,
+                    $categoria,
+                    $rareza,
+                    $universo,
+                    $orden
+                );
+
             break;
 
         case 'buscarGananciasTiempo':
-            $respuesta = buscarGananciasPorTiempo($conn, $anioInicial, $anioFinal, $mesInicial, $mesFinal, $diaInicial, $diaFinal, $categoria, $rareza, $universo, $orden);
-        
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
+
+            $respuesta =
+                buscarGananciasPorTiempo(
+                    $conn,
+                    $anioInicial,
+                    $anioFinal,
+                    $mesInicial,
+                    $mesFinal,
+                    $diaInicial,
+                    $diaFinal,
+                    $categoria,
+                    $rareza,
+                    $universo,
+                    $orden
+                );
+
             break;
 
-        case 'buscarTotales':
-            $respuesta = buscarTotales($conn);
-        
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
+        case 'buscarGananciasProductos':
+
+            $respuesta =
+                buscarGananciasPorProducto(
+                    $conn,
+                    $anioInicial,
+                    $anioFinal,
+                    $mesInicial,
+                    $mesFinal,
+                    $diaInicial,
+                    $diaFinal,
+                    $categoria,
+                    $rareza,
+                    $universo,
+                    $orden
+                );
+
             break;
 
         default:
-            echo 'ERROR, falta una acción';
-            break;
+
+            http_response_code(400);
+
+            $respuesta=[
+                'error'=>'Acción inválida'
+            ];
     }
+
+    header(
+        'Content-Type: application/json'
+    );
+
+    echo json_encode(
+        $respuesta
+    );
 
     $conn->close();
 ?>

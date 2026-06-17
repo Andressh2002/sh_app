@@ -1,7 +1,16 @@
 .title-element {
-    background-color: #ccc;
-    clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 90%);
-    min-height: 128px;
+    background-color: #666;
+    color: white;
+    --clip-top: clamp(4%, 6vw, 20%);
+    --clip-bottom: clamp(85%, 92vw, 95%);
+
+    clip-path: polygon(
+        0 0,
+        100% var(--clip-top),
+        100% 100%,
+        0 var(--clip-bottom)
+    );
+    min-height: clamp(128px, 10vh, 256px);
 
     display: flex;
     align-items: center;

@@ -1,5 +1,5 @@
 <?php
-    $appVersion = "v3.2.1";
+    $appVersion = "v4.0.0";
 ?>
 
 <!DOCTYPE html>
@@ -13,10 +13,10 @@
     <?php include '../layouts/head.html'; ?>
 </head>
 
-<body class="d-flex flex-column min-vh-100 overflow-visible">
+<body class="d-flex flex-column min-vh-100 overflow-visible px-0">
 
     <?php if (isset($showHeader) && $showHeader): ?>
-        <?php include '../layouts/header.html'; ?>
+        <?php include '../layouts/header.php'; ?>
     <?php endif; ?>
 
     <?php if (isset($showNavbar) && $showNavbar): ?>
@@ -45,3 +45,7 @@
 
 
 </html>
+
+<?php
+    include '../src/components/modal/modals.php';
+?>

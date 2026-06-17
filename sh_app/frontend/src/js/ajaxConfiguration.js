@@ -3,6 +3,9 @@ function cambiarModoManteniento() {
     const estadoActual = $('#estado-mantenimiento').text() === "Activado";
     const nuevoValor = estadoActual ? "0" : "1";
 
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", 'Cambiando...', 'Espere un momento...', 'bi bi-wifi', false);
+
     $.ajax({
         url: backend + urlConfiguration,
         type: 'POST',
@@ -14,7 +17,7 @@ function cambiarModoManteniento() {
         success: function(response) {
             const data = typeof response === 'string' ? JSON.parse(response) : response;
 
-            alert(data.title, data.text, data.icon, "Aceptar");
+            cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
 
             buscarConfiguracionModoMantenimiento();
         }

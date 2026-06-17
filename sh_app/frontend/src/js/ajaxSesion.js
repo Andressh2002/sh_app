@@ -2,11 +2,8 @@ function iniciarSesion() {
     const nombreUsuario = $('#nombreUsuario').val();
     const contrasennia = $('#Contrasennia').val();
 
-    alertLoadingBlocked(
-        'Tratando de iniciar sesión',
-        'Por favor espere un momento...',
-        'warning',
-    );
+    abrirModal('modalLogueando');
+    cambiarMensajeModal("#modalLogueando", "Iniciando sesión", 'Espere, estamos tratando de iniciar sesión...', "bi bi-wifi", false);
 
     $.ajax({
         url: backend + urlUser,
@@ -21,11 +18,11 @@ function iniciarSesion() {
             if (data.success) {
                 window.location.href = 'home.php';
             } else {
-                alert('Error', 'Nombre de usuario o contraseña incorrectos.', 'error', 'Aceptar');
+                cambiarMensajeModal("#modalLogueando", "¡Error!", 'Nombre de usuario o contraseña incorrectos.', "bi bi-x-circle", true);
             }
         },
         error: function() {
-            alert('Error', 'Ocurrió un problema al intentar iniciar sesión.', 'error', 'Aceptar');
+            cambiarMensajeModal("#modalLogueando", "¡Error!", 'Ocurrió un problema al intentar iniciar sesión.', "bi bi-x-circle", true);
         }
     });
 }

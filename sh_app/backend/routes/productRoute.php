@@ -174,26 +174,25 @@
             break;
 
         case 'listarIds':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $categoria = isset($_POST['categoria']) ? $_POST['categoria'] : '';
-            $rareza = isset($_POST['rareza']) ? $_POST['rareza'] : '';
-            $universo = isset($_POST['universo']) ? $_POST['universo'] : '';
+            $nombre = $_POST['nombre'] ?? '';
+            $categoria = $_POST['categoria'] ?? '';
+            $rareza = $_POST['rareza'] ?? '';
+            $universo = $_POST['universo'] ?? '';
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
+            $orden = $_POST['orden'] ?? [];
         
             $respuesta = listarIds($conn, $nombre, $categoria, $rareza, $universo, $orden);
-            $total = contarIds($conn, $nombre, $categoria, $rareza, $universo);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
+            echo json_encode($respuesta);
             break;
 
         case 'buscarPorId':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
+            $id = $_POST['id'] ?? '';
             $respuesta = buscarPorId($conn, $id);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
+            echo json_encode($respuesta);
             break;
 
         case 'buscarCartaProducto':

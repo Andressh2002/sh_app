@@ -1,123 +1,139 @@
 <?php
-    // Incluir la conexión a la base de datos
-    include '../db/conection.php';
 
-    // Incluir el archivo con las operaciones SQL
-    include '../controllers/universeController.php';
+include '../db/conection.php';
+include '../controllers/universeController.php';
 
-    // Verificar la acción
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+$accion = $_POST['accion'] ?? '';
 
-    switch ($accion) {
-        case 'insertar':
-            if (isset($_POST['nombre']) && isset($_POST['descripcion'])) {
-                $nombre = $_POST['nombre'];
-                $descripcion = $_POST['descripcion'];
-                $imagen = $_POST['imagen'];
+switch ($accion) {
 
-                $respuesta = insertar($conn, $nombre, $descripcion, $imagen);
-                echo json_encode($respuesta);
-            } else {
-                echo "Faltan datos";
-            }
-            break;
+    case 'insertar':
 
-        case 'actualizar':
-            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['descripcion'])) {
-                $id = $_POST['id'];
-                $nombre = $_POST['nombre'];
-                $descripcion = $_POST['descripcion'];
-                $imagen = $_POST['imagen'];
+        if (
+            isset($_POST['nombre']) &&
+            isset($_POST['imagen'])
+        ) {
 
-                $respuesta = actualizar($conn, $id, $nombre, $descripcion, $imagen);
-                echo json_encode($respuesta);
-            } else {
-                echo "Faltan datos para actualizar la categoría";
-            }
-            break;
+            echo json_encode(
+                insertar(
+                    $conn,
+                    $_POST['nombre'],
+                    $_POST['imagen']
+                )
+            );
 
-        case 'eliminar':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = eliminar($conn, $id);
+        } else {
 
-            echo $respuesta;
-            break;
-        
-        case 'obtener':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $isImagen = isset($_POST['isImagen']) ? $_POST['isImagen'] : '';
-            $respuesta = obtener($conn, $nombre, $isImagen);
+            echo "Faltan datos";
+        }
 
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
-            break;
-        
-        case 'buscar':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = buscar($conn, $id);
+    break;
 
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
-            break;
+    case 'actualizar':
 
-        case 'seleccionar':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 10;  // Límite de categorías por página
-            $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0; // Desplazamiento para la paginación
-        
-            $respuesta = seleccionar($conn, $nombre, $limit, $offset);
-            $total = contar($conn, $nombre);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
-            break;
+        if (
+            isset($_POST['id']) &&
+            isset($_POST['nombre']) &&
+            isset($_POST['imagen'])
+        ) {
 
-        case 'buscarImagen':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-        
-            $respuesta = buscarImagen($conn, $id);
-        
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
-            break;
+            echo json_encode(
+                actualizar(
+                    $conn,
+                    $_POST['id'],
+                    $_POST['nombre'],
+                    $_POST['imagen']
+                )
+            );
 
-        case 'contar':
-            $total = contarTodos($conn);
-        
-            if ($total !== 0) {
-                header('Content-Type: application/json');
-                echo json_encode(['total' => $total]);
-            } else {
-                http_response_code(500);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'No se pudo obtener el total']);
-            }
-            break;
+        } else {
 
-        case 'listarIds':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+            echo "Faltan datos para actualizar el universo";
+        }
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
-        
-            $respuesta = listarIds($conn, $nombre, $orden);
-            $total = contarIds($conn, $nombre);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
-            break;
-    
-        case 'buscarPorId':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = buscarPorId($conn, $id);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
-            break;
-        
-        default:
-            echo 'ERROR, falta una acción';
-            break;
-    }
+    break;
 
-    $conn->close();
-?>
+    case 'eliminar':
+
+        echo eliminar(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+    break;
+
+    case 'obtener':
+
+        $respuesta = obtener(
+            $conn,
+            $_POST['nombre'] ?? '',
+            $_POST['isImagen'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'buscar':
+
+        $respuesta = buscar(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'buscarImagen':
+
+        $respuesta = buscarImagen(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'listarIds':
+
+        $respuesta = listarIds(
+            $conn,
+            $_POST['nombre'] ?? '',
+            $_POST['orden'] ?? []
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'buscarPorId':
+
+        $respuesta = buscarPorId(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    default:
+
+        echo 'ERROR, falta una acción';
+
+    break;
+}
+
+$conn->close();

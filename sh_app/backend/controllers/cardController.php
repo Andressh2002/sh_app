@@ -373,7 +373,10 @@
                 p.especial,
                 p.estado,
                 p.visible,
-                p.calificaciones_estrellas,
+                ROUND(
+                    AVG(c.estrellas),
+                    1
+                ) AS calificacion_estrellas,
                 p.fecha_registro,
                 p.fecha_destacado,
                 p.existencia,
@@ -408,6 +411,7 @@
             LEFT JOIN descuentos ds ON FIND_IN_SET(ds.id, p.idDescuentos) AND p.idDescuentos != '' || NULL
             LEFT JOIN rarezas rr ON p.idRareza = rr.id AND p.idRareza != 0
             LEFT JOIN colores cl ON FIND_IN_SET(cl.id, p.idColores)
+            LEFT JOIN comentarios c ON c.idProducto = p.id AND c.estado = 1
             WHERE p.estado = 1 
             AND p.visible = 1 
             AND p.id=?");

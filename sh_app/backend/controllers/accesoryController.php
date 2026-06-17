@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $idColores, $descripcion) {
+    function insertar($conn, $nombre, $idColores) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -16,17 +16,17 @@
                 return [
                     'title' => "¡No se guardó!",
                     'text' => "El accesorio " . htmlspecialchars($nombre) . " ya existe. Pruebe con otro nombre.",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
     
             // Consulta SQL de inserción
-            $query = "INSERT INTO accesorios (nombre, idColores, descripcion, fecha_registro, estado) 
-                      VALUES (?, ?, ?, ?, 1)";
+            $query = "INSERT INTO accesorios (nombre, idColores, fecha_registro, estado) 
+                      VALUES (?, ?, ?, 1)";
             
             $stmt = $conn->prepare($query);
             // Aquí, se pasa el número correcto de parámetros y los tipos
-            $stmt->bind_param("ssss", $nombre, $idColores, $descripcion, $fecha_registro);
+            $stmt->bind_param("sss", $nombre, $idColores, $fecha_registro);
     
             if ($stmt->execute()) {
                 // Obtener el ID del accesorio insertado
@@ -35,7 +35,7 @@
                 return [
                     'title' => "¡Guardado!",
                     'text' => "El accesorio se ha guardado correctamente.",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'producto_id' => $producto_id
                 ];
             }
@@ -44,14 +44,14 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
 
     function obtener($conn, $nombre) {
         $query = "
-            SELECT p.*, 
+            SELECT p.id, p.nombre, p.descripcion, p.idColores, p.estado, p.fecha_registro, 
                 GROUP_CONCAT(CONCAT(cl.codigo_color_principal, ',', cl.codigo_color_secundario, ',', cl.codigo_color_terciario, ',', cl.color_familia) 
                 SEPARATOR '|') AS colores
             FROM accesorios p 
@@ -125,7 +125,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $idColores, $descripcion) {
+    function actualizar($conn, $id, $nombre, $idColores) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM accesorios WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -138,24 +138,23 @@
                 return [
                     'title' => "¡No se actualizó!",
                     'text' => "Ya existe un accesorio con ese nombre",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
     
             $queryUpdate = "UPDATE accesorios SET 
                             nombre = ?, 
-                            idColores = ?, 
-                            descripcion = ? 
+                            idColores = ? 
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("sssi", $nombre, $idColores, $descripcion, $id);
+            $stmt->bind_param("ssi", $nombre, $idColores, $id);
     
             if ($stmt->execute()) {
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "El accesorio se ha actualizado correctamente",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'producto_id' => $id // Agrega el id aquí
                 ];
             }
@@ -164,7 +163,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el accesorio: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -192,7 +191,6 @@
             SELECT 
                 p.id,
                 p.nombre,
-                p.descripcion,
                 p.estado,
                 p.fecha_registro, 
                 p.idColores,
@@ -297,13 +295,13 @@
 
     function insertarImagen($conn, $id, $imagen, $idImagen) {
         try {
-            $columnasPermitidas = ['imagen_color1', 'imagen_color2', 'imagen_color3', 'imagen_color4', 'imagen_color5', 'imagen_color6', 'imagen_color7', 'imagen_color8', 'imagen_color9', 'imagen_color10', 'imagen_color11', 'imagen_color12', 'imagen_color13', 'imagen_color14', 'imagen_color15', 'imagen_color16'];
+            $columnasPermitidas = ['imagen_color1', 'imagen_color2', 'imagen_color3', 'imagen_color4', 'imagen_color5', 'imagen_color6', 'imagen_color7', 'imagen_color8', 'imagen_color9', 'imagen_color10', 'imagen_color11', 'imagen_color12', 'imagen_color13', 'imagen_color14', 'imagen_color15', 'imagen_color16', 'imagen_color17', 'imagen_color18', 'imagen_color19', 'imagen_color20'];
             
             if (!in_array($idImagen, $columnasPermitidas)) {
                 return [
                     'title' => "¡Error!",
                     'text' => "Columna no permitida",
-                    'icon' => "error",
+                    'icon' => "bi bi-x-circle",
                     'value' => 0
                 ];
             }
@@ -316,14 +314,14 @@
                 return [
                     'title' => "¡Insertado!",
                     'text' => "La imagen se ha insertado correctamente",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'value' => 1
                 ];
             } else {
                 return [
                     'title' => "¡Error!",
                     'text' => "Error al ejecutar la consulta",
-                    'icon' => "error",
+                    'icon' => "bi bi-x-circle",
                     'value' => 0
                 ];
             }
@@ -332,7 +330,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al insertar la imagen: " . $e->getMessage(),
-                'icon' => "error",
+                'icon' => "bi bi-x-circle",
                 'value' => 0
             ];
         }
@@ -345,23 +343,72 @@
             FROM accesorios ac
             WHERE ac.estado = 1";
         
-        if ($nombre !== null && $nombre !== '') {
-            $query .= " AND ac.nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
+        if(!empty($nombre)){
+
+            $query .= "
+                AND ac.nombre LIKE '%" .
+                $conn->real_escape_string($nombre) .
+                "%'
+            ";
         }
     
-        $query .= " GROUP BY ac.id";
-        $query .= " ORDER BY " . $conn->real_escape_string($orden);
-        
-        $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+        $columnasPermitidas = [
+            'ac.nombre',
+        ];
+
+        $formasPermitidas = [
+            'ASC',
+            'DESC'
+        ];
+
+        $campoOrden = 'ac.id';
+        $formaOrden = 'DESC';
+
+        if(
+            is_array($orden)
+            &&
+            isset($orden['orden'])
+            &&
+            in_array(
+                $orden['orden'],
+                $columnasPermitidas
+            )
+        ){
+            $campoOrden = $orden['orden'];
         }
-        
-        return $datas;
+
+        if(
+            is_array($orden)
+            &&
+            isset($orden['forma'])
+            &&
+            in_array(
+                strtoupper($orden['forma']),
+                $formasPermitidas
+            )
+        ){
+            $formaOrden =
+                strtoupper(
+                    $orden['forma']
+                );
+        }
+
+        $query .= "
+            ORDER BY
+            $campoOrden
+            $formaOrden
+        ";
+
+        $result = $conn->query($query);
+
+        $ids = [];
+
+        while($row = $result->fetch_assoc()){
+
+            $ids[] = $row['id'];
+        }
+
+        return $ids;
     }
 
     function contarIds($conn, $nombre) {
@@ -394,7 +441,6 @@
             SELECT 
                 ac.id,
                 ac.nombre,
-                ac.descripcion,
                 ac.estado,
                 ac.fecha_registro, 
                 ac.idColores,
@@ -406,16 +452,17 @@
 
         $stmt->bind_param("i", $id);
         $stmt->execute();
-    
+
         $result = $stmt->get_result();
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+
+        if($result->num_rows <= 0){
+
+            return null;
         }
-        
-        return $datas;
+
+        $accesorio =
+            $result->fetch_assoc();
+
+        return $accesorio;
     }
 ?>

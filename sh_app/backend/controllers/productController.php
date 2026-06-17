@@ -16,7 +16,7 @@
                 return [
                     'title' => "¡No se guardó!",
                     'text' => "El producto " . htmlspecialchars($nombre) . " ya existe. Pruebe con otro nombre.",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
     
@@ -35,7 +35,7 @@
                 return [
                     'title' => "¡Guardado!",
                     'text' => "El producto se ha guardado correctamente.",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'producto_id' => $producto_id
                 ];
             }
@@ -44,7 +44,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -230,7 +230,7 @@
                 return [
                     'title' => "¡No se actualizó!",
                     'text' => "Ya existe un producto con ese nombre",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
     
@@ -262,7 +262,7 @@
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "El producto se ha actualizado correctamente",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'producto_id' => $id // Agrega el id aquí
                 ];
             }
@@ -271,7 +271,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el producto: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -450,13 +450,13 @@
             return [
                 'title' => "¡" . ((int)$visibilidad == 1 ? 'Publicado' : 'Ocultado') . "!",
                 'text' => "El producto se ha " . ((int)$visibilidad == 1 ? 'publicado' : 'ocultado') . " correctamente",
-                'icon' => "success"
+                'icon' => "bi bi-check-circle"
             ];
         } else {
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el producto: " . $conn->error,
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -476,13 +476,13 @@
             return [
                 'title' => "¡" . ((int)$isDestacacidad == 1 ? 'Destacado' : 'Ya no es un destacado') . "!",
                 'text' => "El producto se ha " . ((int)$isDestacacidad == 1 ? 'destacado por siete días' : 'dejado de destacar, pero aún sigue en la tienda como producto ordinario.'),
-                'icon' => "success"
+                'icon' => "bi bi-check-circle"
             ];
         } else {
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el producto: " . $conn->error,
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -495,7 +495,7 @@
                 return [
                     'title' => "¡Error!",
                     'text' => "Columna no permitida",
-                    'icon' => "error",
+                    'icon' => "bi bi-x-circle",
                     'value' => 0
                 ];
             }
@@ -508,14 +508,14 @@
                 return [
                     'title' => "¡Insertado!",
                     'text' => "La imagen se ha insertado correctamente",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'value' => 1
                 ];
             } else {
                 return [
                     'title' => "¡Error!",
                     'text' => "Error al ejecutar la consulta",
-                    'icon' => "error",
+                    'icon' => "bi bi-x-circle",
                     'value' => 0
                 ];
             }
@@ -524,143 +524,250 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al insertar la imagen: " . $e->getMessage(),
-                'icon' => "error",
+                'icon' => "bi bi-x-circle",
                 'value' => 0
             ];
         }
     }
 
-    function listarIds($conn, $nombre, $idCategoria, $idRareza, $idUniverso, $orden) {
+    function listarIds(
+        $conn,
+        $nombre,
+        $categoria,
+        $rareza,
+        $universo,
+        $orden
+    ){
+
         $query = "
-            SELECT 
-                p.id
+
+            SELECT p.id
+
             FROM productos p
-            JOIN categorias ct ON p.idCategoria = ct.id
-            LEFT JOIN rarezas rr ON p.idRareza = rr.id AND p.idRareza != 0
-            LEFT JOIN universos un ON p.idUniverso = un.id AND p.idUniverso != 0
-            WHERE p.estado = 1";
-        
-        if ($nombre !== null && $nombre !== '') {
-            $query .= " AND p.nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
+
+            JOIN categorias ct
+            ON p.idCategoria = ct.id
+
+            LEFT JOIN rarezas rr
+            ON p.idRareza = rr.id
+            AND p.idRareza != 0
+
+            LEFT JOIN universos un
+            ON p.idUniverso = un.id
+            AND p.idUniverso != 0
+
+            WHERE p.estado = 1
+
+        ";
+
+        if(!empty($nombre)){
+
+            $query .= "
+                AND p.nombre LIKE '%" .
+                $conn->real_escape_string($nombre) .
+                "%'
+            ";
         }
-        if ($idCategoria !== null && $idCategoria !== '') {
-            $query .= " AND ct.nombre LIKE '%" . $conn->real_escape_string($idCategoria) . "%'";
+
+        if(!empty($categoria)){
+
+            $query .= "
+                AND ct.nombre LIKE '%" .
+                $conn->real_escape_string($categoria) .
+                "%'
+            ";
         }
-        if ($idRareza !== null && $idRareza !== '') {
-            $query .= " AND rr.nombre LIKE '%" . $conn->real_escape_string($idRareza) . "%'";
+
+        if(!empty($rareza)){
+
+            $query .= "
+                AND rr.nombre LIKE '%" .
+                $conn->real_escape_string($rareza) .
+                "%'
+            ";
         }
-        if ($idUniverso !== null && $idUniverso !== '') {
-            $query .= " AND un.nombre LIKE '%" . $conn->real_escape_string($idUniverso) . "%'";
+
+        if(!empty($universo)){
+
+            $query .= "
+                AND un.nombre LIKE '%" .
+                $conn->real_escape_string($universo) .
+                "%'
+            ";
         }
-    
-        $query .= " GROUP BY p.id";
-        $query .= " ORDER BY " . $conn->real_escape_string($orden);
-        
+
+        $columnasPermitidas = [
+            'p.nombre',
+            'ct.nombre',
+            'rr.nombre',
+            'un.nombre',
+            'p.id'
+        ];
+
+        $formasPermitidas = [
+            'ASC',
+            'DESC'
+        ];
+
+        $campoOrden = 'p.id';
+        $formaOrden = 'DESC';
+
+        if(
+            is_array($orden)
+            &&
+            isset($orden['orden'])
+            &&
+            in_array(
+                $orden['orden'],
+                $columnasPermitidas
+            )
+        ){
+            $campoOrden = $orden['orden'];
+        }
+
+        if(
+            is_array($orden)
+            &&
+            isset($orden['forma'])
+            &&
+            in_array(
+                strtoupper($orden['forma']),
+                $formasPermitidas
+            )
+        ){
+            $formaOrden =
+                strtoupper(
+                    $orden['forma']
+                );
+        }
+
+        $query .= "
+            ORDER BY
+            $campoOrden
+            $formaOrden
+        ";
+
         $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+
+        $ids = [];
+
+        while($row = $result->fetch_assoc()){
+
+            $ids[] = $row['id'];
         }
-        
-        return $datas;
+
+        return $ids;
     }
 
-    function contarIds($conn, $nombre, $idCategoria, $idRareza, $idUniverso) {
-        $query = "
-            SELECT 
-                COUNT(DISTINCT p.id) AS total
-            FROM productos p
-            JOIN categorias ct ON p.idCategoria = ct.id
-            LEFT JOIN rarezas rr ON p.idRareza = rr.id AND p.idRareza != 0
-            LEFT JOIN universos un ON p.idUniverso = un.id AND p.idUniverso != 0
-            WHERE p.estado = 1";
-        
-        if ($nombre !== null && $nombre !== '') {
-            $query .= " AND p.nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
-        }
-        if ($idCategoria !== null && $idCategoria !== '') {
-            $query .= " AND ct.nombre LIKE '%" . $conn->real_escape_string($idCategoria) . "%'";
-        }
-        if ($idRareza !== null && $idRareza !== '') {
-            $query .= " AND rr.nombre LIKE '%" . $conn->real_escape_string($idRareza) . "%'";
-        }
-        if ($idUniverso !== null && $idUniverso !== '') {
-            $query .= " AND un.nombre LIKE '%" . $conn->real_escape_string($idUniverso) . "%'";
-        }
+    function buscarPorId($conn, $id){
 
-        $query .= " GROUP BY p.id";
-        
-        $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
-        }
-        
-        return $datas;
-    }
-
-    function buscarPorId($conn, $id) {
         $stmt = $conn->prepare("
-            SELECT 
-                p.id,
-                p.nombre,
-                p.idCategoria,
-                p.idColores,
-                p.idFestividad,
-                p.idRareza,
-                p.idUniverso,
-                p.idAccesorio,
-                p.idDescuentos,
-                p.precio,
-                p.descripcion,
-                p.pedidos,
-                p.vendidos,
-                p.altura,
-                p.peso,
-                p.especial,
-                p.estado,
-                p.visible,
-                p.calificaciones_estrellas,
-                p.fecha_registro, 
-                p.tiempo,
-                p.comida,
-                p.existencia,
-                p.fecha_destacado,
-                ct.nombre AS categoria, 
-                fs.nombre AS festividad, 
-                rr.nombre AS rareza,
-                un.nombre AS universo,
-                ac.nombre AS accesorio, 
-                GROUP_CONCAT(CONCAT(cl.id, ',', cl.codigo_color_principal, ',', cl.codigo_color_secundario, ',', cl.codigo_color_terciario, ',', cl.color_familia) SEPARATOR '|') AS colores
+
+            SELECT
+
+            p.id,
+            p.nombre,
+            p.idCategoria,
+            p.idColores,
+            p.idFestividad,
+            p.idRareza,
+            p.idUniverso,
+            p.idAccesorio,
+            p.idDescuentos,
+            p.precio,
+            p.descripcion,
+            p.pedidos,
+            p.vendidos,
+            p.altura,
+            p.peso,
+            p.especial,
+            p.estado,
+            p.visible,
+            ROUND(
+                AVG(c.estrellas),
+                1
+            ) AS calificacion_estrellas,
+            p.fecha_registro,
+            p.tiempo,
+            p.comida,
+            p.existencia,
+            p.fecha_destacado,
+
+            ct.nombre AS categoria,
+
+            fs.nombre AS festividad,
+
+            rr.nombre AS rareza,
+
+            un.nombre AS universo,
+
+            ac.nombre AS accesorio,
+
+            GROUP_CONCAT(
+                CONCAT(
+                    cl.id, ',',
+                    cl.codigo_color_principal, ',',
+                    cl.codigo_color_secundario, ',',
+                    cl.codigo_color_terciario, ',',
+                    cl.color_familia
+                )
+                SEPARATOR '|'
+            ) AS colores
+
             FROM productos p
-            JOIN categorias ct ON p.idCategoria = ct.id
-            LEFT JOIN rarezas rr ON p.idRareza = rr.id AND p.idRareza != 0
-            LEFT JOIN universos un ON p.idUniverso = un.id AND p.idUniverso != 0
-            LEFT JOIN accesorios ac ON p.idAccesorio = ac.id AND p.idAccesorio != 0
-            LEFT JOIN festividades fs ON p.idFestividad = fs.id AND p.idFestividad != 0
-            LEFT JOIN colores cl ON FIND_IN_SET(cl.id, p.idColores)
-            WHERE p.estado = 1 AND p.id = ?
+
+            JOIN categorias ct
+            ON p.idCategoria = ct.id
+
+            LEFT JOIN rarezas rr
+            ON p.idRareza = rr.id
+            AND p.idRareza != 0
+
+            LEFT JOIN universos un
+            ON p.idUniverso = un.id
+            AND p.idUniverso != 0
+
+            LEFT JOIN accesorios ac
+            ON p.idAccesorio = ac.id
+            AND p.idAccesorio != 0
+
+            LEFT JOIN festividades fs
+            ON p.idFestividad = fs.id
+            AND p.idFestividad != 0
+
+            LEFT JOIN colores cl
+            ON FIND_IN_SET(cl.id, p.idColores)
+
+            LEFT JOIN comentarios c
+            ON c.idProducto = p.id
+            AND c.estado = 1
+
+            WHERE
+                p.estado = 1
+                AND p.id = ?
+
+            GROUP BY p.id
+
         ");
 
-        $stmt->bind_param("i", $id);
+        $stmt->bind_param(
+            "i",
+            $id
+        );
+
         $stmt->execute();
-    
+
         $result = $stmt->get_result();
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+
+        if($result->num_rows <= 0){
+
+            return null;
         }
-        
-        return $datas;
+
+        $producto =
+            $result->fetch_assoc();
+
+        return $producto;
     }
 
     function buscarCartaProducto($conn, $id) {
@@ -687,7 +794,10 @@
                 p.especial, 
                 p.existencia, 
                 p.comida, 
-                p. calificaciones_estrellas,
+                ROUND(
+                    AVG(c.estrellas),
+                    1
+                ) AS calificacion_estrellas,
                 ct.nombre AS categoria, 
                 fs.nombre AS festividad, 
                 fs.fecha_inicial AS festividad_inicio, 
@@ -741,6 +851,8 @@
                 descuentos ds ON FIND_IN_SET(ds.id, p.idDescuentos) AND p.idDescuentos != '' || NULL
             LEFT JOIN 
                 colores cl ON FIND_IN_SET(cl.id, p.idColores)
+            LEFT JOIN 
+                comentarios c ON c.idProducto = p.id AND c.estado = 1
             WHERE 
                 p.id = ?
             GROUP BY 

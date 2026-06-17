@@ -18,6 +18,13 @@ function guardarUsuario() {
             [nombre, primerApellido, provincia, canton, distrito, nombreUsuario, contrasennia, rol],
             ['el nombre', 'el primer apellido', 'la provincia', 'el cantón', 'el distrito', 'el nombre de usuario', 'la contraseña', 'el rol']
         )) {
+            if(contrasennia.length < 8){
+                abrirModal('modalValidacion');
+                $('#modalValidacion-body p').text(
+                    'La contraseña debe tener al menos 8 caracteres.'
+                );
+                return;
+            }
             return;
         }
     } else {
@@ -29,11 +36,9 @@ function guardarUsuario() {
         }
     }
     
-    alertLoadingBlocked(
-        'Guardando usuario',
-        'Se está guardando el usuario, espere un momento...',
-        'warning',
-    );
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", 'Guardando...', 'Espere un momento...', 'bi bi-wifi', false);
+    
     guardarDatos();
 
     function guardarDatos() {
@@ -66,84 +71,13 @@ function guardarUsuario() {
             data: data,
             success: function(response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             },
             error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al guardar el usuario.',
-                    'error',
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", '!Error¡', 'Hubo un problema al agregar el usuario.', "bi bi-x-circle", true);
             }
         });
     }
-}
-
-function obtenerUsuarios(nombre) {
-    $.ajax({
-        url: backend + urlUser,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: nombre
-        },
-        success: function(response) {
-            try {
-                const usuarios = typeof response === 'string' ? JSON.parse(response) : response;
-                mostrarUsuarios(usuarios);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function() {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
-function mostrarUsuarios(usuarios) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-
-    usuarios = ordenar(usuarios, order);
-
-    usuarios.forEach((usuario, index) => {
-        const json = encodeURIComponent(JSON.stringify(usuario));
-        const html = `
-            <tr>
-                <td class="align-middle">${startIndex + index + 1}</td>
-                <td class="align-middle">${usuario.nombre}</td>
-                <td class="align-middle">${usuario.nombre_usuario}</td>
-                <td class="align-middle">${usuario.rol}</td>
-                <td class="text-center" style="width: 1px;">
-                    <div class="d-flex gap-2 justify-content-start">
-                        <button onclick="location.href='addUser.php?id=${usuario.id}&accion=actualizar'" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Editar<i class="bi bi-pencil-square ms-2"></i>
-                        </button>
-                        <button onclick="eliminarUsuario(${usuario.id}, '${usuario.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesUsuario('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        container.append(html);
-    });
 }
 
 function buscarUsuario(id) {
@@ -180,50 +114,19 @@ function mostrarUsuario(usuario) {
         $('#Distrito').val(usuario.distrito);
         $('#Telefono').val(usuario.telefono);
         $('#Rol').val(usuario.rol);
+        $('#Contrasennia').prop('disabled', true);
     }
 }
 
 function eliminarUsuario(id, nombre, eliminar) {
-    if (!eliminar) {
-        dialogAlert(
-            '¿Estás seguro?',
-            '¿De verdad quiere eliminar a "' + nombre + '" de los usuarios? ¡Si lo haces no se podrá revertir!',
-            'warning',
-            'Si, estoy seguro',
-            'No',
-            function() {
-                eliminarUsuario(id, '', true);
-            }
-        );
-    } else {
-        $.ajax({
-            url: backend + urlUser,
-            type: 'POST',
-            data: {
-                accion: 'eliminar',
-                id: id
-            },
-            success: function(response) {
-                aplicarFiltrosUsuario()
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
-            },
-            error: function() {
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
-            }
-        });
-    }
+    
+    eliminarRegistro({
+        id,
+        nombre,
+        entidad: ['usuario', 'usuarios' , 'el usuario'],
+        url: backend + urlUser,
+        callback: aplicarFiltrosUsuario
+    });
 }
 
 function aplicarFiltrosUsuario() {
@@ -232,210 +135,326 @@ function aplicarFiltrosUsuario() {
     seleccionarUsuarios(nombre, rol);
 }
 
-function verDetallesUsuario(json) {
-    const usuario = JSON.parse(decodeURIComponent(json));
-    alertDetails(
-        'Detalles del usuario ' + usuario.nombre,
-        usuario,
-        ['nombre', 'nombre_usuario', 'rol', 'fecha_registro'],
-        'info',
-        'Cerrar'
-    );
+let tokenCargaUsuarios = 0;
+
+async function seleccionarUsuarios(
+    nombre = '',
+    rol = ''
+){
+
+    const token = ++tokenCargaUsuarios;
+
+    const container =
+        $('#list-container');
+
+    container.empty();
+
+    try{
+
+        const response =
+            await $.ajax({
+
+                url: backend + urlUser,
+
+                type: 'POST',
+
+                dataType: 'json',
+
+                data: {
+                    accion: 'listarIdsAdmin',
+                    nombre,
+                    rol,
+
+                    orden: {
+                        orden: $('#Ordenar_por').val(),
+                        forma: $('#Ordenar_en').val()
+                    }
+                }
+
+            });
+
+        if(token !== tokenCargaUsuarios){
+            return;
+        }
+
+        const ids =
+            response || [];
+
+        mostrarTotalRegistros(
+            ids.length,
+            ['usuario','usuarios']
+        );
+
+        if(ids.length === 0){
+
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron usuarios.
+                </div>
+            `);
+
+            return;
+        }
+
+        await cargarUsuarios(
+            ids,
+            token
+        );
+
+    }
+    catch(error){
+
+        container.html(`
+            <div class="orders-empty">
+                Error al cargar usuarios.
+            </div>
+        `);
+
+    }
+
 }
 
-function seleccionarUsuarios(nombre, rol) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-    const colspan = 5;
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
+let usuarioSeleccionado = null;
+
+async function cargarUsuarios(
+    ids,
+    token
+){
+
+    $('#list-container').empty();
+
+    for(const item of ids){
+
+        renderUsuarioSkeleton(item);
+
+        if(token !== tokenCargaUsuarios){
+            return;
+        }
+
+        try{
+
+            const response =
+                await $.ajax({
+
+                    url: backend + urlUser,
+
+                    type: 'POST',
+
+                    dataType: 'json',
+
+                    data: {
+                        accion: 'buscarPorIdAdmin',
+                        id: item
+                    }
+
+                });
+
+            if(token !== tokenCargaUsuarios){
+                return;
+            }
+
+            const usuario = response;
+
+            if(!usuario){
+                continue;
+            }
+
+            $(
+                `#usuario-${usuario.id}`
+            ).replaceWith(
+                renderUsuarioCard(
+                    usuario,
+                    true
+                )
+            );
+
+        }
+        catch(error){
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+}
+
+function renderUsuarioCard(
+    usuario,
+    returnHtml = false
+){
+
+    const html = `
+
+        <div
+            class="product-admin-card"
+            id="usuario-${usuario.id}"
+        >
+
+            <div class="product-admin-header">
+
+                <div>
+
+                    <p class="product-number">
+                        Registrado el ${formatearFechaConHora(usuario.fecha_registro)}
+                    </p>
+
+                    <h5 class="product-title">
+                        ${usuario.nombre}
+                    </h5>
+
+                </div>
+
+            </div>
+
+            <div class="product-admin-body">
+
+                <div class="product-admin-image">
+
+                    <img
+                        id="img-${usuario.id}"
+                        class="product-image"
+                        src="../src/img/app/no_image.png"
+                        alt="${usuario.nombre_usuario}"
+                    >
+
+                </div>
+
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <span>Usuario:</span>
+                            <strong>
+                                ${usuario.nombre_usuario}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Rol:</span>
+                            <strong>
+                                ${usuario.rol}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="order-actions">
+
+                    <a
+                        href="
+                            addUser.php
+                            ?id=${usuario.id}
+                            &accion=actualizar
+                        "
+                        class="
+                            store-filter-btn
+                            px-4
+                            justify-content-center
+                            text-decoration-none
+                        "
+                    >
+                        <i class="bi bi-pencil-square"></i>
+                        Editar
+                    </a>
+
+                    <button
+                        class="
+                            store-filter-btn
+                            px-4
+                            justify-content-center
+                            text-decoration-none
+                        "
+                        onclick="
+                            eliminarUsuario(
+                                ${usuario.id},
+                                '${usuario.nombre}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-trash3-fill"></i>
+                        Eliminar
+                    </button>
+
+                    <button
+                        class="
+                            store-filter-btn
+                            px-4
+                            justify-content-center
+                            text-decoration-none
+                        "
+                        onclick="
+                            abrirModalCambiarContrasenniaAdmin(
+                                '${usuario.id}',
+                            )
+                        "
+                    >
+                        <i class="bi bi-lock-fill"></i>
+                        Cambiar contraseña
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    if(returnHtml){
+        return html;
+    }
+
+    $('#list-container')
+        .append(html);
+
+}
+
+function renderUsuarioSkeleton(
+    id
+){
+    $('#list-container').append(`
+
+        <div
+            class="product-admin-card product-skeleton"
+            id="usuario-${id}"
+        >
+
+            <div class="product-admin-header">
+                <div>
+                    <div class="skeleton-line skeleton-subtitle"></div>
+                    <div class="skeleton-line skeleton-title"></div>
+                </div>
+            </div>
+
+            <div class="product-admin-body">
+                <div class="product-admin-image skeleton-box">
+                </div>
+
+                <div class="product-info">
+                    <div class="product-info-grid">
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-admin-actions">
+                    <div class="skeleton-button"></div>
+                    <div class="skeleton-button"></div>
+                    <div class="skeleton-button"></div>
+                </div>
+            </div>
+
+        </div>
+
     `);
 
-    cancelarCargaSecuencial = true;
-
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
-
-    cancelarCargaSecuencial = false;
-
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlUser,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            nombre: nombre,
-            rol, rol,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const usuarios = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
-
-                if (usuarios.length > 0) {
-                    procesarUsuariosSecuencialmente(usuarios, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron usuarios.</td></tr>`);
-                }
-                
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
-        }
-    });
-}
-
-function procesarUsuariosSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
-
-    const usuario = lista[index];
-    const container = $('#data-container');
-
-    try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" id="nombre-${usuario.id}"></td>
-                <td class="align-middle" id="usuario-${usuario.id}"></td>
-                <td class="align-middle" id="rol-${usuario.id}"></td>
-                <td class="align-middle text-center" id="opciones-${usuario.id}" style="width: 1px;"></td>
-            </tr>
-        `;
-        container.append(html);
-    } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Este usuario no se pudo cargar.</td></tr>`);
-    }
-
-    cargarUsuarioSeleccionado(usuario.id, function () {
-        procesarUsuariosSecuencialmente(lista, index + 1, colspan);
-    });
-}
-
-function cargarUsuarioSeleccionado(id, callback) {
-    const tdNombre = $(`#nombre-${id}`);
-    const tdUsuario = $(`#usuario-${id}`);
-    const tdRol = $(`#rol-${id}`);
-    const tdOpciones = $(`#opciones-${id}`);
-
-    const liClasses = "list-group-item border-0 bg-transparent px-0 py-0";
-
-    $.ajax({
-        url: backend + urlUser,
-        type: 'POST',
-        data: {
-            accion: 'buscarPorId',
-            id: id
-        },
-        success: function (response) {
-            try {
-                const usuario = typeof response.datos[0] === 'string' ? JSON.parse(response.datos[0]) : response.datos[0];
-                const json = encodeURIComponent(JSON.stringify(usuario));
-                
-                tdNombre.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${usuario.nombre || 'Sin nombre'}</li>
-                    </ul>
-                `);
-                tdUsuario.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${usuario.nombre_usuario || 'Sin usuario'}</li>
-                    </ul>
-                `);
-                tdRol.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${usuario.rol || 'Sin rol'}</li>
-                    </ul>
-                `);
-                tdOpciones.append(`
-                    <div class="d-flex gap-2 justify-content-start">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center" type="button" id="dropdownMenuButton${usuario.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                Editar<i class="bi bi-pencil-square ms-2"></i>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${usuario.id}">
-                                <li><a class="dropdown-item" href="addUser.php?id=${usuario.id}&accion=actualizar">En esta pestaña</a></li>
-                                <li><a class="dropdown-item" href="addUser.php?id=${usuario.id}&accion=actualizar" target="_blank">En otra pestaña</a></li>
-                            </ul>
-                        </div>
-                        <button onclick="eliminarUsuario(${usuario.id}, '${usuario.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesUsuario('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                `);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-
-            if (typeof callback === 'function') callback();
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-            if (typeof callback === 'function') callback();
-        }
-    });
-}
-
-function actualizarPaginacionUsuario(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
-
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaUsuario(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
-
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaUsuario(${i})">${i}</a>
-                </li>
-            `);
-        }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaUsuario(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
-    }
-}
-
-function cambiarPaginaUsuario(pagina) {
-    currentPage = pagina;
-    seleccionarUsuarios('');
 }
 
 function limpiarFiltrosUsuario() {
@@ -463,25 +482,27 @@ function registrarUsuario() {
         return;
     }
 
-    if (contrasennia !== contrasennia2) {
-        alert(
-            '¡Las contraseñas digitadas no son iguales!',
-            'Vuelve a intentarlo',
-            'error',
-            'Cerrar'
+    if(contrasennia.length < 8){
+        abrirModal('modalValidacion');
+        $('#modalValidacion-body p').text(
+            'La contraseña debe tener al menos 8 caracteres.'
         );
         return;
     }
 
-    alertLoadingBlocked(
-        'Registrando usuario',
-        'Se está resitrando el usuario, espere un momento...',
-        'warning',
-    );
+    if (contrasennia !== contrasennia2) {
+        abrirModal('modalValidacion');
+        cambiarMensajeModal("#modalValidacion", "¡Error!", '¡Las contraseñas digitadas no son iguales!', "bi bi-x-circle", true);
+        return;
+    }
+    
     
     guardarDatos();
 
     function guardarDatos() {
+        abrirModal('modalGuardando');
+        cambiarMensajeModal("#modalGuardando", 'Guardando...', 'Espere un momento...', 'bi bi-wifi', false);
+
         const accion = 'insertar';
         const data = {
             accion: accion,
@@ -504,21 +525,185 @@ function registrarUsuario() {
             data: data,
             success: function(response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             },
             error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al agregar el usuario.',
-                    'error',
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", '!Error¡', 'Hubo un problema al agregar el usuario.', "bi bi-x-circle", true);
             }
         });
     }
+}
+
+function abrirModalCambiarContrasennia(){
+
+    $('#ContrasenniaActual').val('');
+    $('#ContrasenniaNueva').val('');
+    $('#ContrasenniaConfirmar').val('');
+
+    abrirModal('modalCambiarContrasennia');
+}
+
+function cambiarContrasenniaUsuario(){
+
+    const id = $('#Id').val();
+
+    const actual = $('#ContrasenniaActual').val();
+    const nueva = $('#ContrasenniaNueva').val();
+    const confirmar = $('#ContrasenniaConfirmar').val();
+
+    if(!actual || !nueva || !confirmar){
+
+        abrirModal('modalValidacion');
+
+        $('#modalValidacion-body p').text(
+            'Debe completar todos los campos.'
+        );
+
+        return;
+    }
+
+    if(nueva !== confirmar){
+
+        abrirModal('modalValidacion');
+
+        $('#modalValidacion-body p').text(
+            'Las contraseñas no coinciden.'
+        );
+
+        return;
+    }
+
+    if(nueva.length < 8){
+
+        abrirModal('modalValidacion');
+
+        $('#modalValidacion-body p').text(
+            'La nueva contraseña debe tener al menos 8 caracteres.'
+        );
+
+        return;
+    }
+
+    cerrarModal('modalCambiarContrasennia');
+
+    abrirModal('modalGuardando');
+
+    $.ajax({
+
+        url: backend + urlUser,
+
+        type: 'POST',
+
+        data: {
+
+            accion: 'cambiarContrasennia',
+
+            id: id,
+
+            contrasenniaActual: actual,
+
+            contrasenniaNueva: nueva
+        },
+
+        success: function(response){
+
+            const data =
+                typeof response === 'string'
+                ? JSON.parse(response)
+                : response;
+
+            cambiarMensajeModal(
+                '#modalGuardando',
+                data.title,
+                data.text,
+                data.icon,
+                true
+            );
+        },
+
+        error: function(){
+
+            cambiarMensajeModal(
+                '#modalGuardando',
+                'Error',
+                'No fue posible actualizar la contraseña.',
+                'bi bi-x-circle',
+                true
+            );
+        }
+    });
+}
+
+function abrirModalCambiarContrasenniaAdmin(id) {
+    usuarioSeleccionado = id;
+    abrirModal('modalCambiarContrasenniaAdmin');
+}
+
+function cambiarContrasenniaAdmin(){
+    if(!usuarioSeleccionado){
+        return;
+    }
+
+    const nueva = $('#ContrasenniaNuevaAdmin').val();
+    const confirmar = $('#ContrasenniaConfirmarAdmin').val();
+
+    if(!nueva || !confirmar){
+        abrirModal('modalValidacion');
+        $('#modalValidacion-body p').text(
+            'Debe completar todos los campos.'
+        );
+        return;
+    }
+
+    if(nueva !== confirmar){
+        abrirModal('modalValidacion');
+        $('#modalValidacion-body p').text(
+            'Las contraseñas no coinciden.'
+        );
+        return;
+    }
+
+    if(nueva.length < 8){
+        abrirModal('modalValidacion');
+        $('#modalValidacion-body p').text(
+            'La nueva contraseña debe tener al menos 8 caracteres.'
+        );
+        return;
+    }
+
+    abrirModal('modalGuardando');
+
+    $.ajax({
+        url: backend + urlUser,
+        type: 'POST',
+        data: {
+            accion: 'cambiarContrasenniaAdmin',
+            id: usuarioSeleccionado,
+            contrasenniaNueva: nueva
+        },
+
+        success: function(response){
+            const data =
+                typeof response === 'string'
+                ? JSON.parse(response)
+                : response;
+            cambiarMensajeModal(
+                '#modalGuardando',
+                data.title,
+                data.text,
+                data.icon,
+                true
+            );
+        },
+
+        error: function(){
+            cambiarMensajeModal(
+                '#modalGuardando',
+                'Error',
+                'No fue posible actualizar la contraseña.',
+                'bi bi-x-circle',
+                true
+            );
+        }
+    });
 }

@@ -25,28 +25,20 @@
             'btnHelp' => true,
             'inputInfo' => "Aquí se escribe el nombre del descuento.",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-4',
         ],
         [
             'label' => 'Descuento',
             'id' => 'Descuento',
             'icon' => 'bi bi-percent',
-            'input' => 'long',
+            'input' => 'number',
             'symbol' => '%',
             'onchange' => '',
             'btnHelp' => true,
             'inputInfo' => "Aquí se escribe el descuento de la oferta.",
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-4',
         ],
-        [
-            'label' => 'Descripcion',
-            'id' => 'Descripcion',
-            'icon' => 'bi bi-info-circle-fill',
-            'input' => 'textarea',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe una descripción del descuento. Esta parte no se ve en la tienda, pero te puede servir si quieres anotar el motivo por el que creaste esta oferta.",
-            'spans' => [null, null],
-        ]
     ];
     $datesInputs = [
         [
@@ -54,34 +46,9 @@
             'id' => 'StartDate',
             'icon' => 'bi bi-calendar-fill',
             'input' => 'day',
-            'onchange' => '',
             'btnHelp' => true,
-            'inputInfo' => "Aquí se selecciona la fecha en la que se inicia la oferta. En otras palabras, a partir de cuando se empieza a aplicar el descuento en la tienda.",
             'spans' => ['Obligatorio', null],
-            'options' => [
-                '1' => 'Enero',
-                '2' => 'Febrero',
-                '3' => 'Marzo',
-                '4' => 'Abril',
-                '5' => 'Mayo',
-                '6' => 'Junio', 
-                '7' => 'Julio',
-                '8' => 'Agosto',
-                '9' => 'Septiembre',
-                '10' => 'Octubre',
-                '11' => 'Noviembre',
-                '12' => 'Diciembre',
-            ],
-        ],
-        [
-            'label' => 'Fecha de finalización',
-            'id' => 'EndDate',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'day',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se selecciona la fecha en la que se termina la oferta. En otras palabras, a partir de cuando se deja de aplicar el descuento en la tienda.",
-            'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6',
             'options' => [
                 '1' => 'Enero',
                 '2' => 'Febrero',
@@ -96,13 +63,33 @@
                 '11' => 'Noviembre',
                 '12' => 'Diciembre',
             ],
+            'onchange' => "actualizarDias('StartDate')"
         ],
+
         [
-            'label' => '',
-            'id' => 'yearIndicator',
-            'icon' => '',
-            'input' => 'infoText',
-        ],
+            'label' => 'Fecha de finalización',
+            'id' => 'EndDate',
+            'icon' => 'bi bi-calendar-fill',
+            'input' => 'day',
+            'btnHelp' => true,
+            'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6',
+                'options' => [
+                '1' => 'Enero',
+                '2' => 'Febrero',
+                '3' => 'Marzo',
+                '4' => 'Abril',
+                '5' => 'Mayo',
+                '6' => 'Junio',
+                '7' => 'Julio',
+                '8' => 'Agosto',
+                '9' => 'Septiembre',
+                '10' => 'Octubre',
+                '11' => 'Noviembre',
+                '12' => 'Diciembre',
+            ],
+            'onchange' => "actualizarDias('EndDate')"
+        ]
     ];
     $menuTable = [
         'url' => 'discounts.php',
@@ -112,47 +99,72 @@
     $type = 'descuento';
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Agregar descuento</h4>
-            <i class="bi bi-file-earmark-plus fs-4 d-flex align-self-center"></i>
+<div class="w-100">
+
+    <div class="overflow-hidden my-2">
+
+        <div class="card-body admin-subheader-card-bg">
+
+            <div class="d-flex align-items-center gap-2">
+
+                <p class="card-title p-0 m-0">
+                    Información básica
+                </p>
+
+            </div>
+
         </div>
+
+        <div class="row px-3 py-1">
+
+            <?php
+            foreach($informationInputs as $input){
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+
+        </div>
+
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Información</p>
-                </div>
+
+    <div class="overflow-hidden my-2">
+
+        <div class="card-body admin-subheader-card-bg">
+
+            <div class="d-flex align-items-center gap-2">
+
+                <p class="card-title p-0 m-0">
+                    Rango de fechas
+                </p>
+
             </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($informationInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
+
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Rango de fechas</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($datesInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
+
+        <div class="row px-3 py-1">
+
+            <?php
+            foreach($datesInputs as $input){
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+
         </div>
-        <div class="container-fluid mt-3 mb-2">
-            <?php include '../src/components/forms/dialogButtons.php'; ?>
-        </div>
-        <input type="hidden" id="Id" value="<?php echo isset($discountId) ? $discountId : ''; ?>"> 
+
     </div>
+
+    <div class="container-fluid mb-3">
+
+        <?php include '../src/components/forms/dialogButtons.php'; ?>
+
+    </div>
+
+    <input
+        type="hidden"
+        id="Id"
+        value="<?php echo $discountId; ?>"
+    >
+
 </div>
 
 <?php
@@ -166,4 +178,47 @@
             buscarDescuento(<?php echo $discountId; ?>);
         }
     });
+
+    function actualizarDias(id){
+
+        const mes =
+            parseInt(
+                $('#Month' + id).val()
+            );
+
+        const diasSelect =
+            $('#Day' + id);
+
+        const diaActual =
+            diasSelect.val();
+
+        let dias = 31;
+
+        if([4,6,9,11].includes(mes)){
+            dias = 30;
+        }
+
+        if(mes === 2){
+            dias = 29;
+        }
+
+        diasSelect.empty();
+
+        diasSelect.append(
+            '<option value="">Día</option>'
+        );
+
+        for(let i = 1; i <= dias; i++){
+
+            diasSelect.append(`
+                <option value="${i}">
+                    ${i}
+                </option>
+            `);
+        }
+
+        if(diaActual <= dias){
+            diasSelect.val(diaActual);
+        }
+    }
 </script>

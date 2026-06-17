@@ -12,34 +12,73 @@
     $showSidebar = true;
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Elementos configurables</h4>
-            <i class="bi bi-search fs-4 d-flex align-self-center"></i>
-        </div>
-    </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Modo mantenimiento</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <div class="align-items-center py-2">
-                    <p class="mb-1">
-                        El modo mantenimiento está actualmente: 
-                        <span id="estado-mantenimiento" class="text-danger">Cargando...</span>
-                    </p>
-                    <p class="mb-1 text-secondary">Este modo hace que si está activo, ningún usuario (excepto usuarios con rol administrador) pueda acceder a la aplicación.</p>
-                    <button 
-                        onclick="cambiarModoManteniento()" 
-                        type="button" 
-                        class="btn-details text-white border-0 rounded-2 px-2 py-1 mt-3 d-flex align-items-center"
-                    >
-                        Cambiar
-                    </button>
+<div class="w-100 overflow-hidden p-0">
+    <div class="px-0 pb-2">
+        <div class="overflow-hidden p-0">
+            <div
+                id="list-container"
+                class="products-admin-grid p-0"
+            >
+
+                <div class="product-admin-card">
+
+                    <div class="product-admin-header">
+                        <div>
+                            <p class="product-number">
+                                Configuración rápida
+                            </p>
+
+                            <h5 class="product-title">
+                                Modo mantenimiento
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="product-admin-body">
+
+                        <div class="product-admin-image">
+                            <img
+                                id="img"
+                                class="product-image"
+                                src="../src/img/app/no_image.png"
+                                alt="${usuario.nombre_usuario}"
+                            >
+                        </div>
+
+                        <div class="product-info">
+                            <div class="product-info-grid">
+
+                                <div>
+                                    <span>El modo mantenimiento está actualmente:</span>
+                                    <strong>
+                                        <span id="estado-mantenimiento" class="text-danger">Cargando...</span>
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span class="text-secondary">Este modo hace que si está activo, ningún usuario (excepto usuarios con rol administrador) pueda acceder a la aplicación.</span>
+                                </div>
+                            
+                            </div>
+                        </div>
+
+                        <div class="order-actions">
+                            <button
+                                class="
+                                    store-filter-btn
+                                    px-4
+                                    justify-content-center
+                                    text-decoration-none
+                                "
+                                onclick="cambiarModoManteniento()"
+                            >
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Cambiar
+                            </button>
+                        </div>
+
+                    </div>
+            
                 </div>
             </div>
         </div>

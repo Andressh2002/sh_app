@@ -24,31 +24,50 @@ function obtenerListaFiltros(idElement, tabla, filtro, categoria) {
                         return a.nombre.localeCompare(b.nombre);
                     });
 
-                    if (tabla == 'festividades') {
-                        selectElement.append(
-                            $(`
-                                <li class="list-group-item py-1 filterbar-input-bg filter">
-                                    <div class="form-check pb-0">
-                                        <input class="form-check-input filter-group-checkbox" type="checkbox" value="0" id="check${tabla.toString()}-1" checked>
-                                        <label class="form-check-label w-100" for="check${tabla.toString()}-1">
-                                            Ninguna
-                                        </label>
-                                    </div>
-                                </li>
-                            `)
-                        );
-                    }
+                    //if (tabla == 'festividades') {
+                    //    selectElement.append(
+                    //        $(`
+                    //            <li class="list-group-item py-1 filterbar-input-bg filter">
+                    //                <div class="form-check pb-0">
+                    //                    <input class="form-check-input filter-group-checkbox" type="checkbox" value="0" id="check${tabla.toString()}-1" checked>
+                    //                    <label class="form-check-label w-100" for="check${tabla.toString()}-1">
+                    //                        Ninguna
+                    //                    </label>
+                    //                </div>
+                    //            </li>
+                    //        `)
+                    //    );
+                    //}
 
                     objets.forEach(function (item) {
                         selectElement.append(
                             $(`
-                                <li class="list-group-item py-1 filterbar-input-bg">
-                                    <div class="form-check pb-0 my-0">
-                                        <input class="form-check-input filter-group-checkbox" type="checkbox" value="${item.id}" id="check${tabla.toString()}${item.id}" ${filtro && tabla == 'categorias' ? (item.nombre == filtro || tabla == 'festividades' ? 'checked' : '') : 'checked'}>
-                                        <label class="form-check-label w-100" for="check${tabla.toString()}${item.id}">
+                                <li class="filter-checkbox-item">
+
+                                    <div class="form-check m-0">
+
+                                        <input
+                                            class="form-check-input filter-group-checkbox"
+                                            type="checkbox"
+                                            value="${item.id}"
+                                            id="check${tabla.toString()}${item.id}"
+                                            ${filtro && tabla == 'categorias'
+                                                ? (item.nombre == filtro || tabla == 'festividades'
+                                                    ? 'checked'
+                                                    : '')
+                                                : 'checked'
+                                            }
+                                        >
+
+                                        <label
+                                            class="form-check-label"
+                                            for="check${tabla.toString()}${item.id}"
+                                        >
                                             ${item.nombre}
                                         </label>
+
                                     </div>
+
                                 </li>
                             `)
                         );

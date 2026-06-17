@@ -1,23 +1,23 @@
 <?php
     include '../security/encrypt.php';
 
-    function insertar($conn, $idProducto, $idCliente, $mensaje) {
+    function insertar($conn, $idProducto, $idCliente, $mensaje, $estrellas) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
         $mensaje = encryptData($mensaje);
 
         try {
-            $query = "INSERT INTO comentarios (idProducto, idCliente, mensaje, fecha_registro, estado) 
-                      VALUES (?, ?, ?, ?, 1)";
+            $query = "INSERT INTO comentarios (idProducto, idCliente, mensaje, estrellas, fecha_registro, estado) 
+                      VALUES (?, ?, ?, ?, ?, 1)";
             
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("ssss", $idProducto, $idCliente, $mensaje, $fecha_registro);
+            $stmt->bind_param("sssss", $idProducto, $idCliente, $mensaje, $estrellas, $fecha_registro);
     
             if ($stmt->execute()) {
                 return [
                     'title' => "¡Guardado!",
                     'text' => "El comentario se ha guardado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -25,7 +25,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -44,22 +44,23 @@
         }
     }
 
-    function actualizar($conn, $id, $idProducto, $idCliente, $mensaje) {
+    function actualizar($conn, $id, $idProducto, $idCliente, $mensaje, $estrellas) {
         try {
             $queryUpdate = "UPDATE comentarios SET 
                             idProducto = ?, 
                             idCliente = ?, 
-                            mensaje = ? 
+                            mensaje = ?, 
+                            estrellas = ? 
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("sssi", $idProducto, $idCliente, $mensaje, $id);
+            $stmt->bind_param("ssssi", $idProducto, $idCliente, $mensaje, $estrellas, $id);
     
             if ($stmt->execute()) {
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "El comentario se ha actualizado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -67,7 +68,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el comentario: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -131,124 +132,196 @@
         
         return $comentarios;
     }
-    
-    function contar($conn, $producto) {
-        $query = "SELECT COUNT(*) as total FROM comentarios c
-              JOIN productos p ON c.idProducto = p.id
-              WHERE c.estado = 1";
-        
-        if ($producto !== null && $producto !== '') {
-            $query .= " AND p.nombre LIKE '%" . $conn->real_escape_string($producto) . "%'";
-        }
-    
-        $result = $conn->query($query);
-        $row = $result->fetch_assoc();
-        
-        return $row['total'];
-    }
 
-    function contarPorIdProducto($conn, $idProducto) {
-        $query = "SELECT COUNT(*) as total FROM comentarios WHERE 1=1 AND estado=1";
+    function listarIds(
+        $conn,
+        $nombre,
+        $orden
+    ){
 
-        if ($idProducto !== null && $idProducto !== '') {
-            $query .= " AND idProducto = " . $conn->real_escape_string($idProducto);
-        }
-    
-        $result = $conn->query($query);
-        $row = $result->fetch_assoc();
-        
-        return $row['total'];
-    }
-
-    function contarTodos($conn) {
-        $query = "SELECT COUNT(*) as total FROM comentarios WHERE estado=1";
-    
-        if ($result = $conn->query($query)) {
-            if ($row = $result->fetch_assoc()) {
-                return $row['total'];
-            }
-        }
-
-        return 0;
-    }
-
-    function listarIds($conn, $nombre, $orden) {
         $query = "
-            SELECT c.id
+
+            SELECT
+                c.id
+
             FROM comentarios c
-            JOIN productos p ON c.idProducto = p.id
-            WHERE c.estado = 1";
-        
-        if ($nombre !== null && $nombre !== '') {
-            $query .= " AND p.nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
+
+            JOIN productos p
+            ON c.idProducto = p.id
+
+            WHERE c.estado = 1
+
+        ";
+
+        if(!empty($nombre)){
+
+            $query .= "
+
+                AND p.nombre LIKE '%" .
+                $conn->real_escape_string(
+                    $nombre
+                ) .
+                "%'
+
+            ";
         }
-    
-        $query .= " GROUP BY c.id";
-        if ($conn->real_escape_string($orden) == "pe.id") {
-            $query .= " ORDER BY " . $conn->real_escape_string($orden) . " DESC";
-        } else {
-            $query .= " ORDER BY " . $conn->real_escape_string($orden);
+
+        $columnasPermitidas = [
+
+            'c.id',
+            'c.fecha_registro',
+            'p.nombre'
+
+        ];
+
+        $formasPermitidas = [
+
+            'ASC',
+            'DESC'
+
+        ];
+
+        $campoOrden =
+            'c.id';
+
+        $formaOrden =
+            'DESC';
+
+        if(
+
+            is_array($orden)
+            &&
+            isset($orden['orden'])
+            &&
+            in_array(
+                $orden['orden'],
+                $columnasPermitidas
+            )
+
+        ){
+
+            $campoOrden =
+                $orden['orden'];
+
         }
-        
-        $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
+
+        if(
+
+            is_array($orden)
+            &&
+            isset($orden['forma'])
+            &&
+            in_array(
+                strtoupper(
+                    $orden['forma']
+                ),
+                $formasPermitidas
+            )
+
+        ){
+
+            $formaOrden =
+                strtoupper(
+                    $orden['forma']
+                );
+
         }
-        
-        return $datas;
+
+        $query .= "
+
+            ORDER BY
+
+            $campoOrden
+
+            $formaOrden
+
+        ";
+
+        $result =
+            $conn->query(
+                $query
+            );
+
+        $ids = [];
+
+        while(
+
+            $row =
+            $result->fetch_assoc()
+
+        ){
+
+            $ids[] =
+                $row['id'];
+
+        }
+
+        return $ids;
     }
 
-    function contarIds($conn, $nombre) {
-        $query = "
-            SELECT 
-                COUNT(DISTINCT c.id) AS total
-            FROM comentarios c
-            JOIN productos p ON c.idProducto = p.id
-            WHERE c.estado = 1";
-        
-            if ($nombre !== null && $nombre !== '') {
-                $query .= " AND p.nombre LIKE '%" . $conn->real_escape_string($nombre) . "%'";
-            }
+    function buscarPorId(
+        $conn,
+        $id
+    ){
 
-        $query .= " GROUP BY c.id";
-        
-        $result = $conn->query($query);
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $datas[] = $row;
-            }
-        }
-        
-        return $datas;
-    }
+        $stmt =
+            $conn->prepare("
 
-    function buscarPorId($conn, $id) {
-        $stmt = $conn->prepare("
-            SELECT c.*, p.nombre AS producto
-            FROM comentarios c
-            JOIN productos p ON c.idProducto = p.id
-            WHERE c.estado = 1 AND c.id = ?
-        ");
+                SELECT
 
-        $stmt->bind_param("i", $id);
+                    c.id,
+                    c.idProducto,
+                    c.idCliente,
+                    c.estrellas,
+                    c.fecha_registro,
+
+                    p.nombre AS producto,
+                    u.nombre AS cliente,
+                    u.segundo_nombre,
+                    u.primer_apellido,
+                    u.segundo_apellido,
+
+                    c.mensaje
+
+                FROM comentarios c
+
+                JOIN productos p
+                ON c.idProducto = p.id
+                JOIN usuarios u
+                ON c.idCliente = u.id
+
+                WHERE
+                    c.estado = 1
+                    AND c.id = ?
+
+            ");
+
+        $stmt->bind_param(
+            "i",
+            $id
+        );
+
         $stmt->execute();
-    
-        $result = $stmt->get_result();
-        
-        $datas = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $row['mensaje'] = decryptData($row['mensaje']);
-                $datas[] = $row;
-            }
+
+        $result =
+            $stmt->get_result();
+
+        if(
+            $result->num_rows <= 0
+        ){
+
+            return null;
+
         }
-        
-        return $datas;
+
+        $comentario = $result->fetch_assoc();
+
+        $comentario['mensaje'] = decryptData($comentario['mensaje']);
+        $comentario['cliente'] = decryptData($comentario['cliente']);
+        $comentario['segundo_nombre'] = decryptData($comentario['segundo_nombre']);
+        $comentario['primer_apellido'] = decryptData($comentario['primer_apellido']);
+        $comentario['segundo_apellido'] = decryptData($comentario['segundo_apellido']);
+
+        return $comentario;
     }
 ?>

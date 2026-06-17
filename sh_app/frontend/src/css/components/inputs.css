@@ -1,0 +1,361 @@
+/* =========================================
+   CONTENEDOR GENERAL
+========================================= */
+
+#input-col-Nombre,
+[id^="input-col-"] {
+
+    margin-bottom: 1.25rem;
+}
+
+/* =========================================
+   LABEL
+========================================= */
+
+.form-label {
+
+    color: white;
+    font-weight: 700;
+    letter-spacing: .04rem;
+    text-transform: uppercase;
+    font-size: .82rem;
+
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+}
+
+/* =========================================
+   INPUT GROUP
+========================================= */
+
+.input-group {
+
+    overflow: visible;
+}
+
+/* =========================================
+   INPUTS BASE
+========================================= */
+
+.form-control,
+.form-select,
+textarea.form-control {
+
+    background: #2b2b2b !important;
+
+    border: none !important;
+
+    color: white !important;
+
+    padding: .8rem 1rem;
+
+    clip-path: polygon(
+        1% 0,
+        100% 0,
+        99% 100%,
+        0 100%
+    );
+
+    border-left: 4px solid var(--green);
+
+    box-shadow:
+        5px 5px 0 rgba(0,0,0,.25);
+
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+}
+
+/* =========================================
+   FOCUS
+========================================= */
+
+.form-control:focus,
+.form-select:focus,
+textarea.form-control:focus {
+
+    background: #3b3b3b !important;
+
+    border-left: 4px solid var(--blue);
+
+    box-shadow:
+        7px 7px 0 rgba(0,0,0,.35);
+
+    transform: translateY(-2px);
+
+    outline: none !important;
+}
+
+/* =========================================
+   PLACEHOLDER
+========================================= */
+
+.form-control::placeholder {
+
+    color: rgba(255,255,255,.45);
+}
+
+/* =========================================
+   INPUT GROUP TEXT
+========================================= */
+
+.input-group-text {
+
+    background: black !important;
+
+    border: none !important;
+
+    color: white !important;
+
+    font-weight: 700;
+
+    clip-path: polygon(
+        10% 0,
+        100% 0,
+        90% 100%,
+        0 100%
+    );
+}
+
+/* =========================================
+   BOTONES HELP / BUSCAR
+========================================= */
+
+.btn-details {
+
+    background: #444;
+
+    position: relative;
+
+    overflow: hidden;
+
+    font-weight: 700;
+
+    transition:
+        transform .25s ease,
+        color .25s ease;
+
+    clip-path: polygon(
+        10% 0,
+        100% 0,
+        90% 100%,
+        0 100%
+    );
+}
+
+.btn-details::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    left: -100%;
+
+    background: var(--green);
+
+    transition: .35s ease;
+
+    z-index: -1;
+}
+
+.btn-details:hover::after {
+
+    left: 0;
+}
+
+.btn-details:hover {
+
+    transform: translateY(-2px);
+
+    color: black !important;
+}
+
+/* =========================================
+   DELETE BTN
+========================================= */
+
+.btn-delete {
+
+    background: #b91c1c;
+
+    transition: .25s ease;
+}
+
+.btn-delete:hover {
+
+    transform: scale(1.08);
+
+    background: #ef4444;
+}
+
+/* =========================================
+   CHECKBOX
+========================================= */
+
+.form-check-input {
+
+    background: #111;
+
+    border: 2px solid var(--green);
+
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+
+    background: var(--green);
+
+    border-color: var(--green);
+}
+
+/* =========================================
+   FILE INPUT
+========================================= */
+
+.id-input-image {
+
+    cursor: pointer;
+}
+
+/* =========================================
+   IMAGE PREVIEW
+========================================= */
+
+[id$="Vista"] {
+
+    background: #111;
+
+    padding: 1rem;
+
+    box-shadow:
+        6px 6px 0 rgba(0,0,0,.3);
+
+    clip-path: polygon(
+        4% 0,
+        100% 0,
+        96% 100%,
+        0 100%
+    );
+}
+
+/* =========================================
+   HELP TEXT
+========================================= */
+
+.label-required {
+
+    color: #ef4444;
+    font-size: .75rem;
+}
+
+.label-limit {
+
+    color: #aaa;
+    font-size: .75rem;
+}
+
+/* =========================================
+   TABLAS
+========================================= */
+
+.table {
+
+    color: white;
+}
+
+.table thead {
+
+    background: black;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+
+    background: rgba(255,255,255,.03);
+}
+
+.table-hover tbody tr:hover {
+
+    background: rgba(0,255,120,.08);
+}
+
+/* =========================================
+   TABLAS
+========================================= */
+
+.rating-star {
+    color: gold;
+}
+
+/* ========================================= */
+/* ADMIN INPUTS */
+/* ========================================= */
+
+.admin-input-card {
+
+    min-width: 128px;
+}
+
+/* HELP */
+
+.admin-input-help {
+
+    color: #bdbdbd;
+
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+
+    font-size: .82rem;
+}
+
+/* REQUIRED */
+
+.admin-input-required {
+
+    color: #ff7676;
+
+    font-size: .78rem;
+
+    font-weight: 600;
+}
+
+/* LIMIT */
+
+.admin-input-limit {
+
+    color: #9f9f9f;
+
+    font-size: .76rem;
+}
+
+/* SELECT */
+
+select.filter-input {
+
+    cursor: pointer;
+}
+
+/* COLOR INPUT */
+
+input[type="color"] {
+
+    height: 52px;
+
+    border: none !important;
+
+    padding: .4rem;
+
+    background: #2b2b2b;
+}
+
+/* FILE */
+
+input[type="file"].filter-input {
+
+    padding: .6rem .8rem;
+}

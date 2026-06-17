@@ -1,0 +1,325 @@
+/* ========================================= */
+/* CONTENEDOR */
+/* ========================================= */
+
+.user-menu-container{
+
+    position: relative;
+
+    z-index: 9999;
+}
+
+/* ========================================= */
+/* BOTÓN */
+/* ========================================= */
+
+.user-menu-btn{
+
+    position: relative;
+
+    overflow: hidden;
+
+    border: none;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: .75rem;
+
+    padding:
+        clamp(.65rem,1vw,.9rem)
+        clamp(1rem,2vw,1.4rem);
+
+    background: #444;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition:
+        transform .25s ease,
+        color .35s ease;
+
+    clip-path: polygon(
+        10% 0,
+        100% 0,
+        95% 100%,
+        0 100%
+    );
+
+    z-index: 1;
+}
+
+.user-menu-btn:hover{
+
+    color: black;
+}
+
+/* ========================================= */
+/* FONDO VERDE ANIMADO */
+/* ========================================= */
+
+.user-menu-bg{
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left: -100%;
+    right: 100%;
+
+    background: var(--green);
+
+    transition: .35s ease;
+
+    z-index: -2;
+
+    clip-path: polygon(
+        10% 0,
+        100% 0,
+        95% 100%,
+        0 100%
+    );
+}
+
+.user-menu-btn:hover .user-menu-bg{
+
+    left: 0;
+    right: 0;
+}
+
+/* ========================================= */
+/* EFECTO BLANCO INFERIOR */
+/* ========================================= */
+
+.user-menu-btn::before{
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    bottom: -20%;
+
+    height: 20%;
+
+    background: white;
+
+    z-index: -1;
+
+    transition: bottom .35s ease;
+
+    clip-path: polygon(
+        0 30%,
+        100% 0,
+        100% 100%,
+        0 100%
+    );
+}
+
+.user-menu-btn:hover::before{
+
+    bottom: 0;
+}
+
+/* ========================================= */
+/* AVATAR */
+/* ========================================= */
+
+.user-menu-avatar{
+
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #222;
+
+    color: var(--green);
+
+    font-size: 1rem;
+
+    clip-path: polygon(
+        10% 0,
+        100% 0,
+        90% 100%,
+        0 100%
+    );
+}
+
+/* ========================================= */
+/* TEXTO */
+/* ========================================= */
+
+.user-menu-info{
+
+    display: flex;
+
+    align-items: center;
+}
+
+.user-menu-label{
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+/* ========================================= */
+/* QUITAR FLECHA BOOTSTRAP */
+/* ========================================= */
+
+.user-menu-btn.dropdown-toggle::after{
+
+    display: none !important;
+}
+
+/* ========================================= */
+/* DROPDOWN */
+/* ========================================= */
+
+.user-menu-dropdown{
+
+    margin-top: 12px !important;
+
+    min-width: 260px;
+
+    padding: 0;
+
+    border: none;
+
+    background: #444;
+
+    border-top: 4px solid var(--green);
+
+    border-bottom: 4px solid var(--blue);
+
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,.25);
+
+    z-index: 10000 !important;
+}
+
+/* ========================================= */
+/* HEADER DEL DROPDOWN */
+/* ========================================= */
+
+.user-menu-dropdown-header{
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    background: #333;
+
+    color: white;
+}
+
+.user-menu-dropdown-header i{
+
+    font-size: 2rem;
+
+    color: var(--green);
+}
+
+.user-menu-dropdown-header small{
+
+    display: block;
+
+    color: #aaa;
+}
+
+/* ========================================= */
+/* ITEMS */
+/* ========================================= */
+
+.user-menu-dropdown .dropdown-item{
+
+    position: relative;
+
+    overflow: hidden;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 14px 18px;
+
+    background: transparent;
+
+    transition: color .25s ease;
+
+    z-index: 1;
+}
+
+/* FONDO ANIMADO */
+
+.user-menu-dropdown .dropdown-item::after{
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left: -100%;
+    right: 100%;
+
+    background: var(--green);
+
+    transition: .35s ease;
+
+    z-index: -1;
+}
+
+.user-menu-dropdown .dropdown-item:hover{
+
+    color: black;
+}
+
+.user-menu-dropdown .dropdown-item:hover::after{
+
+    left: 0;
+    right: 0;
+}
+
+/* ========================================= */
+/* DIVIDER */
+/* ========================================= */
+
+.user-menu-dropdown .dropdown-divider{
+
+    margin: 0;
+
+    border-color: rgba(255,255,255,.15);
+}
+
+/* ========================================= */
+/* LOGOUT */
+/* ========================================= */
+
+.user-menu-logout::after{
+
+    background: #ff3030 !important;
+}
+
+.user-menu-logout:hover{
+
+    color: white !important;
+}

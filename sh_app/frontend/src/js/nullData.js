@@ -15,6 +15,8 @@ function validarCampos(campos, textosErrores) {
     });
 
     if (errores.length > 0) {
+        abrirModal('modalValidacion');
+
         let mensaje = 'Te falta anotar ';
         
         if (errores.length === 1) {
@@ -23,12 +25,7 @@ function validarCampos(campos, textosErrores) {
             mensaje += errores.slice(0, -1).join(', ') + ' y ' + errores[errores.length - 1];
         }
 
-        alert(
-            '¡Error!',
-            mensaje,
-            'error',
-            'Aceptar'
-        );
+        cambiarMensajeModal("#modalValidacion", '¡Advertencia, hay campos vacíos!', mensaje, "bi bi-exclamation-triangle", true);
         return false;
     }
 

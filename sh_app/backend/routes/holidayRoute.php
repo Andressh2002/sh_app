@@ -1,115 +1,129 @@
 <?php
-    // Incluir la conexión a la base de datos
-    include '../db/conection.php';
 
-    // Incluir el archivo con las operaciones SQL
-    include '../controllers/holidayController.php';
+include '../db/conection.php';
+include '../controllers/holidayController.php';
 
-    // Verificar la acción
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+$accion = $_POST['accion'] ?? '';
 
-    switch ($accion) {
-        case 'insertar':
-            if (isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['fecha_inicial']) && isset($_POST['fecha_final'])) {
-                $nombre = $_POST['nombre'];
-                $descripcion = $_POST['descripcion'];
-                $fecha_inicial = $_POST['fecha_inicial'];
-                $fecha_final = $_POST['fecha_final'];
+switch ($accion) {
 
-                $respuesta = insertar($conn, $nombre, $descripcion, $fecha_inicial, $fecha_final);
-                echo json_encode($respuesta);
-            } else {
-                echo "Faltan datos";
-            }
-            break;
+    case 'insertar':
 
-        case 'actualizar':
-            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['fecha_inicial']) && isset($_POST['fecha_final'])) {
-                $id = $_POST['id'];
-                $nombre = $_POST['nombre'];
-                $descripcion = $_POST['descripcion'];
-                $fecha_inicial = $_POST['fecha_inicial'];
-                $fecha_final = $_POST['fecha_final'];
+        if (
+            isset($_POST['nombre']) &&
+            isset($_POST['fecha_inicial']) &&
+            isset($_POST['fecha_final'])
+        ) {
 
-                $respuesta = actualizar($conn, $id, $nombre, $descripcion, $fecha_inicial, $fecha_final);
-                echo json_encode($respuesta);
-            } else {
-                echo "Faltan datos para actualizar la festividad";
-            }
-            break;
+            echo json_encode(
+                insertar(
+                    $conn,
+                    $_POST['nombre'],
+                    $_POST['fecha_inicial'],
+                    $_POST['fecha_final']
+                )
+            );
 
-        case 'eliminar':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = eliminar($conn, $id);
+        } else {
 
-            echo $respuesta;
-            break;
-        
-        case 'obtener':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $respuesta = obtener($conn, $nombre);
+            echo "Faltan datos";
+        }
 
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
-            break;
-        
-        case 'buscar':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = buscar($conn, $id);
+    break;
 
-            header('Content-Type: application/json');
-            echo json_encode($respuesta);
-            break;
+    case 'actualizar':
 
-        case 'seleccionar':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-            $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 10;
-            $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
-        
-            $respuesta = seleccionar($conn, $nombre, $limit, $offset);
-            $total = contar($conn, $nombre);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
-            break;
+        if (
+            isset($_POST['id']) &&
+            isset($_POST['nombre']) &&
+            isset($_POST['fecha_inicial']) &&
+            isset($_POST['fecha_final'])
+        ) {
 
-        case 'contar':
-            $total = contarTodos($conn);
-        
-            if ($total !== 0) {
-                header('Content-Type: application/json');
-                echo json_encode(['total' => $total]);
-            } else {
-                http_response_code(500);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'No se pudo obtener el total']);
-            }
-            break;
+            echo json_encode(
+                actualizar(
+                    $conn,
+                    $_POST['id'],
+                    $_POST['nombre'],
+                    $_POST['fecha_inicial'],
+                    $_POST['fecha_final']
+                )
+            );
 
-        case 'listarIds':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+        } else {
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
-        
-            $respuesta = listarIds($conn, $nombre, $orden);
-            $total = contarIds($conn, $nombre);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
-            break;
-    
-        case 'buscarPorId':
-            $id = isset($_POST['id']) ? $_POST['id'] : '';
-            $respuesta = buscarPorId($conn, $id);
-        
-            header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
-            break;
+            echo "Faltan datos para actualizar la festividad";
+        }
 
-        default:
-            echo 'ERROR, falta una acción';
-            break;
-    }
+    break;
 
-    $conn->close();
-?>
+    case 'eliminar':
+
+        echo eliminar(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+    break;
+
+    case 'obtener':
+
+        $respuesta = obtener(
+            $conn,
+            $_POST['nombre'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'buscar':
+
+        $respuesta = buscar(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'listarIds':
+
+        $respuesta = listarIds(
+            $conn,
+            $_POST['nombre'] ?? '',
+            $_POST['orden'] ?? []
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    case 'buscarPorId':
+
+        $respuesta = buscarPorId(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+
+        echo json_encode($respuesta);
+
+    break;
+
+    default:
+
+        echo 'ERROR, falta una acción';
+
+    break;
+}
+
+$conn->close();

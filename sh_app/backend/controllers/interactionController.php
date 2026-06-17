@@ -31,110 +31,144 @@
         }
     }
 
-    function listarIds($conn, $filtros = []) {
-        try {
-            $query = "SELECT id FROM interacciones";
-            $where = [];
-            $params = [];
-            $types = "";
+    function listarIds(
+        $conn,
+        $accion = '',
+        $orden = [],
+        $limite = 10
+    ){
 
-            // --- Filtro por nombre (LIKE %texto%)
-            if (!empty($filtros['accion'])) {
-                $where[] = "accion LIKE ?";
-                $params[] = "%" . $filtros['accion'] . "%";
-                $types .= "s";
-            }
+        $query = "
+            SELECT
+                i.id
+            FROM interacciones i
+            WHERE 1 = 1
+        ";
 
-            // Agregar condiciones dinámicamente
-            if (!empty($where)) {
-                $query .= " AND " . implode(" AND ", $where);
-            }
+        if(!empty($accion)){
 
-            $columnasPermitidas = [
-                'accion',
-                'fecha_registro',
-                'id',
-            ];
-
-            $ordenarPor = $filtros['ordenarPor'] ?? '';
-            $orden = strtoupper($filtros['orden'] ?? 'ASC');
-
-            if (in_array($ordenarPor, $columnasPermitidas)) {
-                $orden = ($orden === 'DESC') ? 'DESC' : 'ASC';
-                $query .= " ORDER BY $ordenarPor $orden";
-            }
-
-            $stmt = $conn->prepare($query);
-
-            // Bind dinámico solo si hay filtros
-            if (!empty($params)) {
-                $stmt->bind_param($types, ...$params);
-            }
-
-            if ($stmt->execute()) {
-                $result = $stmt->get_result();
-                $ids = [];
-
-                while ($row = $result->fetch_assoc()) {
-                    $ids[] = $row['id'];
-                }
-
-                return [
-                    'title' => "¡Funcionó!",
-                    'text' => "Se obtuvieron los ids",
-                    'icon' => "success",
-                    'list' => $ids
-                ];
-            }
-
-        } catch (mysqli_sql_exception $e) {
-            return [
-                'title' => "¡Error!",
-                'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
-            ];
+            $query .= "
+                AND i.accion LIKE '%" .
+                $conn->real_escape_string($accion) .
+                "%'
+            ";
         }
+
+        $columnasPermitidas = [
+            'i.id',
+            'i.accion',
+            'i.fecha_registro'
+        ];
+
+        $formasPermitidas = [
+            'ASC',
+            'DESC'
+        ];
+
+        $campoOrden =
+            in_array(
+                $orden['orden'] ?? '',
+                $columnasPermitidas
+            )
+            ? $orden['orden']
+            : 'i.id';
+
+        $formaOrden =
+            in_array(
+                strtoupper($orden['forma'] ?? ''),
+                $formasPermitidas
+            )
+            ? strtoupper($orden['forma'])
+            : 'DESC';
+
+        $query .= "
+            ORDER BY
+            $campoOrden
+            $formaOrden
+        ";
+
+        if($limite !== 'todos'){
+
+            $limite =
+                intval(
+                    $limite
+                );
+
+            if(
+                in_array(
+                    $limite,
+                    [10, 20, 50, 100]
+                )
+            ){
+
+                $query .= "
+                    LIMIT
+                    $limite
+                ";
+            }
+        }
+
+        $result =
+            $conn->query(
+                $query
+            );
+
+        $ids = [];
+
+        while(
+            $row =
+            $result->fetch_assoc()
+        ){
+
+            $ids[] =
+                $row['id'];
+        }
+
+        return $ids;
     }
 
-    function obtener($conn, $id) {
-        try {
-            $query = "SELECT
-                id,
-                accion,
-                url,
-                fecha_registro
-                FROM interacciones 
-                WHERE id = ?;
-            ";
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("i", $id);
+    function buscarPorId(
+        $conn,
+        $id
+    ){
 
-            if ($stmt->execute()) {
-                $result = $stmt->get_result();
-                $row = $result->fetch_assoc();
+        $stmt =
+            $conn->prepare("
 
-                if ($row) {
-                    return [
-                        'title' => "¡Funcionó!",
-                        'text' => "Se obtuvo la interacción",
-                        'icon' => "success",
-                        'data' => $row
-                    ];
-                } else {
-                    return [
-                        'title' => "¡Atención!",
-                        'text' => "No se encontró una interacción con ese ID",
-                        'icon' => "warning"
-                    ];
-                }
-            }
-    
-        } catch (mysqli_sql_exception $e) {
-            return [
-                'title' => "¡Error!",
-                'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
-            ];
+                SELECT
+                    i.id,
+                    i.accion,
+                    i.url,
+                    i.fecha_registro,
+                    u.nombre_usuario AS cliente
+
+                FROM interacciones i
+
+                LEFT JOIN usuarios u
+                    ON u.nombre_usuario = i.idCliente
+
+                WHERE i.id = ?
+
+            ");
+
+        $stmt->bind_param(
+            "i",
+            $id
+        );
+
+        $stmt->execute();
+
+        $result =
+            $stmt->get_result();
+
+        if(
+            $result->num_rows <= 0
+        ){
+            return null;
         }
+
+        return
+            $result
+                ->fetch_assoc();
     }
 ?>

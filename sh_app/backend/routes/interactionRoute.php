@@ -16,16 +16,16 @@ switch ($accion) {
         break;
 
     case 'listarIds':
-        $filtros = $_POST['filtros'] ?? [];
-        $respuesta = listarIds($conn, $filtros);
-
+        $respuesta = listarIds($conn, $_POST['accionInteraccion'] ?? '', $_POST['orden'] ?? [], $_POST['limite'] ?? '10');
+        
+        header('Content-Type: application/json');
         echo json_encode($respuesta);
         break;
 
     case 'obtener':
-        $id = $_POST['id'];
-        $respuesta = obtener($conn, $id);
-
+        $respuesta = buscarPorId($conn, $_POST['id']);
+        
+        header('Content-Type: application/json');
         echo json_encode($respuesta);
         break;
 

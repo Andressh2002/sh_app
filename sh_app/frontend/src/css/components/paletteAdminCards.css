@@ -1,0 +1,186 @@
+.palette-selection-card{
+
+    background:
+    linear-gradient(
+        145deg,
+        #1f1f1f,
+        #151515
+    );
+
+    border-top:4px solid var(--green);
+
+    border-bottom:4px solid var(--blue);
+
+    clip-path:polygon(
+        2% 0,
+        100% 0,
+        98% 100%,
+        0 100%
+    );
+
+    padding:18px;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,.25);
+}
+
+.palette-selection-info{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+}
+
+.palette-family{
+
+    color:rgba(255,255,255,.65);
+}
+
+.color-admin-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fill,minmax(320px,1fr));
+
+    gap:24px;
+}
+
+.color-admin-card{
+
+    background:
+    linear-gradient(
+        145deg,
+        #2f2f2f,
+        #252525
+    );
+
+    color:white;
+
+    overflow:hidden;
+
+    position:relative;
+
+    border-top:5px solid var(--green);
+
+    border-bottom:5px solid var(--blue);
+
+    clip-path:polygon(
+        2% 0,
+        100% 0,
+        98% 100%,
+        0 100%
+    );
+
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,.22);
+}
+
+.color-admin-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:16px 18px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.08);
+}
+
+.color-admin-title{
+
+    font-weight:700;
+
+    margin:0;
+}
+
+.color-admin-actions{
+
+    display:flex;
+
+    gap:8px;
+}
+
+.color-admin-body{
+
+    padding:18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+}
+
+.color-admin-preview{
+
+    background:#111;
+
+    min-height:220px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    overflow:hidden;
+
+    clip-path:polygon(
+        4% 0,
+        100% 0,
+        96% 100%,
+        0 100%
+    );
+}
+
+.color-admin-preview img{
+
+    width:100%;
+
+    height:220px;
+
+    object-fit:contain;
+}
+
+.color-admin-footer{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:15px;
+}
+
+.color-family{
+
+    color:rgba(255,255,255,.7);
+
+    font-size:.9rem;
+}
+
+.color-empty{
+
+    color:#888;
+
+    text-align:center;
+
+    padding:40px;
+}

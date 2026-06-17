@@ -2,6 +2,7 @@ function guardarComentario() {
     const idCliente = $('#Sesion').val();
     const idProducto = $('#Id').val();
     const mensaje = $('#Comentario').val();
+    const estrellas = $('#Calificacion').val();
 
     if (!validarCampos(
         [idCliente, idProducto, mensaje],
@@ -13,12 +14,16 @@ function guardarComentario() {
     guardarDatos();
 
     function guardarDatos() {
+        abrirModal('modalGuardando');
+        cambiarMensajeModal("#modalGuardando", "Guardando...", 'Espere un momento...', "bi bi-wifi", false);
+
         const accion = 'insertar';
         const data = {
             accion: accion,
             idCliente: idCliente,
             idProducto: idProducto,
-            mensaje: mensaje
+            mensaje: mensaje,
+            estrellas: estrellas
         };
 
         $.ajax({
@@ -27,20 +32,10 @@ function guardarComentario() {
             data: data,
             success: function(response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             },
             error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al guardar el comentario',
-                    'error',
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             }
         });
     }
@@ -85,149 +80,207 @@ function aplicarFiltrosComentario() {
     seleccionarComentarios(producto);
 }
 
-function verDetallesComentario(json) {
-    const comentario = JSON.parse(decodeURIComponent(json)); // Decodificar y parsear el JSON
-    alertDetails(
-        'Detalles del comentario',
-        comentario,
-        ['producto', 'mensaje', 'fecha_registro'],
-        'info',
-        'Cerrar'
-    );
-}
+let tokenCargaComentarios = 0;
 
-function seleccionarComentarios(producto) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
+async function seleccionarComentarios(producto = '') {
+    const token = ++tokenCargaComentarios;
+    const container = $('#list-container');
+
     container.empty();
-    const colspan = 4;
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
-    `);
 
-    cancelarCargaSecuencial = true;
-
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
-
-    cancelarCargaSecuencial = false;
-
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlComentary,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            nombre: producto,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const comentarios = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
-
-                if (comentarios.length > 0) {
-                    procesarComentariosSecuencialmente(comentarios, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron comentarios.</td></tr>`);
-                }
-                
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
-        }
-    });
-}
-
-function procesarComentariosSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
-
-    const comentario = lista[index];
-    const container = $('#data-container');
+    const orden = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    };
 
     try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" id="producto-${comentario.id}"></td>
-                <td class="align-middle" id="comentario-${comentario.id}"></td>
-                <td class="align-middle text-center" id="opciones-${comentario.id}" style="width: 1px;"></td>
-            </tr>
-        `;
-        container.append(html);
-    } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Este comentario no se pudo cargar.</td></tr>`);
-    }
+        const ids = await $.ajax({
+            url: backend + urlComentary,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                accion: 'listarIds',
+                nombre: producto,
+                orden
+            }
+        });
 
-    cargarComentarioSeleccionado(comentario.id, function () {
-        procesarComentariosSecuencialmente(lista, index + 1, colspan);
-    });
+        if (token !== tokenCargaComentarios) {
+            return;
+        }
+
+        mostrarTotalRegistros(ids.length, [
+            'comentario',
+            'comentarios'
+        ]);
+
+        if (!ids.length) {
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron comentarios
+                </div>
+            `);
+
+            return;
+        }
+
+        await cargarComentarios(ids, token);
+
+    } catch (e) {
+        console.error(e);
+    }
 }
 
-function cargarComentarioSeleccionado(id, callback) {
-    const tdProducto = $(`#producto-${id}`);
-    const tdComentario = $(`#comentario-${id}`);
-    const tdOpciones = $(`#opciones-${id}`);
+async function cargarComentarios(ids, token) {
+    for (const id of ids) {
+        renderComentarioSkeleton(id);
 
-    const liClasses = "list-group-item border-0 bg-transparent px-0 py-0";
+        try {
+            const comentario = await $.ajax({
+                url: backend + urlComentary,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    accion: 'buscarPorId',
+                    id
+                }
+            });
 
-    $.ajax({
-        url: backend + urlComentary,
-        type: 'POST',
-        data: {
-            accion: 'buscarPorId',
-            id: id
-        },
-        success: function (response) {
-            try {
-                const comentario = typeof response.datos[0] === 'string' ? JSON.parse(response.datos[0]) : response.datos[0];
-                const json = encodeURIComponent(JSON.stringify(comentario));
-                
-                tdProducto.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${comentario.producto || 'Sin producto'}</li>
-                    </ul>
-                `);
-                tdComentario.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${comentario.mensaje || 'Sin mensaje'}</li>
-                    </ul>
-                `);
-                tdOpciones.append(`
-                    <div class="d-flex gap-2 justify-content-start">
-                        <button onclick="verDetallesComentario('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                `);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
+            if (token !== tokenCargaComentarios) {
+                return;
             }
 
-            if (typeof callback === 'function') callback();
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-            if (typeof callback === 'function') callback();
+            $(`#comentario-skeleton-${id}`).replaceWith(
+                renderComentarioCard(comentario, true)
+            );
+
+            buscarImagenProducto(comentario.idProducto, comentario.id);
+
+        } catch (error) {
+            console.error(error);
         }
-    });
+    }
+}
+
+function renderComentarioCard(comentario, returnHtml = false) {
+    const json = encodeURIComponent(
+        JSON.stringify(comentario)
+    );
+
+    function renderEstrellas(
+        estrellas = 0,
+        maximo = 5
+    ){
+        estrellas = Number(estrellas) || 0;
+        let html = '';
+        for(let i = 1; i <= maximo; i++){
+            html += `
+                <i class="
+                    bi
+                    ${
+                        i <= estrellas
+                        ? 'bi-star-fill'
+                        : 'bi-star'
+                    }
+                "></i>
+            `;
+        }
+        return html;
+    }
+
+    const html = `
+        <div class="product-admin-card">
+            <div class="product-admin-header">
+                <div>
+                    <p class="product-number">
+                        ${formatearFechaConHora(comentario.fecha_registro)}
+                    </p>
+
+                    <h5 class="product-title">
+                        ${comentario.producto}
+                    </h5>
+                </div>
+            </div>
+
+            <div class="product-admin-body">
+
+                <div class="product-admin-image">
+
+                    <img
+                        id="img-${comentario.idProducto}-${comentario.id}"
+                        class="product-image"
+                        src="../src/img/app/no_image.png"
+                        alt="${comentario.id}"
+                    >
+
+                </div>
+
+                <div class="product-info">
+                    <div class="product-info-grid">
+
+                        <div>
+                            <span>Cliente:</span>
+                            <strong>${comentario.cliente + ' ' + (comentario.segundo_nombre || '') + comentario.primer_apellido + ' ' + (comentario.segundo_apellido || '')}</strong>
+                        </div>
+
+                        <div>
+                            <span>Comentario:</span>
+                            <strong>${comentario.mensaje}</strong>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-1 flex-wrap">
+                            <span>Estrellas:</span>
+                            <strong
+                                class="
+                                    d-flex
+                                    align-items-center
+                                    gap-1
+                                    flex-wrap
+                                "
+                            >
+                                ${renderEstrellas(
+                                    comentario.estrellas
+                                )}
+                                <span class="ms-1">
+                                    (${comentario.estrellas}/5)
+                                </span>
+                            </strong>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="order-actions"></div>
+            </div>
+        </div>
+    `;
+
+    return returnHtml
+        ? html
+        : $('#list-container').append(html);
+}
+
+function renderComentarioSkeleton(id) {
+    $('#list-container').append(`
+        <div
+            id="comentario-skeleton-${id}"
+            class="product-admin-card product-skeleton"
+        >
+            <div class="product-admin-header">
+                <div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line skeleton-title"></div>
+                </div>
+            </div>
+
+            <div class="product-admin-body">
+                <div class="product-info">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line"></div>
+                </div>
+            </div>
+        </div>
+    `);
 }
 
 function seleccionarComentariosPorIdProducto(idProducto) {
@@ -262,82 +315,6 @@ function seleccionarComentariosPorIdProducto(idProducto) {
     });
 }
 
-function actualizarPaginacionComentario(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
-
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaComentario(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
-
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaComentario(${i})">${i}</a>
-                </li>
-            `);
-        }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaComentario(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
-    }
-}
-
-function cambiarPaginaComentario(pagina) {
-    currentPage = pagina;
-    seleccionarComentarios('');
-}
-
 function limpiarFiltrosComentario() {
     $('#Producto').val('');
-}
-
-function actualizarPaginacionComentarioPorIdProducto(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
-
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaComentarioPorIdProducto(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
-
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaComentarioPorIdProducto(${i})">${i}</a>
-                </li>
-            `);
-        }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaComentarioPorIdProducto(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
-    }
-}
-
-function cambiarPaginaComentarioPorIdProducto(pagina) {
-    currentPage = pagina;
-    seleccionarComentarios('');
 }

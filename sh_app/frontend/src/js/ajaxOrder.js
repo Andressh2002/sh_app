@@ -4,17 +4,15 @@ function guardarPedido(idProduct) {
     const color = $('#Color').val();
     const colorAccesorio = $('#AccesoryColor').val();
     const cantidad = $('#cantidad').val();
-    const precio = $('#precio').val();
-    const total = $('#total').val();
+    const precio = $('#Precio').val();
+    const total = $('#Total').val();
 
-    alertLoadingBlocked(
-        'Guardando pedido',
-        'Se está guardando el pedido, espere un momento...',
-        'warning',
-    );
     guardarDatos();
 
     function guardarDatos() {
+        abrirModal('modalGuardando');
+        cambiarMensajeModal("#modalGuardando", 'Guardando...', 'Espere un momento...', 'bi bi-wifi', false);
+
         const accion = 'insertar';
         const data = {
             accion: accion,
@@ -33,143 +31,13 @@ function guardarPedido(idProduct) {
             data: data,
             success: function (response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             },
             error: function () {
-                alert(
-                    'Error',
-                    'Hubo un problema al intentar guardar el pedido.',
-                    'error',
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             }
         });
     }
-}
-
-function obtenerPedidos() {
-    $.ajax({
-        url: backend + urlOrder,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-        },
-        success: function (response) {
-            try {
-                const pedidos = typeof response === 'string' ? JSON.parse(response) : response;
-                mostrarPedidos(pedidos);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
-function mostrarPedidos(pedidos) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-
-    pedidos = ordenar(pedidos, order);
-
-    if (!Array.isArray(pedidos) || pedidos.length === 0) {
-        container.append('<tr><td class="text-center" colspan="12">No se encontraron pedidos.</td></tr>');
-        return;
-    }
-
-    pedidos.forEach((pedido, index) => {
-        const json = encodeURIComponent(JSON.stringify(pedido));
-        const vectColors = (pedido.colores).split(',');
-
-        let indexColor = 0;
-        let indexAccesoryColor = 0;
-        let isColorAccesory = false;
-
-        for (let index = 0; index < vectColors.length; index++) {
-            if (vectColors[index] == pedido.idColor) {
-                indexColor = index;
-            }
-        }
-
-        try {
-            const vectAccesoryColors = (pedido.coloresAccesorio).split(',');
-            isColorAccesory = true;
-
-            for (let index = 0; index < vectAccesoryColors.length; index++) {
-                if (vectAccesoryColors[index] == pedido.idColorAccesorio) {
-                    indexAccesoryColor = index;
-                }
-            }
-        } catch (error) {
-            //
-        }
-
-        const html = `
-            <tr>
-                <td class="align-middle">${startIndex + index + 1}</td>
-                <td class="align-middle" style="width: 256px;">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${pedido.id}" 
-                            style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${pedido.id}" class="d-none w-auto h-100" alt="Imagen">
-                        ${isColorAccesory ? `
-                            <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-accesory-${pedido.id}" 
-                            style="width: 50px; height: 50px;"></div>
-                            <img id="img-accesory-${pedido.id}" class="d-none w-auto h-100" alt="Imagen">
-                        ` : ''}
-                    </div>
-                </td>
-                <td class="align-middle">${pedido.producto}</td>
-                <td class="align-middle">
-                    <ul class="list-group border-0 px-0">
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Nombre: </strong>${pedido.cliente + (pedido.segundo_nombre.length > 1 ? pedido.segundo_nombre + ' ' : ' ') + (pedido.primer_apellido.length > 1 ? pedido.primer_apellido + ' ' : ' ') + (pedido.segundo_apellido.length > 1 ? pedido.segundo_apellido : '')}</li>
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Ubicación: </strong>${(pedido.provincia.length > 1 ? pedido.provincia : '') + (pedido.canton.length > 1 ? ', ' + pedido.canton : '') + (pedido.distrito.length > 1 ? ', ' + pedido.distrito : '')}</li>
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Teléfono: </strong>${pedido.telefono.length > 1 ? pedido.telefono : 'Dato no registrado'}</li>
-                    </ul>
-                </td>
-                <td class="align-middle">${pedido.categoria}</td>
-                <td class="align-middle">${pedido.cantidad}</td>
-                <td class="align-middle">₡${pedido.total}</td>
-                <td class="align-middle">${pedido.pagado == 0 ? 'No' : 'Si'}</td>
-                <td class="align-middle">${formatearFechaConHora(pedido.fecha_registro)}</td>
-                <td class="align-middle">${pedido.fecha_registro == pedido.fecha_pago ? 'No se ha pagado' : formatearFechaConHora(pedido.fecha_pago)}</td>
-                <td class="align-middle text-center" style="width: 1px;">
-                    <div class="d-flex gap-2 justify-content-end">
-                        ${pedido.pagado == 0 ? `
-                            <button onclick="pagarPedido('${pedido.id}', '${pedido.idProducto}', '${pedido.cantidad}')" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Pagar<i class="bi bi-wallet ms-2"></i>
-                            </button>
-                            ` : ``}
-                        <button onclick="verDetallesPedido('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        container.append(html);
-        buscarImagenPedido(pedido.id, indexColor + 1);
-        try {
-            if (isColorAccesory) {
-                buscarImagenAccesorioPedido(pedido.id, indexAccesoryColor + 1);
-            }
-        } catch (error) {
-            //
-        }
-        //mostrarParteColorProducto(indexColor, vectColors.length, pedido.imagen, ('canva' + (startIndex + index + 1).toString()), ('result' + (startIndex + index + 1).toString()));
-    });
 }
 
 function buscarImagenPedido(id, colorIndex) {
@@ -223,7 +91,7 @@ function buscarImagenAccesorioPedido(id, colorIndex) {
             try {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
                 const imagenURL = data[0].imagen && data[0].imagen !== '' ? data[0].imagen : '../src/img/app/no_image.png';
-
+                
                 const imgElement = document.getElementById(`img-accesory-${id}`);
                 const spinnerElement = document.getElementById(`spinner-accesory-${id}`);
 
@@ -280,45 +148,15 @@ function mostrarPedido(color) {
     }
 }
 
-function eliminarPedido(id, nombre, eliminar) {
-    if (!eliminar) {
-        dialogAlert(
-            '¿Estás seguro?',
-            '¿De verdad quiere eliminar este pedido? ¡Si lo haces no se podrá revertir!',
-            'warning',
-            'Si, estoy seguro',
-            'No',
-            function () {
-                eliminarPedido(id, '', true);
-            }
-        );
-    } else {
-        $.ajax({
-            url: backend + urlOrder,
-            type: 'POST',
-            data: {
-                accion: 'eliminar',
-                id: id
-            },
-            success: function (response) {
-                aplicarFiltrosPedido()
-                alert(
-                    '¡Pedido eliminado!',
-                    response,
-                    'success',
-                    'Aceptar'
-                );
-            },
-            error: function () {
-                alert(
-                    'Error',
-                    'Hubo un problema al eliminar el pedido.',
-                    'error',
-                    'Aceptar'
-                );
-            }
-        });
-    }
+function eliminarPedido(id, nombre) {
+    
+    eliminarRegistro({
+        id,
+        nombre,
+        entidad: ['pedido', 'pedidos' , 'el pedido'],
+        url: backend + urlOrder,
+        callback: aplicarFiltrosPedido
+    });
 }
 
 function aplicarFiltrosPedido() {
@@ -344,397 +182,930 @@ function aplicarFiltrosPedidosCliente(cliente) {
     seleccionarPedidosCliente(cliente, producto, categoria, rareza, universo, color, pagado);
 }
 
-function verDetallesPedido(json) {
-    const pedido = JSON.parse(decodeURIComponent(json)); // Decodificar y parsear el JSON
-    alertDetails(
-        'Detalles del pedido',
-        pedido,
-        ['cliente', 'producto', 'color', 'paleta', 'cantidad', 'total', 'pagado', 'fecha_registro'],
-        'info',
-        'Cerrar'
-    );
-}
+let tokenCargaPedidos = 0;
 
-function seleccionarPedidos(cliente, producto, categoria, rareza, universo, color, pagado, ubicacion, telefono) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
+async function seleccionarPedidos(
+    cliente = '',
+    producto = '',
+    categoria = '',
+    rareza = '',
+    universo = '',
+    color = '',
+    pagado = '',
+    ubicacion = '',
+    telefono = ''
+){
+
+    const currentToken =
+        ++tokenCargaPedidos;
+
+    const container =
+        $('#list-container');
+
     container.empty();
-    const colspan = 11;
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
-    `);
 
-    if (!cliente) {
-        cliente = '';
-    }
-    if (!producto) {
-        producto = '';
-    }
-    if (!categoria) {
-        categoria = '';
-    }
-    if (!rareza) {
-        rareza = '';
-    }
-    if (!universo) {
-        universo = '';
-    }
-    if (!color) {
-        color = '';
-    }
-    if (!pagado) {
-        pagado = '';
-    }
-    if (!ubicacion) {
-        ubicacion = '';
-    }
-    if (!telefono) {
-        telefono = '';
-    }
-    const offset = (currentPage - 1) * itemsPerPage;
-    let isPagado;
-    if (pagado != '') {
-        if (pagado == '1') {
-            isPagado = '1';
-        } else {
-            isPagado = '0';
-        }
-    } else {
-        isPagado = '';
-    }
-    
-    cancelarCargaSecuencial = true;
+    const order = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    };
 
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
+    try{
 
-    cancelarCargaSecuencial = false;
+        const response =
+            await $.ajax({
 
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlOrder,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            cliente: cliente,
-            producto: producto,
-            categoria: categoria,
-            rareza: rareza,
-            universo: universo,
-            color: color,
-            pagado: isPagado,
-            ubicacion: ubicacion,
-            telefono: telefono,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const pedidos = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
+                url: backend + urlOrder,
 
-                if (pedidos.length > 0) {
-                    procesarPedidosSecuencialmente(pedidos, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron pedidos.</td></tr>`);
+                type: 'POST',
+
+                dataType: 'json',
+
+                data:{
+                    accion:'listarIds',
+                    cliente,
+                    producto,
+                    categoria,
+                    rareza,
+                    universo,
+                    color,
+                    pagado,
+                    ubicacion,
+                    telefono,
+                    orden: order
                 }
-                
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
+            });
+
+        if(
+            currentToken !==
+            tokenCargaPedidos
+        ){
+            return;
         }
-    });
-}
 
-function procesarPedidosSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
+        const ids = response || [];
 
-    const pedido = lista[index];
-    const container = $('#data-container');
+        mostrarTotalRegistros(
+            ids.length,
+            ['pedido','pedidos']
+        );
 
-    try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" style="width: 200px; min-width: 70px;">
-                    <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 145px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color" role="status" id="spinner-${pedido.id}" style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${pedido.id}" class="d-none w-auto h-100 w-auto" alt="Imagen">
-                        ${pedido.coloresAccesorio != null ? `
-                            <div class="spinner-border spinner-color" role="status" id="spinner-accesory-${pedido.id}" style="width: 50px; height: 50px;"></div>
-                            <img id="img-accesory-${pedido.id}" class="d-none w-auto h-75 w-auto" alt="Imagen">
-                        ` : ''}
-                    </div>
-                </td>
-                <td class="align-middle" id="producto-${pedido.id}"></td>
-                <td class="align-middle" id="cliente-${pedido.id}"></td>
-                <td class="align-middle" id="categoria-${pedido.id}"></td>
-                <td class="align-middle" id="cantidad-${pedido.id}"></td>
-                <td class="align-middle" id="total-${pedido.id}"></td>
-                <td class="align-middle" id="pagado-${pedido.id}"></td>
-                <td class="align-middle" id="fecha_pedido-${pedido.id}"></td>
-                <td class="align-middle" id="fecha_pago-${pedido.id}"></td>
-                <td class="align-middle text-center" id="opciones-${pedido.id}" style="width: 1px;"></td>
-            </tr>
-        `;
-        container.append(html);
-    } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Este pedido no se pudo cargar.</td></tr>`);
-        console.error(error);
+        if(ids.length <= 0){
+
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron pedidos.
+                </div>
+            `);
+
+            return;
+        }
+
+        await cargarPedidosAdminProgresivamente(
+            ids,
+            currentToken
+        );
+
     }
+    catch(error){
 
-    cargarPedidosSeleccionado(pedido.id, function () {
-        procesarPedidosSecuencialmente(lista, index + 1, colspan);
-    });
+        console.error(error);
+
+        container.html(`
+            <div class="orders-empty">
+                Error al cargar pedidos.
+            </div>
+        `);
+    }
 }
 
-function cargarPedidosSeleccionado(id, callback) {
-    const tdProducto = $(`#producto-${id}`);
-    const tdCliente = $(`#cliente-${id}`);
-    const tdCategoria = $(`#categoria-${id}`);
-    const tdCantidad = $(`#cantidad-${id}`);
-    const tdTotal = $(`#total-${id}`);
-    const tdPagado = $(`#pagado-${id}`);
-    const tdFechaPedido = $(`#fecha_pedido-${id}`);
-    const tdFechaPago = $(`#fecha_pago-${id}`);
-    const tdOpciones = $(`#opciones-${id}`);
+async function cargarPedidosAdminProgresivamente(
+    ids,
+    currentToken
+){
 
-    const liClasses = "list-group-item border-0 bg-transparent px-0 py-0";
+    const container =
+        $('#list-container');
 
-    $.ajax({
-        url: backend + urlOrder,
-        type: 'POST',
-        data: {
-            accion: 'buscarPorId',
-            id: id
-        },
-        success: function (response) {
-            try {
-                const pedido = typeof response.datos[0] === 'string' ? JSON.parse(response.datos[0]) : response.datos[0];
-                const json = encodeURIComponent(JSON.stringify(pedido));
+    container.empty();
 
-                const vectColors = (pedido.colores).split(',');
+    for(const item of ids){
 
-                let indexColor = 0;
-                let indexAccesoryColor = 0;
-                let isColorAccesory = false;
+        renderPedidoAdminSkeleton(item);
 
-                for (let index = 0; index < vectColors.length; index++) {
-                    if (vectColors[index] == pedido.idColor) {
-                        indexColor = index;
+        try{
+
+            const response =
+                await $.ajax({
+
+                    url: backend + urlOrder,
+
+                    type: 'POST',
+
+                    dataType: 'json',
+
+                    data:{
+                        accion:'buscarPorId',
+                        id:item
+                    }
+                });
+
+            if(
+                currentToken !==
+                tokenCargaPedidos
+            ){
+                return;
+            }
+
+            const pedido = response;
+
+            if(!pedido){
+                continue;
+            }
+
+            const pedidoFinal =
+                typeof pedido === 'string'
+                    ? JSON.parse(pedido)
+                    : pedido;
+
+            $(
+                `#pedido-skeleton-${pedidoFinal.id}`
+            ).replaceWith(
+                renderPedidoCard(
+                    pedidoFinal,
+                    true
+                )
+            );
+
+            const vectColors =
+                pedidoFinal.colores.split(',');
+
+            let indexColor = 0;
+
+            vectColors.forEach(
+                (color,idColor)=>{
+                    if(
+                        color ==
+                        pedidoFinal.idColor
+                    ){
+                        indexColor =
+                            idColor;
                     }
                 }
+            );
 
-                try {
-                    const vectAccesoryColors = (pedido.coloresAccesorio).split(',');
-                    isColorAccesory = true;
+            buscarImagenPedido(
+                pedidoFinal.id,
+                indexColor + 1
+            );
 
-                    for (let index = 0; index < vectAccesoryColors.length; index++) {
-                        if (vectAccesoryColors[index] == pedido.idColorAccesorio) {
-                            indexAccesoryColor = index;
+            if (pedidoFinal.idColorAccesorio != 0) {
+                let indexAccesoryColor = 0;
+
+                vectColors.forEach(
+                    (color,idColorAccesorio)=>{
+                        if(
+                            color ==
+                            pedidoFinal.idColorAccesorio
+                        ){
+                            indexAccesoryColor =
+                                idColorAccesorio;
                         }
                     }
-                } catch (error) {
-                    //
-                }
-                
-                tdProducto.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 256px;">
-                        <li class="${liClasses}">${pedido.producto || 'Sin producto'}</li>
-                    </ul>
-                `);
-                tdCliente.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 324px;">
-                        <li class="${liClasses}"><strong>Nombre: </strong>${pedido.cliente + (pedido.segundo_nombre.length > 1 ? pedido.segundo_nombre + ' ' : ' ') + (pedido.primer_apellido.length > 1 ? pedido.primer_apellido + ' ' : ' ') + (pedido.segundo_apellido.length > 1 ? pedido.segundo_apellido : '')}</li>
-                        <li class="${liClasses}"><strong>Ubicación: </strong>${(pedido.provincia.length > 1 ? pedido.provincia : '') + (pedido.canton.length > 1 ? ', ' + pedido.canton : '') + (pedido.distrito.length > 1 ? ', ' + pedido.distrito : '')}</li>
-                        <li class="${liClasses}"><strong>Teléfono: </strong>${pedido.telefono.length > 1 ? pedido.telefono : 'Dato no registrado'}</li>
-                    </ul>
-                `);
-                tdCategoria.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${pedido.categoria || 'Sin categoría'}</li>
-                    </ul>
-                `);
-                tdCantidad.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${pedido.cantidad || 'Sin cantidad'}</li>
-                    </ul>
-                `);
-                tdTotal.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">₡${pedido.total || 'Sin total'}</li>
-                    </ul>
-                `);
-                tdPagado.append(`
-                    <ul class="list-group border-0 px-0">
-                        <li class="${liClasses}">${pedido.pagado == 0 ? 'No' : 'Si'}</li>
-                    </ul>
-                `);
-                tdFechaPedido.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 100px;">
-                        <li class="${liClasses}">${formatearFechaConHora(pedido.fecha_registro)}</li>
-                    </ul>
-                `);
-                tdFechaPago.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 100px;">
-                        <li class="${liClasses}">${pedido.fecha_registro == pedido.fecha_pago ? 'No se ha pagado' : formatearFechaConHora(pedido.fecha_pago)}</li>
-                    </ul>
-                `);
-                tdOpciones.append(`
-                    <div class="d-flex gap-2 justify-content-start">
-                        ${pedido.pagado == 0 ? `
-                            <button onclick="pagarPedido('${pedido.id}', '${pedido.idProducto}', '${pedido.cantidad}')" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Pagar<i class="bi bi-wallet ms-2"></i>
-                            </button>
-                            ` : ``}
-                        ${pedido.pagado == 0 ? `
-                            <button onclick="eliminarPedido(${pedido.id}, ${pedido.idCliente}, '${pedido.producto}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                Eliminar<i class="bi bi-x ms-2"></i>
-                            </button>
-                            ` : ''}
-                        <button onclick="verDetallesPedido('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                `);
+                );
 
-                buscarImagenPedido(pedido.id, indexColor + 1);
-                try {
-                    if (isColorAccesory) {
-                        buscarImagenAccesorioPedido(pedido.id, indexAccesoryColor + 1);
-                    }
-                } catch (error) {
-                    console.log(error);
-                }
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
+                buscarImagenAccesorioPedido(
+                    pedidoFinal.id,
+                    indexAccesoryColor + 1
+                );
             }
 
-            if (typeof callback === 'function') callback();
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-            if (typeof callback === 'function') callback();
         }
-    });
+        catch(error){
+
+            console.error(
+                'Error cargando pedido',
+                item.id,
+                error
+            );
+        }
+    }
 }
 
-function seleccionarPedidosCliente(cliente, producto, categoria, rareza, universo, color, pagado) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-    const colspan = 11;
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
-    `);
+let pedidoSeleccionado = null;
 
-    if (!cliente) {
-        cliente = '';
-    }
-    if (!producto) {
-        producto = '';
-    }
-    if (!categoria) {
-        categoria = '';
-    }
-    if (!rareza) {
-        rareza = '';
-    }
-    if (!universo) {
-        universo = '';
-    }
-    if (!color) {
-        color = '';
-    }
-    if (!pagado) {
-        pagado = '';
-    }
+function renderPedidoCard(
+    pedido,
+    returnHtml = false
+){
 
-    const offset = (currentPage - 1) * itemsPerPage;
-    let isPagado;
-    if (pagado != '') {
-        if (pagado == '1') {
-            isPagado = '1';
-        } else {
-            isPagado = '0';
-        }
-    } else {
-        isPagado = '';
-    }
-    
-    cancelarCargaSecuencial = true;
+    const json =
+        encodeURIComponent(
+            JSON.stringify(pedido)
+        );
 
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
+    const html = `
 
-    cancelarCargaSecuencial = false;
+    <div
+        class="product-admin-card"
+        id="pedido-${pedido.id}"
+    >
 
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlOrder,
-        type: 'POST',
-        data: {
-            accion: 'listarIdsCliente',
-            cliente: cliente,
-            producto: producto,
-            categoria: categoria,
-            rareza: rareza,
-            universo: universo,
-            color: color,
-            pagado: isPagado,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const pedidos = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
+        <div class="product-admin-header">
 
-                if (pedidos.length > 0) {
-                    procesarPedidosClienteSecuencialmente(pedidos, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron pedidos.</td></tr>`);
+            <div>
+
+                <p class="product-number">
+                    Registrado el ${formatearFechaConHora(pedido.fecha_registro)}
+                </p>
+
+                <h5 class="product-title">
+                    ${pedido.producto || 'Sin nombre'}
+                </h5>
+
+            </div>
+
+            <div
+                class="
+                    product-status
+                    ${
+                        pedido.pagado == 1
+                        ? 'product-status-visible'
+                        : 'product-status-hidden'
+                    }
+                "
+            >
+
+                ${
+                    pedido.pagado == 1
+                    ? 'Pagado'
+                    : 'Pendiente'
                 }
-                
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
+
+            </div>
+
+        </div>
+
+        <div class="product-admin-body">
+
+            <div class="product-admin-image">
+
+                <img
+                    id="img-${pedido.id}"
+                    class="product-image ${pedido.idColorAccesorio != 0 ? 'w-50' : ''}"
+                    src=""
+                    alt="${pedido.producto}"
+                >
+
+                ${
+                    pedido.idColorAccesorio != 0
+                    ?
+                    `
+                    <img
+                        id="img-accesory-${pedido.id}"
+                        class="product-image w-50"
+                        src=""
+                        alt="${pedido.producto}"
+                    >
+                `:''}
+
+            </div>
+
+            <div class="product-info">
+
+                <div class="product-info-grid">
+
+                    <div class="order-progress-wrapper mb-4">
+                        <div class="order-progress-header">
+                            <strong>
+                                ${pedido.progreso || 0}%
+                            </strong>
+                        </div>
+                        <div class="order-progress-bar">
+                            <div
+                                class="order-progress-fill"
+                                style="
+                                    width:${pedido.progreso || 0}%;
+                                    background:${obtenerColorProgreso( // globalFunctions.js
+                                        pedido.progreso || 0
+                                    )};
+                                "
+                            ></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span>Cliente:</span>
+                        <strong>
+                            ${pedido.cliente + ' ' + (pedido.segundo_nombre || '') + pedido.primer_apellido + ' ' + (pedido.segundo_apellido || '')}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Categoría:</span>
+                        <strong>
+                            ${pedido.categoria || 'Sin registro'}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Rareza:</span>
+                        <strong>
+                            ${pedido.rareza || 'Sin registro'}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Universo:</span>
+                        <strong>
+                            ${pedido.universo || 'Sin registro'}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Cantidad:</span>
+                        <strong>
+                            ${pedido.cantidad || 'Sin registro'}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Total:</span>
+                        <strong>
+                            ₡${pedido.total || 'Sin registro'}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Ubicación:</span>
+                        <strong>
+                            ${(pedido.provincia + ', ' || '') + (pedido.canton + ', ' || ' ') + (pedido.distrito + ' ' || ' ')}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Teléfono:</span>
+                        <strong>
+                            ${pedido.telefono || 'Sin registro'}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Pago:</span>
+                        <strong>
+                            ${
+                                pedido.fecha_registro ==
+                                pedido.fecha_pago
+                                ? 'Pendiente'
+                                : formatearFechaConHora(
+                                    pedido.fecha_pago
+                                )
+                            }
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="order-actions">
+
+                ${
+                    pedido.pagado == 0
+                    ?
+                    `
+                    <button
+                        class="store-filter-btn px-4 justify-content-center text-decoration-none"
+                        onclick="
+                            pagarPedido(
+                                '${pedido.id}',
+                                '${pedido.idProducto}',
+                                '${pedido.cantidad}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-wallet"></i>
+                        Pagar
+                    </button>
+                    `
+                    :
+                    ''
+                }
+
+                ${
+                    pedido.pagado == 0
+                    ?
+                    `
+                    <button
+                        class="store-filter-btn px-4 justify-content-center text-decoration-none"
+                        onclick="
+                            eliminarPedido(
+                                ${pedido.id},
+                                '${pedido.producto}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-trash3-fill"></i>
+                        Eliminar
+                    </button>
+                    `
+                    :
+                    ''
+                }
+
+                ${
+                    pedido.pagado == 0
+                    ?
+                    `
+                    <button
+                        class="store-filter-btn px-4 justify-content-center text-decoration-none"
+                        onclick="
+                            abrirModalActualizarProgreso(
+                                '${pedido.id}',
+                                '${pedido.progreso || 0}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Actualizar progreso
+                    </button>
+                    `
+                    :
+                    ''
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+    `;
+
+    if(returnHtml){
+        return html;
+    }
+
+    $('#list-container')
+        .append(html);
+}
+
+function renderPedidoAdminSkeleton(id){
+
+    $('#list-container').append(`
+
+        <div
+            class="order-admin-card product-skeleton"
+            id="pedido-skeleton-${id}"
+        >
+
+            <div class="order-admin-header">
+
+                <div>
+
+                    <div class="skeleton-line skeleton-subtitle"></div>
+
+                    <div class="skeleton-line skeleton-title"></div>
+
+                </div>
+
+                <div class="skeleton-badge"></div>
+
+            </div>
+
+            <div class="order-admin-body">
+
+                <div
+                    class="
+                        order-admin-image
+                        skeleton-box
+                    "
+                ></div>
+
+                <div class="order-info">
+
+                    <div
+                        class="
+                            order-info-grid
+                        "
+                    >
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="order-actions">
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `);
+}
+
+async function seleccionarPedidosCliente(
+    cliente,
+    producto,
+    categoria,
+    rareza,
+    universo,
+    color,
+    pagado
+){
+
+    // token único
+    const currentToken = ++tokenCargaPedidos;
+
+    const container = $('#orders-container');
+
+    container.html(``);
+
+    const order = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    }
+
+    const textElement = ["pedido", "pedidos"];
+
+    try{
+
+        const response = await $.ajax({
+            url: backend + urlOrder,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                accion: 'listarIdsCliente',
+                cliente: cliente || '',
+                producto: producto || '',
+                categoria: categoria || '',
+                rareza: rareza || '',
+                universo: universo || '',
+                color: color || '',
+                pagado: pagado || '',
+                orden: order
             }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
+        });
+
+        // cancelar cargas viejas
+        if(currentToken !== tokenCargaPedidos){
+            return;
         }
-    });
+
+        const ids = response || [];
+
+        mostrarTotalRegistros(ids.length, [textElement[0], textElement[1]]);
+
+        container.empty();
+
+        if(ids.length === 0){
+
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron ${textElement[1]}.
+                </div>
+            `);
+
+            return;
+        }
+
+        await cargarPedidosProgresivamente(
+            ids,
+            currentToken
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        // solo mostrar error si sigue siendo
+        // la carga actual
+        if(currentToken === tokenCargaPedidos){
+
+            container.html(`
+                <div class="orders-empty">
+                    Error al cargar los ${textElement[1]}.
+                </div>
+            `);
+        }
+    }
+}
+
+async function cargarPedidosProgresivamente(
+    ids,
+    currentToken
+){
+
+    // cancelar cargas viejas
+    if(currentToken !== tokenCargaPedidos){
+        return;
+    }
+
+    const container = $('#orders-container');
+
+    container.empty();
+
+    for(const id of ids){
+
+        renderPedidoSkeleton(id);
+
+        if(currentToken !== tokenCargaPedidos){
+            return;
+        }
+
+        try{
+
+            const response = await $.ajax({
+
+                url: backend + urlOrder,
+
+                type: 'POST',
+
+                dataType: 'json',
+
+                data: {
+                    accion: 'buscarPorIdCliente',
+                    id: id
+                }
+            });
+
+            if(currentToken !== tokenCargaPedidos){
+                return;
+            }
+
+            const pedido = response;
+
+            if(!pedido){
+                continue;
+            }
+
+            // evitar duplicados
+            if($(`#pedido-${pedido.id}`).length){
+                continue;
+            }
+
+            $(`#pedido-skeleton-${pedido.id}`).replaceWith(
+                renderPedidoCliente(pedido, true)
+            );
+
+        }
+        catch(error){
+
+            console.error(
+                'Error cargando pedido:',
+                id,
+                error
+            );
+        }
+    }
+}
+
+function renderPedidoCliente(pedido, returnHtml = false){
+
+    const container = $('#orders-container');
+
+    const json = encodeURIComponent(
+        JSON.stringify(pedido)
+    );
+
+    const pagado = pedido.pagado == 1;
+
+    const estadoClass =
+        pagado
+            ? 'order-status-paid'
+            : 'order-status-pending';
+
+    const estadoLabel =
+        pagado
+            ? 'Pagado'
+            : 'Pendiente';
+
+    const html = `
+
+        <div class="order-card" id="pedido-${pedido.id}">
+
+            <!-- HEADER -->
+            <div class="order-card-header">
+                <div>
+                    <p class="order-number">
+                        Registrado el ${formatearFechaConHora(pedido.fecha_registro)}
+                    </p>
+                    <h5 class="order-product">
+                        ${pedido.producto}
+                    </h5>
+                </div>
+                <div class="order-status ${estadoClass}">
+                    ${estadoLabel}
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="order-card-body">
+
+                <!-- IMÁGENES -->
+                <div class="order-product-images">
+
+                    <!-- PRODUCTO -->
+                    <div class="order-product-image">
+                        <img
+                            id="img-${pedido.id}"
+                            class="order-image"
+                            src="${pedido.imagen_producto || ''}"
+                            alt="Producto"
+                        >
+                    </div>
+
+                    <!-- ACCESORIO -->
+                    ${
+                        pedido.accesorio
+                        ?
+                        `
+                        <div class="order-product-image">
+                            <img
+                                class="order-image"
+                                src="${pedido.imagen_accesorio || ''}"
+                                alt="Accesorio"
+                            >
+                        </div>
+                        `
+                        :
+                        ''
+                    }
+                </div>
+
+                <!-- INFO -->
+                <div class="order-info">
+                    <div class="order-info-grid">
+                        <div class="order-progress-wrapper">
+                            <div class="order-progress-header">
+                                <span>
+                                    Progreso
+                                </span>
+                                <strong>
+                                    ${pedido.progreso || 0}%
+                                </strong>
+                            </div>
+                            <div class="order-progress-bar">
+                                <div
+                                    class="order-progress-fill"
+                                    style="
+                                        width:${pedido.progreso || 0}%;
+                                        background:${obtenerColorProgreso( // globalFunctions.js
+                                            pedido.progreso || 0
+                                        )};
+                                    "
+                                ></div>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Categoría</span>
+                            <strong>
+                                ${pedido.categoria || '-'}
+                            </strong>
+                        </div>
+                        <div>
+                            <span>Universo</span>
+                            <strong>
+                                ${pedido.universo || '-'}
+                            </strong>
+                        </div>
+                        <div>
+                            <span>Cantidad</span>
+                            <strong>
+                                ${pedido.cantidad}
+                            </strong>
+                        </div>
+                        <div>
+                            <span>Precio unitario</span>
+                            <strong>
+                                ₡${pedido.precio}
+                            </strong>
+                        </div>
+                        <div>
+                            <span>Total</span>
+                            <strong class="order-total">
+                                ₡${pedido.total}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTONES -->
+                <div class="order-actions">
+                    ${
+                        !pagado
+                        ?
+                        `
+                        <button
+                            class="store-filter-btn px-4 px-md-5 px-lg-4"
+                            onclick="
+                                quitarPedido(
+                                    ${pedido.id},
+                                    ${pedido.idCliente},
+                                    '${pedido.producto}',
+                                    false
+                                )
+                            "
+                        >
+                            <i class="bi bi-x-circle-fill"></i>
+                            <span>
+                                Cancelar
+                            </span>
+                        </button>
+                        `
+                        :
+                        ''
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+
+    if(returnHtml){
+        return html;
+    }
+
+    container.append(html);
+}
+
+function renderPedidoSkeleton(id){
+
+    const container = $('#orders-container');
+
+    container.append(`
+
+        <div
+            class="order-card order-skeleton"
+            id="pedido-skeleton-${id}"
+        >
+
+            <div class="order-card-header">
+
+                <div class="skeleton-line skeleton-title"></div>
+
+                <div class="skeleton-badge"></div>
+
+            </div>
+
+            <div class="order-card-body">
+
+                <div class="order-product-images">
+
+                    <div class="order-product-image skeleton-box"></div>
+
+                </div>
+
+                <div class="order-info">
+
+                    <div class="order-info-grid">
+
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+
+                    </div>
+
+                </div>
+
+                <div class="order-actions">
+
+                    <div class="skeleton-button"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `);
 }
 
 function procesarPedidosClienteSecuencialmente(lista, index, colspan) {
@@ -873,188 +1244,6 @@ function cargarPedidosClienteSeleccionado(id, callback) {
     });
 }
 
-function mostrarPedidosCliente(pedidos) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-
-    pedidos = ordenar(pedidos, order);
-
-    if (!Array.isArray(pedidos) || pedidos.length === 0) {
-        container.append('<tr><td class="text-center" colspan="11">No se encontraron pedidos.</td></tr>');
-        return;
-    }
-
-    pedidos.forEach((pedido, index) => {
-        const json = encodeURIComponent(JSON.stringify(pedido));
-        const vectColors = (pedido.colores).split(',');
-
-        let indexColor = 0;
-        let indexAccesoryColor = 0;
-        let isColorAccesory = false;
-
-        for (let index = 0; index < vectColors.length; index++) {
-            if (vectColors[index] == pedido.idColor) {
-                indexColor = index;
-            }
-        }
-
-        try {
-            const vectAccesoryColors = (pedido.coloresAccesorio).split(',');
-            isColorAccesory = true;
-
-            for (let index = 0; index < vectAccesoryColors.length; index++) {
-                if (vectAccesoryColors[index] == pedido.idColorAccesorio) {
-                    indexAccesoryColor = index;
-                }
-            }
-        } catch (error) {
-            //
-        }
-
-        const html = `
-            <tr>
-                <td class="align-middle">${startIndex + index + 1}</td>
-                <td class="align-middle" style="width: 256px;">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${pedido.id}" 
-                            style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${pedido.id}" class="d-none w-auto h-100" alt="Imagen">
-                        ${isColorAccesory ? `
-                            <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-accesory-${pedido.id}" 
-                            style="width: 50px; height: 50px;"></div>
-                            <img id="img-accesory-${pedido.id}" class="d-none w-auto h-100" alt="Imagen">
-                        ` : ''}
-                    </div>
-                </td>
-                <td class="align-middle">
-                    <ul class="list-group border-0 px-0">
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Producto: </strong>${pedido.producto}</li>
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Categoría: </strong>${pedido.categoria}</li>
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Precio: </strong>₡${pedido.precio}</li>
-                        <li class="list-group-item border-0 bg-transparent px-0"><strong>Cantidad: </strong>${pedido.cantidad} ${pedido.cantidad.toString() != '1' ? 'unidades' : 'unidad'}</li>
-                    </ul>
-                </td>
-                <td class="align-middle">₡${pedido.total}</td>
-                <td class="align-middle ${pedido.pagado == 0 ? 'text-danger' : 'text-success'}">${pedido.pagado == 0 ? 'No' : 'Si'}</td>
-                <td class="align-middle text-center" style="width: 1px;">
-                    <div class="d-flex gap-2 justify-content-end">
-                        ${pedido.pagado == 0 ? `
-                        <button onclick="quitarPedido(${pedido.id}, ${pedido.idCliente}, '${pedido.producto}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Anular<i class="bi bi-x ms-2"></i>
-                        </button>
-                        ` : ''}
-                        <button onclick="verDetallesPedidoCliente('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        container.append(html);
-        buscarImagenPedido(pedido.id, indexColor + 1);
-        try {
-            if (isColorAccesory) {
-                buscarImagenAccesorioPedido(pedido.id, indexAccesoryColor + 1);
-            }
-        } catch (error) {
-            //
-        }
-        //mostrarParteColorProducto(indexColor, vectColors.length, pedido.imagen, ('canva' + (startIndex + index + 1).toString()), ('result' + (startIndex + index + 1).toString()));
-    });
-}
-
-function verDetallesPedidoCliente(json) {
-    const pedido = JSON.parse(decodeURIComponent(json)); // Decodificar y parsear el JSON
-    alertDetails(
-        'Detalles del pedido',
-        pedido,
-        ['producto', 'cantidad', 'total', 'pagado', 'fecha_registro'],
-        'info',
-        'Cerrar'
-    );
-}
-
-function actualizarPaginacionPedido(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
-
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaPedido(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
-
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaPedido(${i})">${i}</a>
-                </li>
-            `);
-        }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaPedido(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
-    }
-}
-
-function actualizarPaginacionPedidoCliente(totalItems, cliente) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
-
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaPedidoCliente(${currentPage - 1}, ${cliente})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
-
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaPedidoCliente(${i}, ${cliente})">${i}</a>
-                </li>
-            `);
-        }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaPedidoCliente(${currentPage + 1}, ${cliente})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
-    }
-}
-
-function cambiarPaginaPedido(pagina) {
-    currentPage = pagina;
-    aplicarFiltrosPedido();
-}
-
-function cambiarPaginaPedidoCliente(pagina, cliente) {
-    currentPage = pagina;
-    aplicarFiltrosPedidosCliente(cliente);
-}
-
 function limpiarFiltrosPedido() {
     $('#Cliente').val('');
     $('#Producto').val('');
@@ -1085,74 +1274,104 @@ function pagarPedido(id, idProduct, cant) {
         cantidad: cant
     };
 
+    abrirModal('modalGuardando');
+    cambiarMensajeModal(
+        "#modalGuardando",
+        "Pagando...",
+        "Espere un momento...",
+        "bi bi-wifi",
+        false
+    );
+
     $.ajax({
         url: backend + urlOrder,
         type: 'POST',
         data: data,
         success: function (response) {
-            seleccionarPedidos('', '', '', '', '', '', '', '', '');
-            alert(
+            aplicarFiltrosPedido();
+            cambiarMensajeModal(
+                "#modalGuardando",
                 '¡Pedido pagado!',
-                response,
-                'success',
-                'Aceptar'
+                'El pedido se ha pagado correctamente.',
+                'bi bi-check-circle',
+                true
             );
         },
         error: function () {
-            alert(
-                'Error',
-                'Hubo un problema al intentar pagar el pedido.',
-                'error',
-                'Aceptar'
+            cambiarMensajeModal(
+                "#modalGuardando",
+                '¡Error!',
+                'El pedido no se ha podido pagar.',
+                'bi bi-x-circle',
+                true
             );
         }
     });
 }
 
-function quitarPedido(id, idCliente, nombre, eliminar) {
-    const accion = 'quitar';
-    const data = {
-        accion: accion,
-        id: id,
-    };
+let callbackConfirmacion = null;
+
+function quitarPedido(
+    id,
+    idCliente,
+    nombre,
+    eliminar
+) {
 
     if (!eliminar) {
-        dialogAlert(
-            '¿Estás seguro?',
-            '¿De verdad quiere eliminar el producto "' + nombre + '" de tu lista de pedidos? ¡Si lo haces no se podrá revertir al menos que lo vuelva a reservar en la tienda!',
-            'warning',
-            'Si, estoy seguro',
-            'No',
-            function () {
-                quitarPedido(id, idCliente, '', true);
-            }
-        );
-    } else {
-        $.ajax({
-            url: backend + urlOrder,
-            type: 'POST',
-            data: data,
-            success: function (response) {
-                seleccionarPedidosCliente(idCliente, '', '', '', '', '', '');
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
-            },
-            error: function () {
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
+        abrirModalConfirmacion({
+            titulo: '¿Eliminar pedido?',
+            texto:
+                `¿Desea eliminar "${nombre}" de tu lista de pedidos?`,
+            icono: 'bi bi-trash-fill',
+            callback: function () {
+                quitarPedido(
+                    id,
+                    idCliente,
+                    nombre,
+                    true
                 );
             }
         });
+        return;
     }
+
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Eliminado pedido", "Se está eliminado el pedido", "bi bi-trash-fill", false);
+
+    $.ajax({
+        url: backend + urlOrder,
+        type: 'POST',
+        data: {
+            accion: 'quitar',
+            id: id
+        },
+        success: function (response) {
+            seleccionarPedidosCliente(
+                idCliente,
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
+            const data =
+                typeof response === 'string'
+                    ? JSON.parse(response)
+                    : response;
+            cambiarMensajeModal("#modalGuardando", "¡Eliminado!", "Se ha eliminado el pedido", "bi bi-x-circle", true);
+        },
+
+        error: function () {
+            mostrarModalRespuesta({
+                title: 'Error',
+                text: 'No se pudo eliminar el pedido.',
+                icon: 'error'
+            });
+            cambiarMensajeModal("#modalGuardando", "Eliminado pedido", "Se está eliminado el pedido", "bi bi-x-circle", true);
+        }
+    });
 }
 
 function guardarPedidoSinUsuario(idProduct, cant, total) {
@@ -1240,4 +1459,58 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
             }
         });
     }
+}
+
+function abrirModalActualizarProgreso(
+    id,
+    progreso
+){
+
+    pedidoSeleccionado = id;
+
+    $('#progreso')
+        .val(
+            progreso || 0
+        );
+
+    $('#texto-progreso')
+        .text(
+            `${progreso || 0}%`
+        );
+
+    abrirModal(
+        'modalActualizarProgreso'
+    );
+}
+
+function actualizarProgresoPedido() {
+    if(!pedidoSeleccionado){
+        return;
+    }
+
+    const progreso =
+        $('#progreso').val();
+
+    const accion = 'actualizarProgresoPedido';
+    const data = {
+        accion: accion,
+        id: pedidoSeleccionado,
+        progreso: progreso,
+    };
+
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Actulizando avance del pedido", "Se está actualizando el progreso actual del pedido", "bi bi-arrow-clockwise", false);
+
+    $.ajax({
+        url: backend + urlOrder,
+        type: 'POST',
+        data: data,
+        success: function (response) {
+            cambiarMensajeModal("#modalGuardando", "Progreso actualizado", "Se ha actualizado el progreso del producto", "bi bi-check-circle", true);
+            aplicarFiltrosPedido();
+        },
+        error: function () {
+            cambiarMensajeModal("#modalGuardando", "¡Error!", "Ha ocurrido un error al tratar de actualizar el progreso del pedido", "bi bi-x-circle", true);
+        }
+    });
 }

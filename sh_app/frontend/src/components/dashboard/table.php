@@ -1,21 +1,56 @@
-<div class="col p-0">
-    <div class="card overflow-hidden rounded-3" style="background: #DDDDDD;">
-        <div class="admin-indicator-card-card-bg w-100 px-2 py-1">
-            <h6 class="card-title fw-semibold"><?php echo $table['title']; ?></h6>
+<div class="col-12 col-xl p-0 dashboard-shadow">
+
+    <div class="dashboard-table-card">
+
+        <div class="dashboard-section-header">
+
+            <h6>
+                <?php echo $table['title']; ?>
+            </h6>
+
         </div>
-        <div class="card-body pt-1 pb-0">
+
+        <div class="dashboard-table-body">
+
             <div class="table-responsive">
-                <table class="table table-hover table-striped">
+
+                <table
+                    class="
+                        table
+                        dashboard-table
+                        table-hover
+                    "
+                >
+
                     <thead>
-                        <tr class="bg-green text-white fw-semibold">
-                            <?php foreach ($table['headers'] as $header): ?>
-                            <th scope="col" class="align-middle"><?php echo $header; ?></th>
+
+                        <tr>
+
+                            <?php
+                            foreach(
+                                $table['headers']
+                                as $header
+                            ):
+                            ?>
+
+                            <th>
+                                <?php echo $header; ?>
+                            </th>
+
                             <?php endforeach; ?>
+
                         </tr>
+
                     </thead>
+
                     <tbody id="<?php echo $table['id']; ?>"></tbody>
+
                 </table>
+
             </div>
+
         </div>
+
     </div>
+
 </div>

@@ -50,11 +50,11 @@ function guardar($conn, $id, $imagenFile, $colImagen, $tabla)
         ];
 
         if (!in_array($tabla, $tablasPermitidas)) {
-            return ['icon' => "error", 'text' => "Tabla no permitida"];
+            return ['icon' => "bi bi-x-circle", 'text' => "Tabla no permitida"];
         }
 
         if (!in_array($colImagen, $columnasPermitidas)) {
-            return ['icon' => "error", 'text' => "Columna no permitida"];
+            return ['icon' => "bi bi-x-circle", 'text' => "Columna no permitida"];
         }
 
         // no viene imagen, entonces guardar NULL
@@ -66,12 +66,12 @@ function guardar($conn, $id, $imagenFile, $colImagen, $tabla)
 
             if ($stmt->execute()) {
                 return [
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'text' => "Imagen eliminada correctamente"
                 ];
             }
 
-            return ['icon' => "error", 'text' => "No se pudo eliminar la imagen"];
+            return ['icon' => "bi bi-x-circle", 'text' => "No se pudo eliminar la imagen"];
         }
 
         // viene imagen, entonces guardar binario
@@ -86,16 +86,16 @@ function guardar($conn, $id, $imagenFile, $colImagen, $tabla)
 
         if ($stmt->execute()) {
             return [
-                'icon' => "success",
+                'icon' => "bi bi-check-circle",
                 'text' => "Imagen actualizada correctamente"
             ];
         }
 
-        return ['icon' => "error", 'text' => "No se pudo actualizar la imagen"];
+        return ['icon' => "bi bi-x-circle", 'text' => "No se pudo actualizar la imagen"];
 
     } catch (mysqli_sql_exception $e) {
         return [
-            'icon' => "error",
+            'icon' => "bi bi-x-circle",
             'text' => "Error SQL: " . $e->getMessage()
         ];
     }
@@ -157,13 +157,13 @@ function buscar($conn, $id, $colImagen, $tabla, $rowCampo)
         ];
 
         if (!in_array($tabla, $tablasPermitidas)) {
-            return ['title' => "¡Error!", 'text' => "Tabla no permitida", 'icon' => "error", 'value' => 0];
+            return ['title' => "¡Error!", 'text' => "Tabla no permitida", 'icon' => "bi bi-x-circle", 'value' => 0];
         }
         if (!in_array($colImagen, $columnasPermitidas)) {
-            return ['title' => "¡Error!", 'text' => "Columna no permitida", 'icon' => "error", 'value' => 0];
+            return ['title' => "¡Error!", 'text' => "Columna no permitida", 'icon' => "bi bi-x-circle", 'value' => 0];
         }
         if (!in_array($rowCampo, $camposPermitidos)) {
-            return ['title' => "¡Error!", 'text' => "Campo no permitido", 'icon' => "error", 'value' => 0];
+            return ['title' => "¡Error!", 'text' => "Campo no permitido", 'icon' => "bi bi-x-circle", 'value' => 0];
         }
 
         $query = "SELECT $colImagen FROM $tabla WHERE estado = 1 AND $rowCampo = ?";
@@ -176,17 +176,17 @@ function buscar($conn, $id, $colImagen, $tabla, $rowCampo)
                 return [
                     'title' => "¡Éxito!",
                     'text' => "Imagen encontrada",
-                    'icon' => "success",
+                    'icon' => "bi bi-check-circle",
                     'value' => $row[$colImagen]
                 ];
             } else {
-                return ['title' => "¡Error!", 'text' => "No se encontró la imagen", 'icon' => "error", 'value' => 0];
+                return ['title' => "¡Error!", 'text' => "No se encontró la imagen", 'icon' => "bi bi-x-circle", 'value' => 0];
             }
         } else {
-            return ['title' => "¡Error!", 'text' => "Error al ejecutar la consulta", 'icon' => "error", 'value' => 0];
+            return ['title' => "¡Error!", 'text' => "Error al ejecutar la consulta", 'icon' => "bi bi-x-circle", 'value' => 0];
         }
     } catch (mysqli_sql_exception $e) {
-        return ['title' => "¡Error!", 'text' => "Error al obtener la imagen: " . $e->getMessage(), 'icon' => "error", 'value' => 0];
+        return ['title' => "¡Error!", 'text' => "Error al obtener la imagen: " . $e->getMessage(), 'icon' => "bi bi-x-circle", 'value' => 0];
     }
 }
 

@@ -26,7 +26,7 @@
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "La configuración se ha actualizado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -34,7 +34,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar la configuración: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }

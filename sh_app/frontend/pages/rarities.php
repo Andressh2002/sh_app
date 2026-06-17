@@ -3,6 +3,7 @@
     checkAccess('Administrador');
 
     ob_start();
+
     $pageTitle = "Rarezas";
     $pageIcon = 'bi-tag-fill';
     $type = 'rareza';
@@ -12,34 +13,48 @@
     $showFooter = false;
     $showSidebar = true;
 
-    $updateRarity = false;
-
     $inputs = [
         [
             'label' => 'Nombre',
             'id' => 'Nombre',
             'icon' => 'bi bi-card-text',
             'input' => 'text',
-            'onchange' => 'currentPage = 1; aplicarFiltrosRareza()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Buscar rareza...',
         ]
     ];
+
     $orders = [
         [
             'label' => 'Ordenar por:',
             'id' => 'Ordenar_por',
-            'icon' => '',
+            'icon' => 'bi bi-arrow-down-up',
             'input' => 'select',
             'options' => [
+                'rr.fecha_registro' => 'Fecha de creación',
                 'rr.nombre' => 'Nombre',
-                'rr.fecha_registro' => 'Fecha de creación'
             ],
-            'onchange' => 'aplicarFiltrosRareza()',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+        ],
+        [
+            'label' => 'De forma:',
+            'id' => 'Ordenar_en',
+            'icon' => 'bi bi-arrow-down-up',
+            'input' => 'select',
+            'options' => [
+                'DESC' => 'Descendente',
+                'ASC' => 'Ascendente'
+            ],
+            'btnHelp' => false,
+            'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ]
     ];
+
     $menuTable = [
         'url' => 'addRarity.php',
         'updateMethod' => 'seleccionarRarezas('.')',
@@ -47,67 +62,54 @@
         'pageInfo' => 'rarezas',
         'showAdd' => true,
         'showUpdate' => true,
-        'showInfo' => true,
-        'spans' => [null, null],
+        'showInfo' => false,
+        'showCount' => true,
     ];
-    $headers = ['#', 'Nombre', 'Color', 'Opciones'];
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Rarezas</h4>
-            <i class="bi bi-search fs-4 d-flex align-self-center"></i>
-        </div>
+<div class="w-100 overflow-hidden p-0">
+
+    <div class="row px-0 py-1" id="formulario-filtros">
+
+        <?php
+        foreach ($inputs as $input) {
+            include '../src/components/inputs/input.php';
+        }
+        ?>
+
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Filtros</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros">
-                <?php
-                foreach ($inputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Orden</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1" id="formulario-filtros-orden">
-                <?php
-                foreach ($orders as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
+
+    <div class="row px-0 py-1" id="formulario-filtros-orden">
+
+        <?php
+        foreach ($orders as $input) {
+            include '../src/components/inputs/input.php';
+        }
+        ?>
+
+    </div>
+
+    <div class="px-0 pb-2">
+
         <div class="row justify-content-between">
-            <div class="col-auto">
-                <p class="card-text mb-3" id="total-data"></p>
-            </div>
-        </div>
-        <div class="row justify-content-between">
-            <div class="col-auto">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination"></ul>
-                </nav>
-            </div>
+
             <div class="col-auto d-flex gap-2 mb-4">
-                <?php include '../src/components/tables/menuTable.php'; ?>
+
+                <?php
+                include '../src/components/tables/menuTable.php';
+                ?>
+
             </div>
+
         </div>
-        <div class="border border-1 border-light rounded-2 overflow-hidden">
-            <?php include '../src/components/tables/dataTable.php'; ?>
-        </div>
+
+        <div
+            id="list-container"
+            class="products-admin-grid p-0"
+        ></div>
+
     </div>
+
 </div>
 
 <?php
@@ -116,7 +118,58 @@
 ?>
 
 <script>
-    $(document).ready(function() {
+
+    $(document).ready(function(){
+
         seleccionarRarezas('');
+
     });
+
+    let typingTimer;
+
+    function actualizarDatosConFiltros(){
+
+        seleccionarRarezas(
+            $('#Nombre').val()
+        );
+
+    }
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function(){
+
+            $('#Nombre').on(
+                'input',
+                function(){
+
+                    clearTimeout(typingTimer);
+
+                    typingTimer = setTimeout(
+                        () => {
+
+                            currentPage = 1;
+
+                            actualizarDatosConFiltros();
+
+                        },
+                        400
+                    );
+                }
+            );
+
+            $('#Ordenar_por, #Ordenar_en').on(
+                'change',
+                function(){
+
+                    currentPage = 1;
+
+                    actualizarDatosConFiltros();
+
+                }
+            );
+
+        }
+    );
+
 </script>

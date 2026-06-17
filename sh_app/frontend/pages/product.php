@@ -13,367 +13,438 @@
     $idCliente = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : '';
 
     $pageTitle = $nombreProducto;
+
+    $modalComentario = [
+        'id' => 'modalGuardarComentario',
+        'title' => 'Guardar comentario',
+        'icon' => 'bi bi-chat-left-text-fill',
+        'size' => 'modal-lg',
+        'btn_close' => true,
+
+        'form' => [
+
+            [
+                'label' => 'Comentario',
+                'id' => 'Comentario',
+                'input' => 'textarea',
+                'icon' => 'bi bi-chat-left-text-fill',
+                'placeholder' => 'Escribir comentario...',
+                'help' => 'Escribe un comentario',
+                'required' => 'Campo obligatorio',
+            ],
+
+            [
+                'input' => 'rating',
+                'id' => 'Calificacion',
+                'label' => 'Calificación',
+                'icon' => 'bi bi-star-half',
+                'value' => 0,
+                'help' => 'Selecciona una cantidad de estrellas',
+            ]
+
+        ],
+
+        'buttons' => [
+
+            [
+                'text' => 'Cancelar',
+                'icon' => 'bi bi-x-lg',
+                'class' => 'store-btn-secondary',
+                'dismiss' => true
+            ],
+
+            [
+                'text' => 'Guardar comentario',
+                'icon' => 'bi bi-floppy-fill',
+                'class' => 'store-filter-btn',
+                'onclick' => 'guardarComentario()'
+                //'onclick' => "abrirModal('modalGuardando')"
+            ]
+
+        ]
+    ];
+    $modal = $modalComentario;
+    include '../src/components/modal/modal.php';
 ?>
-<div class="container-fluid p-0 m-0">
-    <div class="w-100 container" id="producto-informacion">
-        <div class="row my-3 align-items-center gap-3 mx-auto">
-            <div class="col px-3 container" style="max-width: 512px;">
-                <!-- Producto -->
-                <div class="row my-2">
-                    <div class="rounded-2 overflow-hidden preview-product-card-bg preview-product-card-border">
-                        <div class="p-4">
-                            <div class="d-flex justify-content-center align-items-center">
-                                <?php 
-                                    $loadingIcon = [
-                                        'id' => 'spinner-imagen-portada',
-                                    ];
-                                    include '../src/components/loading/loading.php';
-                                ?>
-                                <img class="w-auto h-100 product-page-img overflow-hidden" src="" alt="[Imagen del producto]" id="product-color-image">
-                                <canvas id="canvas" style="display: none;"></canvas>
-                                <input type="hidden" class="m-0 p-0" id="idProducto" value="" />
-                            </div>
-                        </div>
-                    </div>
+<div class="container-fluid py-4">
+    <div class="container">
+
+        <!-- ========================================= -->
+        <!-- SKELETON GENERAL -->
+        <!-- ========================================= -->
+
+        <div id="producto-page-skeleton">
+            <div class="row g-4">
+                <div class="col-12 col-lg-5">
+                    <div class="store-skeleton skeleton-image"></div>
+                    <div
+                        class="store-skeleton skeleton-image mt-4"
+                    ></div>
                 </div>
-                
-                <!-- Accesorio -->
-                <div class="row my-2" id="row-imagen-accesorio">
-                    <div class="rounded-2 overflow-hidden preview-product-card-bg preview-product-card-border">
-                        <div class="p-4">
-                            <div class="d-flex justify-content-center align-items-center">
-                                <?php 
-                                    $loadingIcon = [
-                                        'id' => 'spinner-imagen-accesorio',
-                                    ];
-                                    include '../src/components/loading/loading.php';
-                                ?>
-                                <img class="w-auto h-100 product-page-img" src="" alt="[Imagen del accesorio]" id="accesory-color-image">
-                                <canvas id="canvas" style="display: none;"></canvas>
-                                <input type="hidden" class="m-0 p-0" id="idAccesorio" value="" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Datos del producto -->
-            <div class="col px-3">
-                <div class="d-flex flex-column gap-3">
-                    <div class="rounded-2 overflow-hidden preview-product-card-border">
-                        <div class="preview-product-card-bg p-0 m-0">
-                            <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                                <h4 class="card-title" id="nombreProducto">
-                                    <?php 
-                                        $loadingIcon = [
-                                            'width' => '20px',
-                                            'height' => '20px'
-                                        ];
-                                        include '../src/components/loading/loading.php';
-                                    ?>
-                                </h4>
-                            </div>
-                            <div class="px-2 pb-2">
-                                <p class="card-text" id="nombreCategoria"></p>
-                                <p class="card-text" id="nombrePrecio"></p>
-                                <p class="card-text" id="descuento"></p>
-                                <p class="card-text" id="tiempoDescuento"></p>
-                                <p class="card-text" id="disponibilidad"></p>
-                                <div class="m-auto text-star" id="estrellas"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Colores -->
-                    <div class="rounded-2 overflow-hidden preview-product-card-border">
-                        <div class="preview-product-card-bg p-0 m-0">
-                            <div class="preview-product-card-bg-header w-100 px-2 py-1 mb-2">
-                                <p class="card-text">Colores del producto</p>
-                            </div>
-                            <div id="contenedor-colores" class="d-flex flex-wrap gap-2 py-2 justify-content-center align-items-center">
-                                <?php 
-                                    $loadingIcon = [
-                                        'width' => '32px',
-                                        'height' => '32px'
-                                    ];
-                                    include '../src/components/loading/loading.php';
-                                ?>
-                            </div>
-                        </div>
-                        <div class="p-0 m-0" id="isImageEdited"></div>
-                    </div>
-
-                    <!-- Colores del accesorio -->
-                    <div class="rounded-2 overflow-hidden preview-product-card-border" id="row-colores-accesorio">
-                        <div class="preview-product-card-bg p-0 m-0">
-                            <div class="preview-product-card-bg-header w-100 px-2 py-1 mb-2">
-                                <p class="card-text">Colores del accesorio</p>
-                            </div>
-                            <div id="contenedor-colores-accesorio" class="d-flex flex-wrap gap-2 py-2 justify-content-center align-items-center">
-                                <?php 
-                                    $loadingIcon = [
-                                        'width' => '32px',
-                                        'height' => '32px'
-                                    ];
-                                    include '../src/components/loading/loading.php';
-                                ?>
-                            </div>
-                        </div>
-                        <div class="p-0 m-0" id="isAccesoryImageEdited"></div>
-                    </div>
-
-                    <!-- Observación -->
-                    <div class="rounded-2 overflow-hidden preview-product-card-border">
-                        <div class="preview-product-card-bg p-0 m-0">
-                            <div class="preview-product-card-bg-header w-100 px-2 py-1 mb-2">
-                                <p class="card-text">Observación</p>
-                            </div>
-                            <div class="px-2 pb-2">
-                                Las imagenes de las paletas son editadas, con el propósito de mostrar el color aproximado que tendrá el producto con la apariencia seleccionada.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Datos modificables -->
-                    <div class="rounded-2 overflow-hidden preview-product-card-border">
-                        <div class="preview-product-card-bg p-0 m-0 overflow-hidden">
-                            <p class="card-text d-flex align-items-center px-2 pt-2">
-                                <span class="me-2">Cantidad:</span>
-                                <input type="number" id="cantidad" value="1" min="1" max="100" class="form-control w-auto">
-                            </p>
-                            <div class="preview-product-card-bg-footer w-100 px-2 py-1 overflow-hidden">
-                                <p class="card-text p-0 m-0 fw-bolder" id="labelTotal"></p>
-                            </div>
-                            <input type="hidden" class="m-0 p-0" id="total" />
-                            <input type="hidden" class="m-0 p-0" id="precio" value="" />
-                        </div>
-                    </div>
-
-                    <!-- Botón de guardar/pedir -->
-                    <div class="align-items-center">
-                        <button 
-                            id="btnAccionProducto"
-                            onclick="" 
-                            type="button" 
-                            class="btn-details text-white border-0 rounded-2 px-4 py-2 d-flex align-items-center"
-                        >
-                            ...
-                            <i class="bi bi-cart-fill ms-2 d-flex align-self-center"></i>
-                        </button>
-                    </div>
+                <div class="col-12 col-lg-7">
+                    <div class="store-skeleton skeleton-title mb-3"></div>
+                    <div class="store-skeleton skeleton-text"></div>
+                    <div class="store-skeleton skeleton-text"></div>
+                    <div class="store-skeleton skeleton-text"></div>
+                    <div
+                        class="store-skeleton skeleton-button mt-4"
+                    ></div>
                 </div>
             </div>
         </div>
 
-        <!-- Descripción del producto -->
-        <div class="row my-3 align-items-center">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0 overflow-hidden">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Descripción</h4>
-                        </div>
-                        <p class="card-text px-2 pb-2" id="descripcionProducto">
-                            <?php 
-                                $loadingIcon = [
-                                    'id' => 'spinner-descripcion',
-                                    'width' => '32px',
-                                    'height' => '32px'
-                                ];
-                                include '../src/components/loading/loading.php';
-                            ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Advertencias -->
-        <div class="row my-3 align-items-center" id="row-advertencias">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0 overflow-hidden">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Advertencias</h4>
-                        </div>
-                        <p class="card-text px-2 pb-2" id="advertenciasProducto">
-                            <?php 
-                                $loadingIcon = [
-                                    'id' => 'spinner-advertencias',
-                                    'width' => '32px',
-                                    'height' => '32px'
-                                ];
-                                include '../src/components/loading/loading.php';
-                            ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- ========================================= -->
+        <!-- CONTENIDO REAL -->
+        <!-- ========================================= -->
 
-        <!-- Datos Características del producto -->
-        <div class="row my-3 align-items-center">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0 overflow-hidden">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Características</h4>
+        <div id="producto-page-content" class="d-none">
+
+            <!-- ========================================= -->
+            <!-- PRODUCTO -->
+            <!-- ========================================= -->
+
+            <div class="row g-4 align-items-start">
+
+                <!-- IMÁGENES -->
+                <div class="col-12 col-lg-5">
+
+                    <!-- Imagen principal -->
+                    <div class="store-panel-shadow mb-4">
+                        <div class="store-panel">
+                            <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                                <i class="bi bi-image-fill"></i>
+                                Producto
+                            </div>
+                            <div class="store-panel-body text-center">
+
+                                <!-- Skeleton -->
+                                <div
+                                    id="skeleton-image-main"
+                                    class="
+                                        store-skeleton
+                                        skeleton-image
+                                    "
+                                ></div>
+                                <img
+                                    id="product-color-image"
+                                    class="
+                                        product-page-img
+                                        d-none
+                                        w-100 h-auto
+                                    "
+                                    src=""
+                                    alt=""
+                                >
+
+                                <!-- COLORES PRODUCTO -->
+                                <div
+                                    id="contenedor-colores"
+                                    class="
+                                        d-flex
+                                        flex-wrap
+                                        gap-3
+                                        justify-content-center
+                                        mt-4
+                                    "
+                                ></div>
+                            </div>
                         </div>
-                        <div class="d-flex flex-wrap gap-2 px-0 pb-2">
-                            <div class="d-flex flex-column align-items-center mx-2">
-                                <div class="w-100 py-2 d-flex gap-2">
-                                    <label class="form-label m-0">Altura</label>
-                                    <i class="bi bi-rulers d-flex align-self-center"></i>
+                    </div>
+
+                    <!-- Accesorio -->
+                    <div
+                        id="row-imagen-accesorio"
+                        class="store-panel-shadow"
+                    >
+                        <div class="store-panel">
+                            <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                                <i class="bi bi-gem"></i>
+                                Accesorio
+                            </div>
+                            <div
+                                class="
+                                    store-panel-body
+                                    text-center
+                                "
+                            >
+                                <div
+                                    id="skeleton-image-accesorio"
+                                    class="
+                                        store-skeleton
+                                        skeleton-image
+                                    "
+                                ></div>
+                                <img
+                                    id="accesory-color-image"
+                                    class="
+                                        product-page-img
+                                        d-none
+                                        w-100 h-auto
+                                    "
+                                    src=""
+                                    alt=""
+                                >
+
+                                <!-- COLORES ACCESORIO -->
+                                <div
+                                    id="contenedor-colores-accesorio"
+                                    class="
+                                        d-flex
+                                        flex-wrap
+                                        gap-3
+                                        justify-content-center
+                                        mt-4
+                                    "
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN -->
+                <div class="col-12 col-lg-7">
+                    <div class="d-flex flex-column gap-4">
+
+                        <!-- DATOS -->
+                        <div class="store-panel-shadow">
+                            <div class="store-panel">
+                                <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                                    <i class="bi bi-box-fill"></i>
+                                    Información del producto
                                 </div>
-                                <p class="form-label m-0" id="alturaProducto">
-                                    <?php 
-                                        $loadingIcon = [
-                                            'id' => 'spinner-altura',
-                                            'width' => '24px',
-                                            'height' => '24px'
-                                        ];
-                                        include '../src/components/loading/loading.php';
-                                    ?>
-                                </p>
-                            </div>
-                            <div class="d-flex flex-column align-items-center mx-2">
-                                <div class="w-100 py-2 d-flex gap-2">
-                                    <label class="form-label m-0">Peso</label>
-                                    <i class="bi bi-hammer d-flex align-self-center"></i>
-                                </div>
-                                <p class="form-label m-0" id="pesoProducto">
-                                    <?php 
-                                        $loadingIcon = [
-                                            'id' => 'spinner-peso',
-                                            'width' => '24px',
-                                            'height' => '24px'
-                                        ];
-                                        include '../src/components/loading/loading.php';
-                                    ?>
-                                </p>
-                            </div>
-                            <div class="d-flex flex-column align-items-center mx-2">
-                                <div class="w-100 py-2 d-flex gap-2">
-                                    <label class="form-label m-0">Tiempo</label>
-                                    <i class="bi bi-alarm-fill d-flex align-self-center"></i>
-                                </div>
-                                <p class="form-label m-0" id="tiempoProducto">
-                                    <?php 
-                                        $loadingIcon = [
-                                            'id' => 'spinner-tiempo',
-                                            'width' => '24px',
-                                            'height' => '24px'
-                                        ];
-                                        include '../src/components/loading/loading.php';
-                                    ?>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                <div class="store-panel-body">
 
-        <!-- Imágen de galería -->
-        <div class="row my-3 align-items-center">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0 overflow-hidden">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Galería</h4>
-                        </div>
-                        <p class="card-text d-flex justify-content-center align-items-center px-2 pb-2">
-                            <?php 
-                                $loadingIcon = [
-                                    'id' => 'spinner-imagen-galeria'
-                                ];
-                                include '../src/components/loading/loading.php';
-                            ?>
-                            <div class="d-flex">
-                                <img id="imagenGaleria" class="w-auto h-100 product-page-img overflow-hidden rounded rounded-4 mx-auto" src="" alt="[Imágen de galería]" style="max-height: 196px;">
-                            </div>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                    <!-- Skeleton -->
+                                    <div id="skeleton-info">
+                                        <div class="store-skeleton skeleton-title"></div>
+                                        <div class="store-skeleton skeleton-text"></div>
+                                        <div class="store-skeleton skeleton-text"></div>
+                                        <div class="store-skeleton skeleton-text"></div>
+                                    </div>
 
-        <!-- Calificación de estrellas -->
-        <div class="row my-3 align-items-center" id="row-calificacion">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Calificación de estrellas</h4>
-                        </div>
-                        <div class="d-flex flex-column align-items-center px-2 pb-2">
-                            <div class="preview-product-card-border rounded-2 p-3" style="background-color:rgb(245, 245, 245)">
-                                <div class="d-flex align-items-center gap-2">
-                                    <button id="reset-rating" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                                        </svg>
-                                    </button>
-                                    <div class="m-auto mb-2 text-star" id="rating-opinion" data-id="opinion">
-                                        <i class="bi bi-star star-radio-pointer" data-star="1"></i>
-                                        <i class="bi bi-star star-radio-pointer" data-star="2"></i>
-                                        <i class="bi bi-star star-radio-pointer" data-star="3"></i>
-                                        <i class="bi bi-star star-radio-pointer" data-star="4"></i>
-                                        <i class="bi bi-star star-radio-pointer" data-star="5"></i>
+                                    <!-- Contenido -->
+                                    <div id="product-info-content" class="d-none">
+                                        <h1 id="nombreProducto" class="mb-3 fw-bold"></h1>
+                                        <div class="product-meta">
+                                            <p
+                                                id="nombreCategoria"
+                                            ></p>
+                                            <div
+                                                id="nombrePrecio"
+                                            ></div>
+                                            <p
+                                                id="descuento"
+                                            ></p>
+                                            <p
+                                                id="tiempoDescuento"
+                                            ></p>
+                                            <p
+                                                id="disponibilidad"
+                                            ></p>
+                                        </div>
+                                        <div
+                                            id="estrellas"
+                                            class="
+                                                text-star
+                                                mt-3
+                                            "
+                                        ></div>
                                     </div>
                                 </div>
-                                <button onclick="" id="save-rating" type="button" class="btn-details mx-auto text-white border-0 rounded-2 px-2 py-1 mt-2 d-flex align-items-center">
-                                    <span id="texto-boton-rating"></span>
-                                    <i id="icono-boton-rating" class="ms-2 d-flex align-items-center"></i>
-                                </button>
-                                <input type="hidden" class="m-0 p-0" id="Estrellas" />
+                            </div>
+                        </div>
+
+                        <!-- ADVERTENCIAS -->
+                        <div
+                            id="row-advertencias"
+                            class="store-panel-shadow"
+                        >
+                            <div class="store-panel">
+                                <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                                    <i
+                                        class="
+                                            bi
+                                            bi-exclamation-triangle-fill
+                                        "
+                                    ></i>
+                                    Advertencias
+                                </div>
+                                <div class="store-panel-body">
+                                    <div
+                                        id="advertenciasProducto"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CANTIDAD -->
+                        <div class="store-panel-shadow">
+                            <div class="store-panel">
+                                <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                                    <i class="bi bi-cart-fill"></i>
+                                    Pedido
+                                </div>
+                                <div class="store-panel-body">
+                                    <div class="mb-3">
+                                        <label class="mb-2">
+                                            Cantidad
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="cantidad"
+                                            class="filter-input w-auto rounded-0"
+                                            value="1"
+                                            min="1"
+                                            max="100"
+                                        >
+                                    </div>
+                                    <h3
+                                        id="labelTotal"
+                                        class="product-price"
+                                    ></h3>
+                                    <div
+                                        class="
+                                            navbar-btn-shadow
+                                            mt-4
+                                        "
+                                    >
+                                        <button
+                                            id="btnAccionProducto"
+                                            class="
+                                                store-filter-btn
+                                                slide_from_left
+                                            "
+                                        >
+                                            ...
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Agregar comentario -->
-        <div class="row my-3 align-items-center" id="row-comentario">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Agregar un comentario</h4>
-                        </div>
-                        <div class="px-2 pb-2">
-                            <textarea class="form-control bi-textarea-resize" id="Comentario" cols="999%" rows="3"></textarea>
-                            <button onclick="guardarComentario()" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 mt-2 d-flex align-items-center">
-                                Enviar
-                                <i class="bi bi-pencil-square ms-2 d-flex align-items-center"></i>
-                            </button>
+
+            <!-- ========================================= -->
+            <!-- DESCRIPCIÓN -->
+            <!-- ========================================= -->
+
+            <div class="store-panel-shadow mt-4">
+                <div class="store-panel">
+                    <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                        <i class="bi bi-card-text"></i>
+                        Descripción
+                    </div>
+                    <div class="store-panel-body">
+                        <div
+                            id="descripcionProducto"
+                            class="lh-lg"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- CARACTERÍSTICAS -->
+            <!-- ========================================= -->
+
+            <div class="store-panel-shadow mt-4">
+                <div class="store-panel">
+                    <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                        <i class="bi bi-rulers"></i>
+                        Características
+                    </div>
+                    <div class="store-panel-body">
+                        <div class="row g-4 text-center">
+                            <div class="col-md-4">
+                                <h5>Altura</h5>
+                                <p id="alturaProducto"></p>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Peso</h5>
+                                <p id="pesoProducto"></p>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Tiempo</h5>
+                                <p id="tiempoProducto"></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Lista de comentarios del producto -->
-        <div class="row my-3 align-items-center">
-            <div class="col px-3">
-                <div class="rounded-2 overflow-hidden preview-product-card-border">
-                    <div class="preview-product-card-bg p-0 m-0">
-                        <div class="preview-product-card-bg-header w-100 px-2 py-3 mb-2">
-                            <h4 class="card-title">Lista de comentarios</h4>
+
+            <!-- ========================================= -->
+            <!-- GALERÍA -->
+            <!-- ========================================= -->
+
+            <div class="store-panel-shadow mt-4">
+                <div class="store-panel">
+                    <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                        <i class="bi bi-image-fill"></i>
+                        Imágen de galería
+                    </div>
+                    <div class="store-panel-body text-center">
+
+                        <!-- Skeleton -->
+                        <div
+                            id="skeleton-galeria"
+                            class="
+                                store-skeleton
+                                skeleton-image
+                            "
+                        ></div>
+                        <img
+                            id="imagenGaleria"
+                            class="
+                                product-page-img
+                                d-none
+                                w-100 h-auto
+                            "
+                            src=""
+                            alt=""
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- COMENTARIOS -->
+            <!-- ========================================= -->
+
+            <div class="store-panel-shadow mt-4">
+                <div class="store-panel">
+                    <div class="store-panel-header px-3 px-sm-3 px-md-4 px-lg-4 px-xl-5">
+                        <i
+                            class="
+                                bi
+                                bi-chat-left-text-fill
+                            "
+                        ></i>
+
+                        Comentarios
+                    </div>
+                    <div class="store-panel-body">
+
+                        <!-- BOTÓN PARA COMENTAR -->
+                        <div class="row px-0 mx-0" id="btn-comentar">
+                            <div class="col-12 px-0">
+                                <div class="navbar-btn-shadow my-4">
+                                    <button
+                                        class="store-filter-btn slide_from_left"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalGuardarComentario"
+                                    >
+                                        <i class="bi bi-chat-left-text"></i>
+                                        <span>Comentar</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="px-2 pb-2">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination"></ul>
-                            </nav>
-                            <?php 
-                                $loadingIcon = [
-                                    'id' => 'spinner-comentarios'
-                                ];
-                                include '../src/components/loading/loading.php';
-                            ?>
-                            <div class="container-fluid row p-0 m-0" id="container-comentaries"></div>
-                        </div>
+
+                        <!-- LISTA DE COMENTARIOS -->
+                        <div
+                            id="container-comentaries" class="overflow-y-scroll" style="max-height: 312px"
+                        ></div>
                     </div>
                 </div>
             </div>
@@ -388,6 +459,8 @@
 <input type="hidden" id="NumColor" value=""> 
 <input type="hidden" id="NumAccesoryColor" value=""> 
 <input type="hidden" id="Sesion" value="<?php echo isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : '' ?>"> 
+<input type="hidden" id="Precio" value=""> 
+<input type="hidden" id="Total" value=""> 
 
 <!-- Productos relacionados -->
 <?php 
@@ -417,4 +490,58 @@
             accion: `Ver el producto ${"<?php echo $pageTitle; ?>"}`,
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.rating-stars').forEach(container => {
+            const hiddenInput = document.getElementById(
+                container.dataset.target
+            );
+            const stars = container.querySelectorAll('.rating-star');
+
+            // Pintar estado inicial
+            paintStars(stars, parseInt(hiddenInput.value || 0));
+            stars.forEach(star => {
+
+                // Hover
+                star.addEventListener('mouseenter', function () {
+                    const value = parseInt(this.dataset.value);
+                    paintStars(stars, value);
+                });
+
+                // Click
+                star.addEventListener('click', function () {
+                    const value = parseInt(this.dataset.value);
+                    hiddenInput.value = value;
+                    paintStars(stars, value);
+
+                    // Ejecutar onchange si existe
+                    const onchange = hiddenInput.getAttribute('data-onchange');
+                    if (onchange) {
+                        eval(onchange);
+                    }
+                });
+            });
+
+            // Restaurar valor real
+            container.addEventListener('mouseleave', function () {
+                paintStars(
+                    stars,
+                    parseInt(hiddenInput.value || 0)
+                );
+            });
+        });
+    });
+
+    function paintStars(stars, value) {
+        stars.forEach(star => {
+            const current = parseInt(star.dataset.value);
+            if (current <= value) {
+                star.classList.remove('bi-star');
+                star.classList.add('bi-star-fill');
+            } else {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
+            }
+        });
+    }
 </script>

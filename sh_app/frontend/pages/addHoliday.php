@@ -1,158 +1,238 @@
 <?php
-    include '../src/components/login/access.php';
-    checkAccess('Administrador');
 
-    ob_start();
+include '../src/components/login/access.php';
+checkAccess('Administrador');
 
-    $showHeader = false;
-    $showNavbar = false;
-    $showFooter = false;
-    $showSidebar = true;
+ob_start();
 
-    $updateHoliday = isset($_GET['accion']) && $_GET['accion'] == 'actualizar';
-    $holidayId = isset($_GET['id']) ? $_GET['id'] : null;
+$showHeader = false;
+$showNavbar = false;
+$showFooter = false;
+$showSidebar = true;
 
-    $pageTitle = $updateHoliday ? 'Actualizar festividad' : 'Agregar festividad';
-    $pageIcon = 'bi-calendar-fill';
-    
-    $informationInputs = [
-        [
-            'label' => 'Nombre',
-            'id' => 'Nombre',
-            'icon' => 'bi bi-card-text',
-            'input' => 'text',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe el nombre de la festividad.",
-            'spans' => ['Obligatorio', null],
+$updateHoliday =
+    isset($_GET['accion']) &&
+    $_GET['accion'] == 'actualizar';
+
+$holidayId =
+    isset($_GET['id'])
+        ? $_GET['id']
+        : null;
+
+$pageTitle =
+    $updateHoliday
+        ? 'Actualizar festividad'
+        : 'Agregar festividad';
+
+$pageIcon = 'bi-calendar-fill';
+
+$basicInputs = [
+
+    [
+        'label' => 'Nombre',
+        'id' => 'Nombre',
+        'icon' => 'bi bi-card-text',
+        'input' => 'text',
+        'btnHelp' => true,
+        'spans' => ['Obligatorio', null],
+        'col' => 'col-12 col-md-6 col-xl-4',
+    ]
+
+];
+
+$datesInputs = [
+
+    [
+        'label' => 'Fecha de inicio',
+        'id' => 'StartDate',
+        'icon' => 'bi bi-calendar-fill',
+        'input' => 'day',
+        'btnHelp' => true,
+        'spans' => ['Obligatorio', null],
+        'col' => 'col-12 col-md-6',
+        'options' => [
+            '1' => 'Enero',
+            '2' => 'Febrero',
+            '3' => 'Marzo',
+            '4' => 'Abril',
+            '5' => 'Mayo',
+            '6' => 'Junio',
+            '7' => 'Julio',
+            '8' => 'Agosto',
+            '9' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
         ],
-        [
-            'label' => 'Descripcion',
-            'id' => 'Descripcion',
-            'icon' => 'bi bi-info-circle-fill',
-            'input' => 'textarea',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se escribe una descripción de la festividad. Esta parte no se ve en la tienda, pero te puede servir si quieres anotar el motivo por el que creaste esta festividad.",
-            'spans' => [null, null],
-        ]
-    ];
-    $datesInputs = [
-        [
-            'label' => 'Fecha de inicio',
-            'id' => 'StartDate',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'day',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se selecciona la fecha en la que se inicia la festividad. En otras palabras, a partir de cuando se empieza a ver en la tienda.",
-            'spans' => ['Obligatorio', null],
+        'onchange' => "actualizarDias('StartDate')"
+    ],
+
+    [
+        'label' => 'Fecha de finalización',
+        'id' => 'EndDate',
+        'icon' => 'bi bi-calendar-fill',
+        'input' => 'day',
+        'btnHelp' => true,
+        'spans' => ['Obligatorio', null],
+        'col' => 'col-12 col-md-6',
             'options' => [
-                '1' => 'Enero',
-                '2' => 'Febrero',
-                '3' => 'Marzo',
-                '4' => 'Abril',
-                '5' => 'Mayo',
-                '6' => 'Junio', 
-                '7' => 'Julio',
-                '8' => 'Agosto',
-                '9' => 'Septiembre',
-                '10' => 'Octubre',
-                '11' => 'Noviembre',
-                '12' => 'Diciembre',
-            ],
+            '1' => 'Enero',
+            '2' => 'Febrero',
+            '3' => 'Marzo',
+            '4' => 'Abril',
+            '5' => 'Mayo',
+            '6' => 'Junio',
+            '7' => 'Julio',
+            '8' => 'Agosto',
+            '9' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
         ],
-        [
-            'label' => 'Fecha de finalización',
-            'id' => 'EndDate',
-            'icon' => 'bi bi-calendar-fill',
-            'input' => 'day',
-            'onchange' => '',
-            'btnHelp' => true,
-            'inputInfo' => "Aquí se selecciona la fecha en la que se termina la festividad. En otras palabras, a partir de cuando se deja de ver en la tienda.",
-            'spans' => ['Obligatorio', null],
-            'options' => [
-                '1' => 'Enero',
-                '2' => 'Febrero',
-                '3' => 'Marzo',
-                '4' => 'Abril',
-                '5' => 'Mayo',
-                '6' => 'Junio',
-                '7' => 'Julio',
-                '8' => 'Agosto',
-                '9' => 'Septiembre',
-                '10' => 'Octubre',
-                '11' => 'Noviembre',
-                '12' => 'Diciembre',
-            ],
-        ],
-        [
-            'label' => '',
-            'id' => 'yearIndicator',
-            'icon' => '',
-            'input' => 'infoText',
-        ],
-    ];
-    $menuTable = [
-        'url' => 'holidays.php',
-        'addMethod' => 'guardarFestividad()',
-    ];
+        'onchange' => "actualizarDias('EndDate')"
+    ]
 
-    $type = 'festividad';
+];
+
+$menuTable = [
+    'url' => 'holidays.php',
+    'addMethod' => 'guardarFestividad()',
+];
+
+$type = 'festividad';
+
 ?>
 
-<div class="w-100 rounded-3 overflow-hidden" style="background-color: #f9fafb;">
-    <div class="admin-header-card-bg w-100 px-3 py-4">
-        <div class="d-flex align-items-center gap-2">
-            <h4 class="card-title">Agregar festividad</h4>
-            <i class="bi bi-file-earmark-plus fs-4 d-flex align-self-center"></i>
+<div class="w-100">
+
+    <div class="overflow-hidden my-2">
+
+        <div class="card-body admin-subheader-card-bg">
+
+            <div class="d-flex align-items-center gap-2">
+
+                <p class="card-title p-0 m-0">
+                    Información básica
+                </p>
+
+            </div>
+
         </div>
+
+        <div class="row px-3 py-1">
+
+            <?php
+            foreach ($basicInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+
+        </div>
+
     </div>
-    <div class="px-3 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Información</p>
-                </div>
+
+    <div class="overflow-hidden my-2">
+
+        <div class="card-body admin-subheader-card-bg">
+
+            <div class="d-flex align-items-center gap-2">
+
+                <p class="card-title p-0 m-0">
+                    Rango de fechas
+                </p>
+
             </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($informationInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
+
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Rango de fechas</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($datesInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
+
+        <div class="row px-3 py-1">
+
+            <?php
+            foreach ($datesInputs as $input) {
+                include '../src/components/inputs/input.php';
+            }
+            ?>
+
         </div>
-        <div class="container-fluid mt-3 mb-2">
-            <?php include '../src/components/forms/dialogButtons.php'; ?>
-        </div>
-        <input type="hidden" id="Id" value="<?php echo isset($holidayId) ? $holidayId : ''; ?>"> 
+
     </div>
+
+    <div class="container-fluid mb-3">
+
+        <?php include '../src/components/forms/dialogButtons.php'; ?>
+
+    </div>
+
+    <input
+        type="hidden"
+        id="Id"
+        value="<?php echo $holidayId; ?>"
+    >
+
 </div>
 
 <?php
-    $content = ob_get_clean();
-    include 'template.php';
+$content = ob_get_clean();
+include 'template.php';
 ?>
 
 <script>
-    $(document).ready(function() {
-        if (<?php echo $updateHoliday ? 'true' : 'false'; ?>) {
-            buscarFestividad(<?php echo $holidayId; ?>);
-        }
-    });
+
+$(document).ready(function(){
+
+    if(
+        <?php echo $updateHoliday ? 'true' : 'false'; ?>
+    ){
+
+        buscarFestividad(
+            <?php echo $holidayId; ?>
+        );
+
+    }
+
+});
+
+function actualizarDias(id){
+
+    const mes =
+        parseInt(
+            $('#Month' + id).val()
+        );
+
+    const diasSelect =
+        $('#Day' + id);
+
+    const diaActual =
+        diasSelect.val();
+
+    let dias = 31;
+
+    if([4,6,9,11].includes(mes)){
+        dias = 30;
+    }
+
+    if(mes === 2){
+        dias = 29;
+    }
+
+    diasSelect.empty();
+
+    diasSelect.append(
+        '<option value="">Día</option>'
+    );
+
+    for(let i = 1; i <= dias; i++){
+
+        diasSelect.append(`
+            <option value="${i}">
+                ${i}
+            </option>
+        `);
+    }
+
+    if(diaActual <= dias){
+        diasSelect.val(diaActual);
+    }
+}
+
 </script>

@@ -41,7 +41,7 @@
                 return [
                     'title' => "¡Guardado!",
                     'text' => "El usuario se ha guardado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -50,13 +50,13 @@
                 return [
                     'title' => "¡No se guardó!",
                     'text' => "Este usuario ya existe. Pruebe con otro nombre de usuario",
-                    'icon' => "error"
+                    'icon' => "bi bi-x-circle"
                 ];
             }
             return [
                 'title' => "¡Error!",
                 'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -138,7 +138,7 @@
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "El usuario se ha actualizado correctamente",
-                    'icon' => "success"
+                    'icon' => "bi bi-check-circle"
                 ];
             }
     
@@ -146,7 +146,7 @@
             return [
                 'title' => "¡Error!",
                 'text' => "Error al actualizar el usuario: " . $e->getMessage(),
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -171,7 +171,7 @@
                     return [
                         'title' => "¡Proceso evitado!",
                         'text' => "No se puede eliminar el único usuario con rol de Administrador",
-                        'icon' => "error"
+                        'icon' => "bi bi-x-circle"
                     ];
                 }
             }
@@ -184,13 +184,13 @@
             return [
                 'title' => "¡Eliminado!",
                 'text' => "El usuario se ha eliminado correctamente",
-                'icon' => "success"
+                'icon' => "bi bi-check-circle"
             ];
         } else {
             return [
                 'title' => "¡ERROR!",
                 'text' => "Error al actualizar el usuario: " . $conn->error,
-                'icon' => "error"
+                'icon' => "bi bi-x-circle"
             ];
         }
     }
@@ -234,39 +234,6 @@
         
         return $usuarios;
     }
-    
-    function contar($conn, $nombre, $rol) {
-        // Ejecuta una consulta solo con filtros no encriptados
-        $query = "SELECT * FROM usuarios WHERE estado=1";
-        $result = $conn->query($query);
-    
-        $total = 0;
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                // Desencripta solo los campos necesarios para el filtrado
-                $nombreDesencriptado = decryptData($row['nombre']);
-                
-                // Filtrar por nombre si se proporcionó
-                if (!empty($nombre) && stripos($nombreDesencriptado, $nombre) === false) {
-                    continue; // Saltar si no coincide
-                }
-                
-                // Filtrar por rol si se proporcionó
-                if (!empty($rol) === false) {
-                    continue; // Saltar si no coincide
-                }
-
-                if ($row['rol'] == "Invitado") {
-                    continue;
-                }
-                
-                // Incrementar el contador solo si pasan todos los filtros
-                $total++;
-            }
-        }
-        
-        return $total;
-    }
 
     function login($conn, $nombreUsuario, $contrasennia) {
         $query = "SELECT * FROM usuarios WHERE nombre_usuario = ? AND estado = 1";
@@ -298,18 +265,6 @@
         }
 
         return null;
-    }
-
-    function contarTodos($conn) {
-        $query = "SELECT COUNT(*) as total FROM usuarios WHERE estado=1";
-    
-        if ($result = $conn->query($query)) {
-            if ($row = $result->fetch_assoc()) {
-                return $row['total'];
-            }
-        }
-
-        return 0;
     }
 
     function listarIds($conn, $nombre, $rol, $orden) {
@@ -349,36 +304,6 @@
         return $usuarios;
     }
 
-    function contarIds($conn, $nombre, $rol) {
-        $query = "SELECT COUNT(DISTINCT id) AS total, nombre, rol, nombre_usuario FROM usuarios WHERE estado=1 GROUP BY id";
-        $result = $conn->query($query);
-        
-        $usuarios = [];
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                // Desencriptar campos
-                $row['nombre'] = decryptData($row['nombre']);
-    
-                // Filtros
-                if (!empty($nombre) && stripos($row['nombre'], $nombre) === false) {
-                    continue;
-                }
-    
-                if (!empty($rol) && stripos($row['rol'], $rol) === false) {
-                    continue;
-                }
-    
-                if ($row['rol'] === "Invitado") {
-                    continue;
-                }
-    
-                $usuarios[] = $row;
-            }
-        }
-    
-        return $usuarios;
-    }
-
     function buscarPorId($conn, $id) {
         $stmt = $conn->prepare("SELECT * FROM usuarios WHERE estado=1 AND id=?");
 
@@ -411,5 +336,281 @@
         }
     
         return $usuarios;
+    }
+
+    function cambiarContrasennia($conn, $id, $contrasenniaActual, $contrasenniaNueva){
+        try{
+            $query =
+            "
+            SELECT contrasennia
+            FROM usuarios
+            WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "i",
+                $id
+            );
+
+            $stmt->execute();
+
+            $usuario =
+                $stmt
+                ->get_result()
+                ->fetch_assoc();
+
+            if(
+                !$usuario ||
+                !password_verify(
+                    $contrasenniaActual,
+                    $usuario['contrasennia']
+                )
+            ){
+
+                return [
+
+                    'title' =>
+                        'Contraseña incorrecta',
+
+                    'text' =>
+                        'La contraseña actual no coincide.',
+
+                    'icon' =>
+                        'bi bi-x-circle'
+                ];
+            }
+
+            $nuevoHash =
+                password_hash(
+                    $contrasenniaNueva,
+                    PASSWORD_DEFAULT
+                );
+
+            $update =
+            "
+            UPDATE usuarios
+            SET contrasennia = ?
+            WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $update
+                );
+
+            $stmt->bind_param(
+                "si",
+                $nuevoHash,
+                $id
+            );
+
+            $stmt->execute();
+
+            return [
+
+                'title' =>
+                    '¡Actualizada!',
+
+                'text' =>
+                    'La contraseña se actualizó correctamente.',
+
+                'icon' =>
+                    'bi bi-check-circle'
+            ];
+
+        }
+        catch(Exception $e){
+
+            return [
+
+                'title' =>
+                    'Error',
+
+                'text' =>
+                    $e->getMessage(),
+
+                'icon' =>
+                    'bi bi-x-circle'
+            ];
+        }
+    }
+
+    function cambiarContrasenniaAdmin($conn, $id, $contrasenniaNueva){
+        try{
+            $nuevoHash =
+                password_hash(
+                    $contrasenniaNueva,
+                    PASSWORD_DEFAULT
+                );
+
+            $update =
+            "
+            UPDATE usuarios
+            SET contrasennia = ?
+            WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $update
+                );
+
+            $stmt->bind_param(
+                "si",
+                $nuevoHash,
+                $id
+            );
+
+            $stmt->execute();
+
+            return [
+
+                'title' =>
+                    '¡Actualizada!',
+
+                'text' =>
+                    'La contraseña se actualizó correctamente.',
+
+                'icon' =>
+                    'bi bi-check-circle'
+            ];
+
+        }
+        catch(Exception $e){
+
+            return [
+
+                'title' =>
+                    'Error',
+
+                'text' =>
+                    $e->getMessage(),
+
+                'icon' =>
+                    'bi bi-x-circle'
+            ];
+        }
+    }
+
+    function listarIdsAdmin($conn, $nombre, $rol, $orden)
+    {
+        $query = "
+            SELECT
+                u.id,
+                u.nombre,
+                u.rol
+            FROM usuarios u
+            WHERE
+                u.estado = 1
+                AND u.rol <> 'Invitado'
+        ";
+
+        if (!empty($rol)) {
+            $query .= "
+                AND u.rol = '" .
+                $conn->real_escape_string($rol) .
+                "'
+            ";
+        }
+
+        $result = $conn->query($query);
+
+        $usuarios = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $row['nombre'] = decryptData($row['nombre']);
+
+            if (
+                !empty($nombre)
+                && stripos($row['nombre'], $nombre) === false
+            ) {
+                continue;
+            }
+
+            $usuarios[] = $row;
+        }
+
+        $columnasPermitidas = [
+            'id',
+            'nombre',
+            'rol'
+        ];
+
+        $formasPermitidas = [
+            'ASC',
+            'DESC'
+        ];
+
+        $campoOrden = 'id';
+        $formaOrden = 'DESC';
+
+        if (
+            is_array($orden)
+            && isset($orden['orden'])
+            && in_array($orden['orden'], $columnasPermitidas)
+        ) {
+            $campoOrden = $orden['orden'];
+        }
+
+        if (
+            is_array($orden)
+            && isset($orden['forma'])
+            && in_array(
+                strtoupper($orden['forma']),
+                $formasPermitidas
+            )
+        ) {
+            $formaOrden = strtoupper($orden['forma']);
+        }
+
+        usort(
+            $usuarios,
+            function ($a, $b) use ($campoOrden, $formaOrden) {
+                $resultado = strcasecmp(
+                    (string) $a[$campoOrden],
+                    (string) $b[$campoOrden]
+                );
+
+                return $formaOrden === 'ASC'
+                    ? $resultado
+                    : -$resultado;
+            }
+        );
+
+        return array_column($usuarios, 'id');
+    }
+
+    function buscarPorIdAdmin($conn, $id)
+    {
+        $stmt = $conn->prepare("
+            SELECT
+                u.*
+            FROM usuarios u
+            WHERE
+                u.estado = 1
+                AND u.id = ?
+                AND u.rol <> 'Invitado'
+        ");
+
+        $stmt->bind_param("i", $id);
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows <= 0) {
+            return null;
+        }
+
+        $usuario = $result->fetch_assoc();
+
+        $usuario['nombre'] = decryptData($usuario['nombre']);
+
+        return $usuario;
     }
 ?>

@@ -8,69 +8,144 @@
     $showSidebar = false;
 
     session_start();
+
     if (isset($_SESSION['usuario_id'])) {
-      if ($_SESSION['usuario_rol'] == 'Administrador') {
-          header('Location: home.php');
-          exit();
-      } elseif ($_SESSION['usuario_rol'] == 'Cliente') {
-          header('Location: store.php');
-          exit();
-      }
-  }
+
+        if ($_SESSION['usuario_rol'] == 'Administrador') {
+            header('Location: home.php');
+            exit();
+        }
+
+        if ($_SESSION['usuario_rol'] == 'Cliente') {
+            header('Location: store.php');
+            exit();
+        }
+    }
 ?>
 
-<section class="vh-100">
-  <div class="container h-custom">
-    <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col-md-9 col-lg-6 col-xl-5 d-flex align-middle align-content-center">
-        <img src="../src/img/app/SH_Logo.png" class="img-fluid m-auto" alt="Sample image">
-      </div>
-      <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-        <form>
-          <p class="lead fw-bold mb-0 me-3 mb-3">Iniciar sesión</p>
-
-          <!-- Email input -->
-          <div data-mdb-input-init class="form-outline mb-4">
-            <div class="w-100 py-2 d-flex gap-2">
-              <label class="form-label m-0" for="nombreUsuario">Nombre de usuario</label>
-              <i class="bi bi-key-fill d-flex align-self-center"></i>
+<section class="login-page">
+    <div class="login-card-shadow">
+        <div class="login-card">
+            <div class="login-header">
+                <img
+                    src="../src/img/app/SH_Logo.png"
+                    class="login-logo"
+                    alt="Logo"
+                >
+                <h2>
+                    Iniciar sesión
+                </h2>
+                <p>
+                    Bienvenido nuevamente
+                </p>
             </div>
-            <input type="email" id="nombreUsuario" class="form-control form-control-lg" />
-          </div>
+            <form>
+                <div class="filter-card px-4">
+                    <h6 class="filter-title">
+                        <i class="bi bi-person-fill"></i>
+                        Usuario
+                    </h6>
+                    <input
+                        type="text"
+                        id="nombreUsuario"
+                        class="form-control filter-input"
+                        placeholder="Escribe tu usuario"
+                    >
+                </div>
+                <div class="filter-card mt-4 px-4">
+                    <h6 class="filter-title">
+                        <i class="bi bi-lock-fill"></i>
+                        Contraseña
+                    </h6>
 
-          <!-- Password input -->
-          <div data-mdb-input-init class="form-outline mb-3">
-            <div class="w-100 py-2 d-flex gap-2">
-              <label class="form-label m-0" for="Contrasennia">Contraseña</label>
-              <i class="bi bi-lock-fill d-flex align-self-center"></i>
-            </div>
-            <input type="password" id="Contrasennia" class="form-control form-control-lg" />
-          </div>
-
-          <div class="text-center text-lg-start mt-4 pt-2">
-            <button type="button" class="btn-details btn-lg fs-5 text-white border-0 rounded-2 px-4 py-3 d-flex align-items-center" style="padding-left: 2.5rem; padding-right: 2.5rem;" onclick="iniciarSesion()">Ingresar</button>
-            <p class="small fw-bold mt-2 pt-1 mb-0">¿No tienes una cuenta aquí? <a href="createLogin.php" class="link-danger">¡Registrala!</a></p>
-          </div>
-
-        </form>
-      </div>
+                    <div class="password-container">
+                        <input
+                            type="password"
+                            id="Contrasennia"
+                            class="form-control filter-input"
+                            placeholder="Escribe tu contraseña"
+                        >
+                        <button
+                            type="button"
+                            class="password-btn"
+                            onclick="togglePassword()"
+                        >
+                            <i
+                                id="passwordIcon"
+                                class="bi bi-eye-fill"
+                            ></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-center">
+                    <div class="navbar-btn-shadow">
+                        <button
+                            type="button"
+                            class="store-filter-btn slide_from_left"
+                            onclick="iniciarSesion()"
+                        >
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>
+                                Ingresar
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                <div class="login-register">
+                    ¿No tienes una cuenta?
+                    <a href="createLogin.php">
+                        Crear cuenta
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </section>
 
 <?php
-    $content = ob_get_clean();
-    include 'template.php';
+$content = ob_get_clean();
+include 'template.php';
 ?>
 
 <script>
-  try {
-    $(document).on('keydown', function(event) {
-    if (event.key === "Enter") {
-      iniciarSesion();
+
+function togglePassword(){
+
+    const input=
+        document.getElementById(
+            'Contrasennia'
+        );
+
+    const icon=
+        document.getElementById(
+            'passwordIcon'
+        );
+
+    if(input.type==='password'){
+
+        input.type='text';
+
+        icon.className=
+            'bi bi-eye-slash-fill';
     }
-    });
-  } catch (error) {
-    //
-  }
+    else{
+
+        input.type='password';
+
+        icon.className=
+            'bi bi-eye-fill';
+    }
+}
+
+$('#nombreUsuario,#Contrasennia').on(
+    'keypress',
+    function(e){
+
+        if(e.key==='Enter'){
+            iniciarSesion();
+        }
+
+    }
+);
+
 </script>

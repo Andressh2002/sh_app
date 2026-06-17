@@ -1,7 +1,7 @@
 <?php
     include '../src/components/login/access.php';
     //checkAccess('Cliente');
-    $pageTitle = "Productos";
+    $pageTitle = "Tienda";
     
     ob_start();
     $showHeader = true;
@@ -37,13 +37,6 @@
             'id' => 'lista-categorias-filtros',
             'input' => 'listCheckbox',
         ],
-        /*
-        [
-            'label' => 'Festividades',
-            'id' => 'lista-festividades-filtros',
-            'input' => 'listCheckbox',
-        ], 
-        */
         [
             'label' => 'Rarezas',
             'id' => 'lista-rarezas-filtros',
@@ -57,51 +50,134 @@
     ]
 ?>
 
-<div class="container-fluid row">
-    <div class="col-auto py-3 filterBar-responsive" id="filterBar">
-        <div class="card position-sticky sticky-top border-0 filterbar-font-size" style="top: 0px;">
-            <div class="card-header filterbar-header-bg border-0">Filtros de búsqueda</div>
-            <div class="card-body filterbar-body-bg d-flex flex-column gap-3 border-0 rounded-bottom-1 overflow-auto" id="filterBar-container">
-                <?php
-                    foreach ($listFilters as $input) {
-                        include '../src/components/inputs/filters.php';
-                    }
-                ?>
+<div class="container-fluid px-0 mx-0">
+
+    <!-- FILA BOTON -->
+    <div class="row px-0 mx-0">
+
+        <div class="col-12 px-4">
+
+            <div class="navbar-btn-shadow my-4">
+
+                <button
+                    class="store-filter-btn slide_from_left"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalFiltros"
+                >
+                    <i class="bi bi-funnel-fill"></i>
+                    <span>Filtros</span>
+                </button>
+
             </div>
-        </div>
-    </div>
-    <div class="col">
-        <!-- Productos destacados -->
-        <div class="m-0 p-0" id="col-productos-destacados">
-            <?php 
-                $title = [
-                    'title' => 'Productos destacados',
-                    'icon' => 'bi bi-lightbulb',
-                ];
-                include '../src/components/titles/titleStore.php';
-            ?>
-            <div id="contenedor-productos-destacados" class="row my-3 mx-0 px-0">
-                <?php 
-                    include '../src/components/loading/loading.php';
-                ?>
-            </div>
+
         </div>
 
-        <!-- Productos de la tienda -->
-        <div class="m-0 p-0" id="col-productos-ordinarios">
-            <?php 
-                $title = [
-                    'title' => 'Productos de la tienda',
-                    'icon' => 'bi bi-brush',
-                ];
-                include '../src/components/titles/titleStore.php';
-            ?>
-            <div id="contenedor-productos" class="row my-3 mx-0 px-0">
+    </div>
+
+    <!-- FILA PRODUCTOS -->
+    <div class="row px-0 mx-0">
+
+        <div class="col-12 px-0 mx-0">
+
+            <!-- Productos destacados -->
+            <div class="m-0 p-0" id="col-productos-destacados">
+
                 <?php 
-                    include '../src/components/loading/loading.php';
+                    $title = [
+                        'title' => 'Productos destacados',
+                        'icon' => 'bi bi-lightbulb',
+                    ];
+
+                    include '../src/components/titles/titleStore.php';
                 ?>
+
+                <div
+                    id="contenedor-productos-destacados"
+                    class="row my-3 mx-0 px-0"
+                >
+                    <?php 
+                        include '../src/components/loading/loading.php';
+                    ?>
+                </div>
+
             </div>
+
+            <!-- Productos -->
+            <div class="m-0 p-0" id="col-productos-ordinarios">
+
+                <?php 
+                    $title = [
+                        'title' => 'Productos de la tienda',
+                        'icon' => 'bi bi-brush',
+                    ];
+
+                    include '../src/components/titles/titleStore.php';
+                ?>
+
+                <div
+                    id="contenedor-productos"
+                    class="row my-3 mx-0 px-0"
+                >
+                    <?php 
+                        include '../src/components/loading/loading.php';
+                    ?>
+                </div>
+
+            </div>
+
         </div>
+
+    </div>
+
+</div>
+
+<!-- Modal de filtros -->
+<div
+    class="modal fade px-0"
+    id="modalFiltros"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg">
+
+        <!-- CONTENEDOR DE SOMBRA -->
+        <div class="store-modal-shadow">
+
+            <div class="modal-content store-modal">
+
+                <!-- HEADER -->
+                <div class="store-modal-header">
+
+                    <div class="d-flex align-items-center gap-2 px-1 px-sm-2">
+                        <i class="bi bi-funnel-fill"></i>
+                        <p class="m-0">Filtros de búsqueda</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="store-modal-close"
+                        data-bs-dismiss="modal"
+                    >
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+
+                </div>
+
+                <!-- BODY -->
+                <div class="store-modal-body">
+
+                    <?php
+                        foreach ($listFilters as $input) {
+                            include '../src/components/inputs/filters.php';
+                        }
+                    ?>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 </div>
 

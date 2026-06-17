@@ -10,7 +10,7 @@
 ?>
 
 <section class="vh-100">
-    <div class="container h-custom">
+    <div class="container h-custom h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12 text-center">
                 <img src="../src/img/app/SH_Logo.png" class="img-fluid m-auto" alt="Sample image">

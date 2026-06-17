@@ -1,60 +1,67 @@
-function generarRangoMeses(datos) {
-    const meses = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
+let myChart; // Variable global para la gráfica
+let myChart2;  // Variable global para la segunda gráfica
 
-    // Validar que los datos no estén vacíos
-    if (!datos || datos.length === 0) {
-        console.error("No hay datos para generar el rango de meses.");
-        cargarGrafica([], []);
-        return;
-    }
+async function cargarGraficaGanancias(){
 
-    // Asegurar que los datos estén ordenados por año y mes
-    datos.sort((a, b) => {
-        const diffAnio = parseInt(a.anio) - parseInt(b.anio);
-        if (diffAnio === 0) {
-            return parseInt(a.mes) - parseInt(b.mes);
-        }
-        return diffAnio;
-    });
+    const datos =
+        await consultarDashboard(
+            'buscarGananciasTiempo',
+            obtenerFiltrosDashboard()
+        );
 
-    // Encontrar el rango de fechas
-    const primerDato = datos[0];
-    const ultimoDato = datos[datos.length - 1];
+    const g =
+        transformarGananciasTiempo(
+            datos
+        );
 
-    const anioInicio = parseInt(primerDato.anio);
-    const mesInicio = parseInt(primerDato.mes);
-    const anioFinal = parseInt(ultimoDato.anio);
-    const mesFinal = parseInt(ultimoDato.mes);
-
-    const xValues = [];
-    const yValues = [];
-
-    // Generar el rango completo de meses entre las fechas
-    for (let anio = anioInicio; anio <= anioFinal; anio++) {
-        const mesInicioAño = anio === anioInicio ? mesInicio : 1;
-        const mesFinalAño = anio === anioFinal ? mesFinal : 12;
-
-        for (let mes = mesInicioAño; mes <= mesFinalAño; mes++) {
-            const mesNombre = `${meses[mes - 1]} ${anio}`;
-            xValues.push(mesNombre);
-
-            // Buscar si hay datos para este mes y año
-            const dato = datos.find(d => parseInt(d.anio) === anio && parseInt(d.mes) === mes);
-
-            // Si hay datos, tomar las ganancias; si no, asignar 0
-            yValues.push(dato ? parseInt(dato.ganancias) : 0);
-        }
-    }
-
-    // Generar la gráfica con los datos
-    cargarGrafica(xValues, yValues);
+    cargarGrafica(
+        g.meses,
+        g.valores
+    );
 }
 
+async function cargarGraficaProductos() {
 
-let myChart; // Variable global para la gráfica
+    const datos =
+        await consultarDashboard(
+            'buscarProductos',
+            obtenerFiltrosDashboard()
+        );
+
+    generarBarrasProductos(
+        datos
+    );
+}
+
+function transformarGananciasTiempo(
+    datos
+){
+
+    const meses = [];
+
+    const valores = [];
+
+    datos.forEach(
+
+        d=>{
+
+            meses.push(
+                `${d.mes_nombre} ${d.anio}`
+            );
+
+            valores.push(
+                Number(
+                    d.ganancias
+                )
+            );
+        }
+    );
+
+    return {
+        meses,
+        valores
+    };
+}
 
 function cargarGrafica(xValues, yValues) {
     // Si ya existe una gráfica, actualizamos sus datos
@@ -70,18 +77,36 @@ function cargarGrafica(xValues, yValues) {
         type: "line",
         data: {
             labels: xValues,
-            datasets: [{
-                label: "Ganancia",
-                fill: false,
-                lineTension: 0.0,
-                backgroundColor: "rgba(0, 132, 240, 0.2)",
-                borderColor: "rgba(0, 132, 240, 0.8)",
-                borderWidth: 2,
-                pointBorderColor: "rgba(0, 132, 240, 1)",
-                pointBackgroundColor: "rgba(0, 132, 240, 1)",
-                pointRadius: 4,
-                data: yValues
-            }]
+            datasets:[
+            {
+                label:'Ganancias',
+
+                data:yValues,
+
+                tension:0,
+
+                fill:true,
+
+                borderWidth:4,
+
+                borderColor:'#00df00',
+
+                backgroundColor:
+                    'rgba(0,217,111,.12)',
+
+                pointRadius:5,
+
+                pointHoverRadius:8,
+
+                pointBackgroundColor:
+                    '#00df00',
+
+                pointBorderWidth:3,
+
+                pointBorderColor:
+                    '#ffffff'
+            }
+            ]
         },
         options: {
             legend: {display: false},
@@ -91,6 +116,16 @@ function cargarGrafica(xValues, yValues) {
                     display: false,
                 }
             },
+            interaction:{
+                intersect:false,
+                mode:'index'
+            },
+            elements:{
+                line:{
+                    borderJoinStyle:
+                        'round'
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -98,41 +133,30 @@ function cargarGrafica(xValues, yValues) {
                         callback: function(value) {
                             return '₡' + value.toLocaleString(); // Formato moneda
                         },
-                        color: "rgba(0, 0, 0, 0.8)",
+                        color:'#666',
                         font: {
-                            size: 12
+                            size: 16
                         }
                     },
                     grid: {
-                        color: "rgba(0, 0, 0, 0.1)"
+                        color: 'rgba(0,0,0,.06)'
                     }
                 },
                 x: {
                     ticks: {
-                        color: "rgba(0, 0, 0, 0.8)",
+                        color:'#666',
                         font: {
-                            size: 12
+                            size: 16
                         }
                     },
                     grid: {
-                        color: "rgba(0, 0, 0, 0.1)"
+                        color: 'rgba(0,0,0,.06)'
                     }
                 }
             }
         }
     });
 }
-
-function generarBarrasProductos(datos) {
-    // Extraer los valores para los ejes de la gráfica
-    const xValues = datos.map(item => item.producto);  // Eje X: productos
-    const pedidosData = datos.map(item => parseInt(item.pedidos));  // Pedidos (convertidos a número)
-    const vendidosData = datos.map(item => parseInt(item.vendidos));  // Vendidos (convertidos a número)
-
-    cargarGraficaBarras(xValues, pedidosData, vendidosData);
-}
-
-let myChart2;  // Variable global para la segunda gráfica
 
 function cargarGraficaBarras(xValues, pedidos, vendidos) {
     if (myChart2) {
@@ -166,27 +190,32 @@ function cargarGraficaBarras(xValues, pedidos, vendidos) {
             },
             options: {
                 scales: {
-                    yAxes: [{
+                    y: {
+                        beginAtZero: true,
                         ticks: {
-                            beginAtZero: true,  // Comienza el eje Y desde 0
-                            fontColor: "rgb(0, 0, 0)",  // Color de los valores del eje Y
-                            fontFamily: "Arial",  // Fuente del eje Y
-                            fontSize: 14  // Tamaño de la fuente del eje Y
+                            callback: function(value) {
+                                return '₡' + value.toLocaleString(); // Formato moneda
+                            },
+                            color:'#666',
+                            font: {
+                                size: 16
+                            }
                         },
-                        gridLines: {
-                            color: "rgba(0, 0, 0, 0.1)"  // Color de las líneas del grid
+                        grid: {
+                            color: 'rgba(0,0,0,.06)'
                         }
-                    }],
-                    xAxes: [{
+                    },
+                    x: {
                         ticks: {
-                            fontColor: "rgb(0, 0, 0, 0.7)",  // Color de los valores del eje X
-                            fontFamily: "Arial",  // Fuente del eje X
-                            fontSize: 14  // Tamaño de la fuente del eje X
+                            color:'#666',
+                            font: {
+                                size: 16
+                            }
                         },
-                        gridLines: {
-                            color: "rgba(0, 0, 0, 0.1)"  // Color de las líneas del grid
+                        grid: {
+                            color: 'rgba(0,0,0,.06)'
                         }
-                    }]
+                    }
                 },
                 legend: {
                     display: false,  // Muestra la leyenda para identificar cada conjunto de barras
@@ -199,4 +228,13 @@ function cargarGraficaBarras(xValues, pedidos, vendidos) {
             }
         });
     }
+}
+
+function generarBarrasProductos(datos) {
+    // Extraer los valores para los ejes de la gráfica
+    const xValues = datos.map(item => item.producto);  // Eje X: productos
+    const pedidosData = datos.map(item => parseInt(item.pedidos));  // Pedidos (convertidos a número)
+    const vendidosData = datos.map(item => parseInt(item.vendidos));  // Vendidos (convertidos a número)
+
+    cargarGraficaBarras(xValues, pedidosData, vendidosData);
 }

@@ -13,50 +13,55 @@
             'id' => 'Producto',
             'icon' => 'bi bi-palette-fill',
             'input' => 'text',
-            'onchange' => 'currentPage = 1; aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Buscar producto...',
         ],
         [
             'label' => 'Categoría',
             'id' => 'Categoria',
             'icon' => 'bi bi-tools',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => 'currentPage = 1; aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Rareza',
             'id' => 'Rareza',
             'icon' => 'bi bi-tag',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => 'currentPage = 1; aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Universo',
             'id' => 'Universo',
             'icon' => 'bi bi-flag',
-            'input' => 'selectajax',
+            'input' => 'select',
             'onchange' => 'currentPage = 1; aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Color',
             'id' => 'Color',
             'icon' => 'bi bi-paint-bucket',
             'input' => 'text',
-            'onchange' => 'currentPage = 1; aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Buscar color...',
         ],
         [
             'label' => '¿Está pagado?',
             'id' => 'Pagado',
-            'icon' => 'bi bi-money',
+            'icon' => 'bi bi-cash',
             'input' => 'select',
             'options' => [
                 '' => 'Ambos',
@@ -66,23 +71,40 @@
             'onchange' => 'currentPage = 1; aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ]
     ];
     $orders = [
         [
             'label' => 'Ordenar por:',
             'id' => 'Ordenar_por',
-            'icon' => '',
+            'icon' => 'bi bi-arrow-down-up',
             'input' => 'select',
             'options' => [
                 'pe.id' => 'Fecha de pedido',
                 'pr.nombre' => 'Producto',
                 'ca.nombre' => 'Categoría',
-                'co.nombre' => 'Color'
+                'co.nombre' => 'Color',
+                'pe.progreso' => 'Progreso',
             ],
             'onchange' => 'aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+        ],
+        [
+            'label' => 'De forma:',
+            'id' => 'Ordenar_en',
+            'icon' => 'bi bi-arrow-down-up',
+            'input' => 'select',
+            'options' => [
+                'DESC' => 'Descendente',
+                'ASC' => 'Ascendente',
+            ],
+            'onchange' => 'aplicarFiltrosPedidosCliente(' . $_SESSION["usuario_id"] . ')',
+            'btnHelp' => false,
+            'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ]
     ];
     $menuTable = [
@@ -92,18 +114,13 @@
         'showAdd' => false,
         'showUpdate' => true,
         'showInfo' => false,
+        'showCount' => true,
     ];
-    $headers = ['#', 'Producto', 'Resumen', 'Total', '¿Pagado?', 'Opciones'];
 ?>
 
 <input type="hidden" id="Cliente" value="<?php echo $_SESSION['usuario_id']; ?>"> 
 
 <div class="row my-3 p-4 mx-0">
-    <div class="d-flex align-items-center gap-2 mb-4 px-0">
-        <h4 class="mb-0">Tus pedidos</h4>
-        <i class="bi bi-cart-fill fs-4 d-flex align-self-center"></i>
-    </div>
-
     <div class="container-fluid p-0">
         <div class="row" id="formulario-filtros">
             <?php
@@ -120,24 +137,14 @@
             ?>
         </div>
         <div class="row justify-content-between">
-            <div class="col-auto">
-                <p class="card-text mb-3" id="total-data"></p>
-            </div>
-        </div>
-        <div class="row justify-content-between">
-            <div class="col-auto">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination"></ul>
-                </nav>
-            </div>
-            <div class="col-auto d-flex gap-0 mb-4">
-                <?php include '../src/components/tables/menuTable.php'; ?>
+            <div class="col-12 mb-4">
+                <div class="table-menu-responsive">
+                    <?php include '../src/components/tables/menuTable.php'; ?>
+                </div>
             </div>
         </div>
     </div>
-    <div class="border border-1 border-light rounded-2 overflow-hidden px-0">
-        <?php include '../src/components/tables/dataTable.php'; ?>
-    </div>
+    <div id="orders-container" class="orders-grid"></div>
 </div>
 
 <?php
@@ -149,8 +156,91 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         seleccionarPedidosCliente(<?php echo $_SESSION['usuario_id']; ?>, '', '', '', '', '', '');
-        obtenerCategoriasParaProductos('Categoria', true);
-        obtenerRarezasParaDashboard('Rareza', true);
-        obtenerUniversosParaDashboard('Universo', true);
+        obtenerCategoriasParaProductos('Categoria', true, false);
+        obtenerRarezasParaDashboard('Rareza', true, false);
+        obtenerUniversosParaDashboard('Universo', true, false);
     });
+
+    let typingTimer;
+
+    function actualizarPedidosConFiltros(){
+
+        seleccionarPedidosCliente(
+
+            <?php echo $_SESSION['usuario_id']; ?>,
+
+            $('#Producto').val(),
+            $('#Categoria').val(),
+            $('#Rareza').val(),
+            $('#Universo').val(),
+            $('#Color').val(),
+            $('#Pagado').val()
+        );
+    }
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function(){
+
+            actualizarPedidosConFiltros();
+
+            obtenerCategoriasParaProductos(
+                'Categoria',
+                true,
+                false
+            );
+
+            obtenerRarezasParaDashboard(
+                'Rareza',
+                true,
+                false
+            );
+
+            obtenerUniversosParaDashboard(
+                'Universo',
+                true,
+                false
+            );
+
+            // INPUTS TEXT CON DELAY
+
+            $('#Producto, #Color').on(
+                'input',
+                function(){
+
+                    clearTimeout(typingTimer);
+
+                    typingTimer = setTimeout(
+                        () => {
+
+                            currentPage = 1;
+
+                            actualizarPedidosConFiltros();
+
+                        },
+                        400
+                    );
+                }
+            );
+
+            // SELECTS INMEDIATOS
+
+            $(
+                '#Categoria,' +
+                '#Rareza,' +
+                '#Universo,' +
+                '#Pagado,' +
+                '#Ordenar_por,' +
+                '#Ordenar_en'
+            ).on(
+                'change',
+                function(){
+
+                    currentPage = 1;
+
+                    actualizarPedidosConFiltros();
+                }
+            );
+        }
+    );
 </script>

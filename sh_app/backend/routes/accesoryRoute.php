@@ -10,12 +10,11 @@
 
     switch ($accion) {
         case 'insertar':
-            if (isset($_POST['nombre']) && isset($_POST['colores']) && isset($_POST['descripcion'])) {
+            if (isset($_POST['nombre']) && isset($_POST['colores'])) {
                 $nombre = $_POST['nombre'];
                 $colores = $_POST['colores'];
-                $descripcion = $_POST['descripcion'];
 
-                $respuesta = insertar($conn, $nombre, $colores, $descripcion);
+                $respuesta = insertar($conn, $nombre, $colores);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos";
@@ -23,13 +22,12 @@
             break;
 
         case 'actualizar':
-            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['colores']) && isset($_POST['descripcion'])) {
+            if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['colores'])) {
                 $id = $_POST['id'];
                 $nombre = $_POST['nombre'];
                 $colores = $_POST['colores'];
-                $descripcion = $_POST['descripcion'];
 
-                $respuesta = actualizar($conn, $id, $nombre, $colores, $descripcion);
+                $respuesta = actualizar($conn, $id, $nombre, $colores);
                 echo json_encode($respuesta);
             } else {
                 echo "Faltan datos para actualizar el accesorio";
@@ -115,15 +113,14 @@
             break;
 
         case 'listarIds':
-            $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
+            $nombre = $_POST['nombre'] ?? '';
 
-            $orden = isset($_POST['orden']) ? $_POST['orden'] : '';
+            $orden = $_POST['orden'] ?? [];
         
             $respuesta = listarIds($conn, $nombre, $orden);
-            $total = contarIds($conn, $nombre);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta, 'total' => $total]);
+            echo json_encode($respuesta);
             break;
     
         case 'buscarPorId':
@@ -131,7 +128,7 @@
             $respuesta = buscarPorId($conn, $id);
         
             header('Content-Type: application/json');
-            echo json_encode(['datos' => $respuesta]);
+            echo json_encode($respuesta);
             break;
 
         default:

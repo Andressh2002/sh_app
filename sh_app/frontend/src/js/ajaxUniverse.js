@@ -1,128 +1,69 @@
 function guardarUniverso() {
-    const id = document.getElementById('Id').value || null;
+
+    const id =
+        document.getElementById('Id').value || null;
+
     const nombre = $('#Nombre').val();
-    const descripcion = $('#Descripcion').val();
     const imagen = $('#hiddenImagenUniverso').val();
 
-    if (!validarCampos(
-        [nombre, imagen.length > 30 ? 'A' : ''],
-        ['el nombre', 'la imagen de portada']
-    )) {
+    if(
+        !validarCampos(
+            [nombre, imagen.length > 30 ? 'A' : ''],
+            ['el nombre', 'la imagen']
+        )
+    ){
         return;
     }
-    
-    
-    guardarDatos();
 
-    function guardarDatos() {
-        const accion = id ? 'actualizar' : 'insertar';
-        const data = {
-            accion: accion,
-            nombre: nombre,
-            descripcion: descripcion,
-            imagen: imagen
-        };
+    abrirModal('modalGuardando');
 
-        if (id) {
-            data.id = id;
-        }
+    cambiarMensajeModal(
+        "#modalGuardando",
+        "Guardando...",
+        "Espere un momento...",
+        "bi bi-wifi",
+        false
+    );
 
-        $.ajax({
-            url: backend + urlUniverse,
-            type: 'POST',
-            data: data,
-            success: function(response) {
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
-            },
-            error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al guardar el universo.',
-                    'error',
-                    'Aceptar'
-                );
-            }
-        });
-    }
-}
-
-function obtenerUniversos(nombre) {
     $.ajax({
+
         url: backend + urlUniverse,
+
         type: 'POST',
+
         data: {
-            accion: 'obtener',
-            nombre: nombre
+            accion: id ? 'actualizar' : 'insertar',
+            id: id,
+            nombre: nombre,
+            imagen: imagen
         },
-        success: function(response) {
-            try {
-                const universos = typeof response === 'string' ? JSON.parse(response) : response;
-                mostrarUniversos(universos);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
+
+        success: function(response){
+
+            const data =
+                typeof response === 'string'
+                    ? JSON.parse(response)
+                    : response;
+
+            cambiarMensajeModal(
+                "#modalGuardando",
+                data.title,
+                data.text,
+                data.icon,
+                true
+            );
         },
-        error: function() {
-            console.error('Error al procesar la solicitud.');
+
+        error: function(error){
+
+            cambiarMensajeModal(
+                "#modalGuardando",
+                error.title,
+                error.text,
+                error.icon,
+                true
+            );
         }
-    });
-}
-
-function mostrarUniversos(universos) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
-    container.empty();
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-
-    universos = ordenar(universos, order);
-
-    if (!Array.isArray(universos) || universos.length === 0) {
-        container.append('<tr><td class="text-center" colspan="4">No se encontraron universos.</td></tr>');
-        return;
-    }
-
-    universos.forEach((universo, index) => {
-        const json = encodeURIComponent(JSON.stringify(universo));
-        const html = `
-            <tr>
-                <td class="align-middle">${startIndex + index + 1}</td>
-                <td class="align-middle">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 200px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${universo.id}" 
-                            style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${universo.id}" class="d-none product-img-hover" alt="Imagen">
-                    </div>
-                </td>
-                <td class="align-middle">${universo.nombre}</td>
-                <td class="align-middle text-center" style="width: 1px;">
-                    <div class="d-flex gap-2 justify-content-start">
-                        <button onclick="location.href='addUniverse.php?id=${universo.id}&accion=actualizar'" type="button" class="btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Editar<i class="bi bi-pencil-square ms-2"></i>
-                        </button>
-                        <button onclick="eliminarUniverso(${universo.id}, '${universo.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesUniverso('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        container.append(html);
-        buscarImagenUniverso(universo.id);
     });
 }
 
@@ -188,52 +129,22 @@ function buscarUniverso(id) {
 function mostrarUniverso(universo) {
     if (universo) {
         $('#Nombre').val(universo.nombre);
-        $('#Descripcion').val(universo.descripcion);
 
         cargarImagenGuardada(universo.imagen, '#vistaImagenUniverso');
         $('#hiddenImagenUniverso').val(universo.imagen);
     }
 }
 
-function eliminarUniverso(id, nombre, eliminar) {
-    if (!eliminar) {
-        dialogAlert(
-            '¿Estás seguro?',
-            '¿De verdad quiere eliminar "' + nombre + '" de los universos? ¡Si lo haces no se podrá revertir!',
-            'warning',
-            'Si, estoy seguro',
-            'No',
-            function() {
-                eliminarUniverso(id, '', true);
-            }
-        );
-    } else {
-        $.ajax({
-            url: backend + urlUniverse,
-            type: 'POST',
-            data: {
-                accion: 'eliminar',
-                id: id
-            },
-            success: function(response) {
-                aplicarFiltrosUniverso()
-                alert(
-                    '¡Universo eliminado!',
-                    response,
-                    'success',
-                    'Aceptar'
-                );
-            },
-            error: function() {
-                alert(
-                    'Error',
-                    'Hubo un problema al eliminar el universo.',
-                    'error',
-                    'Aceptar'
-                );
-            }
-        });
-    }
+function eliminarUniverso(id, nombre) {
+
+    eliminarRegistro({
+        id,
+        nombre,
+        entidad: ['universo', 'universos' , 'el universo'],
+        url: backend + urlUniverse,
+        callback: aplicarFiltrosUniverso
+    });
+
 }
 
 function aplicarFiltrosUniverso() {
@@ -241,205 +152,307 @@ function aplicarFiltrosUniverso() {
     seleccionarUniversos(nombre);
 }
 
-function verDetallesUniverso(json) {
-    const universo = JSON.parse(decodeURIComponent(json)); // Decodificar y parsear el JSON
-    alertDetails(
-        'Detalles del universo',
-        universo,
-        ['nombre', 'descripcion', 'fecha_registro'],
-        'info',
-        'Cerrar'
-    );
-}
+let tokenCargaUniversos = 0;
 
-function seleccionarUniversos(nombre) {
-    const container = $('#data-container');
-    const order = $('#Ordenar_por').val();
+async function seleccionarUniversos(nombre){
+
+    const currentToken = ++tokenCargaUniversos;
+
+    const container = $('#list-container');
+
     container.empty();
-    const colspan = 4;
-    container.append(`
-        <tr><td class="text-center align-middle" colspan="${colspan}">
-            <div class="spinner-border spinner-color" role="status" style="width: 24px; height: 24px;"></div>
-        </td></tr>
-    `);
 
-    cancelarCargaSecuencial = true;
+    const order = {
+        orden: $('#Ordenar_por').val(),
+        forma: $('#Ordenar_en').val()
+    };
 
-    if (solicitudAjaxActiva) {
-        solicitudAjaxActiva.abort();
-        solicitudAjaxActiva = null;
-    }
+    try{
 
-    cancelarCargaSecuencial = false;
+        const response = await $.ajax({
 
-    solicitudAjaxActiva = $.ajax({
-        url: backend + urlUniverse,
-        type: 'POST',
-        data: {
-            accion: 'listarIds',
-            nombre: nombre,
-            orden: order,
-        },
-        success: function (response) {
-            try {
-                const universos = response.datos;
-                const total = response.total;
-                mostrarTotalRegistros(total.length);
-                container.empty();
+            url: backend + urlUniverse,
 
-                if (universos.length > 0) {
-                    procesarUniversosSecuencialmente(universos, 0, colspan);
-                } else {
-                    container.empty();
-                    container.append(`<tr><td class="text-center" colspan="${colspan}">No se encontraron universos.</td></tr>`);
-                }
-                
-            } catch (error) {
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">A ocurrido un error al cargar la lista.</td></tr>`);
-                console.error('Error al procesar la respuesta:', error);
+            type: 'POST',
+
+            dataType: 'json',
+
+            data: {
+                accion: 'listarIds',
+                nombre: nombre || '',
+                orden: order
             }
-        },
-        error: function (xhr, status) {
-            if (status !== 'abort') { // Ignoramos errores si fue por abortar
-                container.empty();
-                container.append(`<tr><td class="text-center" colspan="${colspan}">Ha ocurrido un error al tratar de conseguir la información.</td></tr>`);
-                console.error('Error al procesar la solicitud.');
-            } else {
-                console.log('Solicitud anterior cancelada.');
-            }
+        });
+
+        if(currentToken !== tokenCargaUniversos){
+            return;
         }
-    });
-}
 
-function procesarUniversosSecuencialmente(lista, index, colspan) {
-    if (cancelarCargaSecuencial || index >= lista.length) return;
+        const ids = response || [];
 
-    const universo = lista[index];
-    const container = $('#data-container');
+        mostrarTotalRegistros(
+            ids.length,
+            ['universos', 'universos']
+        );
 
-    try {
-        const html = `
-            <tr>
-                <td class="align-middle">${index + 1}</td>
-                <td class="align-middle" style="max-width: 256px; min-width: 140px;">
-                    <div class="position-relative d-flex justify-content-center align-items-center" style="width: 100%; height: 140px;">
-                        <!-- Spinner mientras se carga la imagen -->
-                        <div class="spinner-border spinner-color position-absolute" role="status" id="spinner-${universo.id}" style="width: 50px; height: 50px;"></div>
-                        <!-- Imagen (oculta por defecto) -->
-                        <img id="img-${universo.id}" class="d-none product-img-hover" alt="Imagen">
-                    </div>
-                </td>
-                <td class="align-middle" id="informacion-${universo.id}"></td>
-                <td class="align-middle text-center" id="opciones-${universo.id}" style="width: 1px;"></td>
-            </tr>
-        `;
-        container.append(html);
-    } catch (error) {
-        container.append(`<tr><td class="text-center" colspan="${colspan}">Este universo no se pudo cargar.</td></tr>`);
-    }
+        if(ids.length === 0){
 
-    cargarUniversoSeleccionado(universo.id, function () {
-        procesarUniversosSecuencialmente(lista, index + 1, colspan);
-    });
-}
+            container.html(`
+                <div class="orders-empty">
+                    No se encontraron universos.
+                </div>
+            `);
 
-function cargarUniversoSeleccionado(id, callback) {
-    const tdInformacion = $(`#informacion-${id}`);
-    const tdOpciones = $(`#opciones-${id}`);
-
-    const liClasses = "list-group-item border-0 bg-transparent px-0 py-0";
-
-    $.ajax({
-        url: backend + urlUniverse,
-        type: 'POST',
-        data: {
-            accion: 'buscarPorId',
-            id: id
-        },
-        success: function (response) {
-            try {
-                const universo = typeof response.datos[0] === 'string' ? JSON.parse(response.datos[0]) : response.datos[0];
-                const json = encodeURIComponent(JSON.stringify(universo));
-                
-                tdInformacion.append(`
-                    <ul class="list-group border-0 px-0" style="min-width: 248px;">
-                        <li class="${liClasses}">${universo.nombre || 'Sin nombre'}</li>
-                    </ul>
-                `);
-                tdOpciones.append(`
-                    <div class="d-flex gap-2 justify-content-start">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle btn-edit text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center" type="button" id="dropdownMenuButton${universo.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                Editar<i class="bi bi-pencil-square ms-2"></i>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${universo.id}">
-                                <li><a class="dropdown-item" href="addUniverse.php?id=${universo.id}&accion=actualizar">En esta pestaña</a></li>
-                                <li><a class="dropdown-item" href="addUniverse.php?id=${universo.id}&accion=actualizar" target="_blank">En otra pestaña</a></li>
-                            </ul>
-                        </div>
-                        <button onclick="eliminarUniverso(${universo.id}, '${universo.nombre}', false)" type="button" class="btn-delete text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Eliminar
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ms-2" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button onclick="verDetallesUniverso('${json}')" type="button" class="btn-details text-white border-0 rounded-2 px-2 py-1 d-flex align-items-center">
-                            Detalles<i class="bi bi-three-dots ms-2"></i>
-                        </button>
-                    </div>
-                `);
-
-                buscarImagenUniverso(universo.id);
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-
-            if (typeof callback === 'function') callback();
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-            if (typeof callback === 'function') callback();
+            return;
         }
-    });
-}
 
-function actualizarPaginacionUniverso(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+        await cargarUniversosProgresivamente(
+            ids,
+            currentToken
+        );
 
-    const paginationContainer = $('.pagination');
-    paginationContainer.empty();
+    }
+    catch(error){
 
-    if (totalPages !== 0) {
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === 1 ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Previous" onclick="cambiarPaginaUniverso(${currentPage - 1})">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
+        console.error(error);
 
-        for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.append(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPaginaUniverso(${i})">${i}</a>
-                </li>
+        if(currentToken === tokenCargaUniversos){
+
+            container.html(`
+                <div class="orders-empty">
+                    Error al cargar universo.
+                </div>
             `);
         }
-
-        paginationContainer.append(`
-            <li class="page-item ${currentPage === totalPages ? 'btn-details-disabled' : ''}">
-                <a class="page-link" href="#" aria-label="Next" onclick="cambiarPaginaUniverso(${currentPage + 1})">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
     }
 }
 
-function cambiarPaginaUniverso(pagina) {
-    currentPage = pagina;
-    seleccionarUniversos('');
+async function cargarUniversosProgresivamente(
+    ids,
+    currentToken
+){
+
+    $('#list-container').empty();
+
+    for(const item of ids){
+
+        renderUniversoSkeleton(item);
+
+        if(currentToken !== tokenCargaUniversos){
+            return;
+        }
+
+        try{
+
+            const response = await $.ajax({
+
+                url: backend + urlUniverse,
+
+                type: 'POST',
+
+                dataType: 'json',
+
+                data: {
+                    accion: 'buscarPorId',
+                    id: item
+                }
+            });
+
+            if(currentToken !== tokenCargaUniversos){
+                return;
+            }
+
+            const universo = response;
+
+            if(!universo){
+                continue;
+            }
+
+            const universoFinal =
+                typeof universo === 'string'
+                    ? JSON.parse(universo)
+                    : universo;
+
+            $(`#universo-skeleton-${universoFinal.id}`)
+                .replaceWith(
+                    renderUniversoCard(
+                        universoFinal,
+                        true
+                    )
+                );
+
+            buscarImagenUniverso(
+                universoFinal.id
+            );
+        }
+        catch(error){
+
+            console.error(
+                'Error cargando universo',
+                item.id,
+                error
+            );
+        }
+    }
+}
+
+function renderUniversoCard(
+    universo,
+    returnHtml = false
+){
+
+    const json = encodeURIComponent(
+        JSON.stringify(universo)
+    );
+
+    const html = `
+
+        <div
+            class="product-admin-card"
+            id="universo-${universo.id}"
+        >
+
+            <div class="product-admin-header">
+
+                <div>
+
+                    <p class="product-number">
+                        Registrado el ${formatearFechaConHora(universo.fecha_registro)}
+                    </p>
+
+                    <h5 class="product-title">
+                        ${universo.nombre}
+                    </h5>
+
+                </div>
+
+            </div>
+
+            <div class="product-admin-body">
+
+                <div class="product-admin-image">
+
+                    <img
+                        id="img-${universo.id}"
+                        class="product-image"
+                        src="../src/img/app/no_image.png"
+                        alt="${universo.nombre}"
+                    >
+
+                </div>
+
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <span>Nombre:</span>
+                            <strong>
+                                ${universo.nombre}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Productos relacionados:</span>
+                            <strong>
+                                ${universo.total_productos}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="order-actions">
+
+                    <a
+                        href="addUniverse.php?id=${universo.id}&accion=actualizar"
+                        class="store-filter-btn px-4 justify-content-center text-decoration-none"
+                    >
+                        <i class="bi bi-pencil-square"></i>
+                        Editar
+                    </a>
+
+                    <button
+                        class="store-filter-btn px-4 justify-content-center"
+                        onclick="
+                            eliminarUniverso(
+                                ${universo.id},
+                                '${universo.nombre}'
+                            )
+                        "
+                    >
+                        <i class="bi bi-trash3-fill"></i>
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    if(returnHtml){
+        return html;
+    }
+
+    $('#list-container').append(html);
+}
+
+function renderUniversoSkeleton(id){
+
+    $('#list-container').append(`
+
+        <div
+            class="product-admin-card product-skeleton"
+            id="universo-skeleton-${id}"
+        >
+
+            <div class="product-admin-header">
+
+                <div>
+
+                    <div class="skeleton-line skeleton-subtitle"></div>
+
+                    <div class="skeleton-line skeleton-title"></div>
+
+                </div>
+
+            </div>
+
+            <div class="product-admin-body">
+
+                <div
+                    class="product-admin-image skeleton-box"
+                ></div>
+
+                <div class="product-info">
+
+                    <div class="product-info-grid">
+
+                        <div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line skeleton-small"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="product-admin-actions">
+
+                    <div class="skeleton-button"></div>
+
+                    <div class="skeleton-button"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `);
 }
 
 function limpiarFiltrosUniverso() {
