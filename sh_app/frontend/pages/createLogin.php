@@ -127,7 +127,7 @@ if (isset($_SESSION['usuario_id'])) {
                                 type="text"
                                 id="Telefono"
                                 class="form-control filter-input"
-                                placeholder="Teléfono"
+                                placeholder="Teléfono *"
                             >
                         </div>
                         <div class="col-md-6">
@@ -143,7 +143,7 @@ if (isset($_SESSION['usuario_id'])) {
                                 type="password"
                                 id="Contrasennia"
                                 class="form-control filter-input"
-                                placeholder="Contraseña *"
+                                placeholder="Contraseña **"
                             >
                         </div>
                         <div class="col-md-6 mt-3">
@@ -151,14 +151,16 @@ if (isset($_SESSION['usuario_id'])) {
                                 type="password"
                                 id="Contrasennia2"
                                 class="form-control filter-input"
-                                placeholder="Confirmar contraseña *"
+                                placeholder="Confirmar contraseña **"
                             >
                         </div>
                     </div>
                 </div>
                 <p class="text-light opacity-75 mt-4">
-
-                    (*) Campos obligatorios
+                    (*) Campo obligatorio
+                </p>
+                <p class="text-light opacity-75 mt-4">
+                    (**) Campo obligatorio y con una longitud mínima de 8 caractéres
                 </p>
                 <!-- BOTONES -->
                 <div

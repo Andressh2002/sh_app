@@ -1,135 +1,342 @@
 <?php
     include '../security/encrypt.php';
 
-    function insertar($conn, $idCliente, $idProducto, $idColor, $cantidad, $total, $colorAccesorio, $precio) {
-        if (!$idCliente || trim($idCliente) == '') {
-            return [
-                'title' => "¡Error!",
-                'text' => "El cliente es inválido.",
-                'icon' => "bi bi-x-circle"
-            ];
-        }
-    
+    function insertar(
+        $conn,
+        $idCliente,
+        $idProducto,
+        $idColor,
+        $cantidad,
+        $total,
+        $colorAccesorio,
+        $precio,
+        $fichasUsadas,
+        $fichasGanadasFront
+    ) {
         date_default_timezone_set('America/Costa_Rica');
-        $fecha_registro = date('Y-m-d H:i:s');
-        $fecha_actual = date('m-d'); // Formato para comparar con los descuentos
-    
+
+        $fechaRegistro = date('Y-m-d H:i:s');
+
+        $conn->begin_transaction();
+
         try {
-            // Obtener el precio del producto y los IDs de descuentos
-            $queryProducto = "SELECT precio, idDescuentos FROM productos WHERE id = ?";
-            $stmtProd = $conn->prepare($queryProducto);
-            $stmtProd->bind_param("s", $idProducto);
-            $stmtProd->execute();
-            $resultProd = $stmtProd->get_result();
-    
-            if ($resultProd->num_rows == 0) {
-                return [
-                    'title' => "¡Error!",
-                    'text' => "El producto no existe.",
-                    'icon' => "bi bi-x-circle"
-                ];
+
+            // =====================
+            // VALIDACIONES
+            // =====================
+
+            $cantidad = max(1, (int)$cantidad);
+            $fichasUsadas = max(0, (int)$fichasUsadas);
+            $fichasGanadasFront = max(0, (int)$fichasGanadasFront);
+
+            // =====================
+            // PRODUCTO
+            // =====================
+
+            $query = "
+                SELECT
+                    precio,
+                    fichas,
+                    idDescuentos
+                FROM productos
+                WHERE id = ?
+            ";
+
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $idProducto);
+            $stmt->execute();
+
+            $producto = $stmt->get_result()->fetch_assoc();
+
+            if (!$producto) {
+                throw new Exception('Producto inválido.');
             }
-    
-            $producto = $resultProd->fetch_assoc();
+
             $precioBase = (float)$producto['precio'];
-            $idDescuentosStr = $producto['idDescuentos'];
-    
-            // Si no hay descuentos, calcular el total normal
-            if (empty($idDescuentosStr)) {
-                $precioFinal = $precioBase;
-                $totalCalculado = $precioFinal * (int)$cantidad;
-            } else {
-                // Obtener los descuentos aplicables
-                $idsDescuentos = explode(',', $idDescuentosStr);
-                $placeholders = implode(',', array_fill(0, count($idsDescuentos), '?'));
-                
-                $queryDescuentos = "SELECT id, fecha_inicial, fecha_final, descuento 
-                                    FROM descuentos 
-                                    WHERE id IN ($placeholders)";
-                $stmtDesc = $conn->prepare($queryDescuentos);
-                
-                $types = str_repeat('i', count($idsDescuentos));
-                $stmtDesc->bind_param($types, ...$idsDescuentos);
-                $stmtDesc->execute();
-                $resultDesc = $stmtDesc->get_result();
+            $fichasBase = (int)$producto['fichas'];
 
-                // Verificar si hay resultados
-                if ($resultDesc->num_rows == 0) {
-                    var_dump("No se encontraron descuentos para los IDs:", $idsDescuentos);
-                    exit;
-                }
-    
-                // Encontrar el mejor descuento aplicable
-                $mejorDescuento = 0;
-                $tieneDescuentos = false;  // Variable para saber si encontró al menos un descuento
+            $precioFinal = $precioBase;
+            $rebaja = 0;
 
-                while ($descuento = $resultDesc->fetch_assoc()) {
-                    $tieneDescuentos = true; // Se encontró al menos un descuento
+            // =====================
+            // DESCUENTOS
+            // =====================
 
-                    $anioActual = date('Y');
-                    $fechaInicioFormateada = $anioActual . '-' . $descuento['fecha_inicial'];
-                    $fechaFinFormateada = $anioActual . '-' . $descuento['fecha_final'];
+            if (!empty($producto['idDescuentos'])) {
 
-                    $fechaInicioConvertida = date('m-d', strtotime($fechaInicioFormateada));
-                    $fechaFinConvertida = date('m-d', strtotime($fechaFinFormateada));
+                $ids = array_filter(
+                    array_map(
+                        'intval',
+                        explode(',', $producto['idDescuentos'])
+                    )
+                );
 
-                    if ($fecha_actual >= $fechaInicioConvertida && $fecha_actual <= $fechaFinConvertida) {
-                        $mejorDescuento = max($mejorDescuento, (int)$descuento['descuento']);
+                if (!empty($ids)) {
+
+                    $placeholders = implode(
+                        ',',
+                        array_fill(0, count($ids), '?')
+                    );
+
+                    $query = "
+                        SELECT
+                            fecha_inicial,
+                            fecha_final,
+                            descuento
+                        FROM descuentos
+                        WHERE id IN ($placeholders)
+                    ";
+
+                    $stmt = $conn->prepare($query);
+
+                    $stmt->bind_param(
+                        str_repeat('i', count($ids)),
+                        ...$ids
+                    );
+
+                    $stmt->execute();
+
+                    $result = $stmt->get_result();
+
+                    $hoy = new DateTime();
+
+                    while ($row = $result->fetch_assoc()) {
+
+                        $inicio = DateTime::createFromFormat(
+                            'm-d',
+                            $row['fecha_inicial']
+                        );
+
+                        $fin = DateTime::createFromFormat(
+                            'm-d',
+                            $row['fecha_final']
+                        );
+
+                        if (!$inicio || !$fin) {
+                            continue;
+                        }
+
+                        $inicio->setDate(
+                            $hoy->format('Y'),
+                            $inicio->format('m'),
+                            $inicio->format('d')
+                        );
+
+                        $fin->setDate(
+                            $inicio->format('Y'),
+                            $fin->format('m'),
+                            $fin->format('d')
+                        );
+
+                        if ($fin < $inicio) {
+                            $fin->modify('+1 year');
+                        }
+
+                        if ($hoy >= $inicio && $hoy <= $fin) {
+                            $rebaja = max(
+                                $rebaja,
+                                (float)$row['descuento']
+                            );
+                        }
                     }
-                }
 
-                // Si no se encontró ningún descuento, aseguramos que el valor no sea NULL
-                if (!$tieneDescuentos) {
-                    $mejorDescuento = 0;
-                }
-    
-                // Aplicar el mejor descuento encontrado
-                $precioFinal = $precioBase * (1 - ($mejorDescuento / 100));
-                $totalCalculado = $precioFinal * (int)$cantidad;
-            }
-    
-            // Validar si el total enviado es correcto
-            if ((float)$total != round($totalCalculado, 2)) {
-                return [
-                    'title' => "¡Error!",
-                    'text' => "El total enviado no es válido.",
-                    'icon' => "bi bi-x-circle"
-                ];
-            }
-    
-            // Insertar en la tabla 'pedidos'
-            $query1 = "INSERT INTO pedidos (idCliente, idProducto, idColor, cantidad, total, fecha_registro, estado, idColorAccesorio, precio) 
-                       VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)";
-    
-            $stmt = $conn->prepare($query1);
-            $stmt->bind_param("ssssssss", $idCliente, $idProducto, $idColor, $cantidad, $total, $fecha_registro, $colorAccesorio, $precioFinal);
-    
-            if ($stmt->execute()) {
-                // Actualizar la cantidad de pedidos en la tabla 'productos'
-                $query2 = "UPDATE productos SET pedidos = pedidos + ? WHERE id = ?";
-                $stmt2 = $conn->prepare($query2);
-                $stmt2->bind_param("is", $cantidad, $idProducto);
-    
-                if ($stmt2->execute()) {
-                    return [
-                        'title' => "¡Guardado!",
-                        'text' => "El pedido se ha guardado correctamente.",
-                        'icon' => "bi bi-check-circle"
-                    ];
-                } else {
-                    return [
-                        'title' => "¡Error!",
-                        'text' => "Error al actualizar el producto: " . $conn->error,
-                        'icon' => "bi bi-x-circle"
-                    ];
+                    $precioFinal = round(
+                        $precioBase * (1 - ($rebaja / 100)),
+                        2
+                    );
                 }
             }
-    
-        } catch (mysqli_sql_exception $e) {
+
+            // =====================
+            // TOTAL
+            // =====================
+
+            $subtotal = $precioFinal * $cantidad;
+
+            $descuento = $fichasUsadas * 10;
+
+            $totalCalculado = max(
+                0,
+                $subtotal - $descuento
+            );
+
+            if (
+                abs(
+                    $totalCalculado - (float)$total
+                ) > 0.01
+            ) {
+                throw new Exception(
+                    "Total inválido. Front: {$total} | Back: {$totalCalculado}"
+                );
+            }
+
+            // =====================
+            // FICHAS
+            // =====================
+
+            $recompensaUnitaria =
+                $rebaja > 0
+                    ? (int)(
+                        $fichasBase *
+                        (
+                            1 -
+                            (
+                                $rebaja / 100
+                            )
+                        )
+                    )
+                    : $fichasBase;
+
+            $recompensaBase =
+                $recompensaUnitaria *
+                $cantidad;
+
+            $porcentajePagado =
+                $subtotal > 0
+                    ? (
+                        $totalCalculado /
+                        $subtotal
+                    )
+                    : 0;
+
+            // igual que JS
+            $fichasGanadas =
+                (int)floor(
+                    max(
+                        0,
+                        $recompensaBase *
+                        $porcentajePagado
+                    )
+                );
+
+            if (
+                abs(
+                    $fichasGanadas -
+                    $fichasGanadasFront
+                ) > 0
+            ) {
+
+                throw new Exception(
+                    "Fichas inválidas. " .
+                    "Front: {$fichasGanadasFront} | " .
+                    "Back: {$fichasGanadas}" .
+                    " | Unit: {$recompensaUnitaria}" .
+                    " | Base: {$recompensaBase}" .
+                    " | %: {$porcentajePagado}"
+                );
+            }
+
+            // =====================
+            // DESCONTAR FICHAS
+            // =====================
+
+            if ($fichasUsadas > 0) {
+
+                $query = "
+                    UPDATE usuarios
+                    SET fichas = fichas - ?
+                    WHERE id = ?
+                    AND fichas >= ?
+                ";
+
+                $stmt = $conn->prepare($query);
+
+                $stmt->bind_param(
+                    "iii",
+                    $fichasUsadas,
+                    $idCliente,
+                    $fichasUsadas
+                );
+
+                $stmt->execute();
+
+                if ($stmt->affected_rows == 0) {
+                    throw new Exception(
+                        'No tienes suficientes fichas.'
+                    );
+                }
+            }
+
+            // =====================
+            // INSERTAR PEDIDO
+            // =====================
+
+            $query = "
+                INSERT INTO pedidos (
+                    idCliente,
+                    idProducto,
+                    idColor,
+                    cantidad,
+                    total,
+                    fecha_registro,
+                    estado,
+                    idColorAccesorio,
+                    precio,
+                    fichas_usadas,
+                    fichas_ganadas
+                )
+                VALUES (
+                    ?, ?, ?, ?,
+                    ?, ?,
+                    1,
+                    ?, ?, ?, ?
+                )
+            ";
+
+            $stmt = $conn->prepare($query);
+
+            $stmt->bind_param(
+                "iiiidsdiii",
+                $idCliente,
+                $idProducto,
+                $idColor,
+                $cantidad,
+                $totalCalculado,
+                $fechaRegistro,
+                $colorAccesorio,
+                $precioFinal,
+                $fichasUsadas,
+                $fichasGanadas
+            );
+
+            $stmt->execute();
+
+            // =====================
+            // ACTUALIZAR CONTADOR
+            // =====================
+
+            $query = "
+                UPDATE productos
+                SET pedidos = pedidos + ?
+                WHERE id = ?
+            ";
+
+            $stmt = $conn->prepare($query);
+
+            $stmt->bind_param(
+                "ii",
+                $cantidad,
+                $idProducto
+            );
+
+            $stmt->execute();
+
+            $conn->commit();
+
             return [
-                'title' => "¡Error!",
-                'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "bi bi-x-circle"
+                'title' => '¡Guardado!',
+                'text'  => 'Pedido realizado correctamente.',
+                'icon'  => 'bi bi-check-circle'
+            ];
+
+        } catch (Exception $e) {
+
+            $conn->rollback();
+
+            return [
+                'title' => '¡Error!',
+                'text'  => $e->getMessage(),
+                'icon'  => 'bi bi-x-circle'
             ];
         }
     }
@@ -403,47 +610,327 @@
         return $pedidos;
     }
 
-    function pagar($conn, $id, $idProducto, $cantidad) {
-        $id = $conn->real_escape_string($id);
-        $idProducto = $conn->real_escape_string($idProducto);  // Escapamos también el $idProducto
-        date_default_timezone_set('America/Costa_Rica');
-        $fecha_pago = date('Y-m-d H:i:s');
-    
-        $query = "UPDATE pedidos SET 
-                    pagado = 1, 
-                    fecha_pago = '$fecha_pago' 
-                  WHERE id = '$id';";
-                  
-        $query .= "UPDATE productos SET 
-                    vendidos = vendidos + $cantidad 
-                  WHERE id = '$idProducto';";
-    
-        // Ejecutar múltiples consultas
-        if ($conn->multi_query($query)) {
-            return "El pedido se ha pagado";
-        } else {
-            return "Error al pagar el pedido: " . $conn->error;
+    function pagar(
+        $conn,
+        $id,
+        $idProducto,
+        $cantidad
+    ) {
+
+        date_default_timezone_set(
+            'America/Costa_Rica'
+        );
+
+        $fechaPago =
+            date(
+                'Y-m-d H:i:s'
+            );
+
+        $conn->begin_transaction();
+
+        try {
+
+            // =====================
+            // PEDIDO
+            // =====================
+
+            $query = "
+                SELECT
+                    idCliente,
+                    fichas_ganadas,
+                    pagado
+                FROM pedidos
+                WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "i",
+                $id
+            );
+
+            $stmt->execute();
+
+            $pedido =
+                $stmt
+                    ->get_result()
+                    ->fetch_assoc();
+
+            if (
+                !$pedido
+            ) {
+
+                throw new Exception(
+                    'Pedido inválido.'
+                );
+            }
+
+            if (
+                $pedido['pagado']
+            ) {
+
+                throw new Exception(
+                    'Este pedido ya fue pagado.'
+                );
+            }
+
+            $idCliente =
+                (int)
+                $pedido[
+                    'idCliente'
+                ];
+
+            $fichasGanadas =
+                (int)
+                $pedido[
+                    'fichas_ganadas'
+                ];
+
+            // =====================
+            // PAGAR PEDIDO
+            // =====================
+
+            $query = "
+                UPDATE pedidos
+                SET
+                    pagado = 1,
+                    fecha_pago = ?
+                WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "si",
+                $fechaPago,
+                $id
+            );
+
+            $stmt->execute();
+
+            if (
+                $stmt->affected_rows == 0
+            ) {
+
+                throw new Exception(
+                    'No se pudo actualizar el pedido.'
+                );
+            }
+
+            // =====================
+            // SUMAR VENDIDOS
+            // =====================
+
+            $query = "
+                UPDATE productos
+                SET vendidos =
+                    vendidos + ?
+                WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "ii",
+                $cantidad,
+                $idProducto
+            );
+
+            $stmt->execute();
+
+            // =====================
+            // DAR FICHAS
+            // =====================
+
+            if (
+                $fichasGanadas > 0
+            ) {
+
+                $query = "
+                    UPDATE usuarios
+                    SET fichas =
+                        fichas + ?
+                    WHERE id = ?
+                ";
+
+                $stmt =
+                    $conn->prepare(
+                        $query
+                    );
+
+                $stmt->bind_param(
+                    "ii",
+                    $fichasGanadas,
+                    $idCliente
+                );
+
+                $stmt->execute();
+
+                if (
+                    $stmt->affected_rows == 0
+                ) {
+
+                    throw new Exception(
+                        'No se pudieron asignar las fichas.'
+                    );
+                }
+            }
+
+            $conn->commit();
+
+            return [
+                'title' =>
+                    '¡Pagado!',
+                'text' =>
+                    'Pedido pagado correctamente.',
+                'icon' =>
+                    'bi bi-check-circle'
+            ];
+
+        } catch (
+            Exception $e
+        ) {
+
+            $conn->rollback();
+
+            return [
+                'title' =>
+                    '¡Error!',
+                'text' =>
+                    $e->getMessage(),
+                'icon' =>
+                    'bi bi-x-circle'
+            ];
         }
     }
 
-    function quitar($conn, $id) {
-        $id = $conn->real_escape_string($id);
-    
-        $query = "UPDATE pedidos SET 
-                    estado = 0 
-                  WHERE id = '$id';";
-    
-        if ($conn->query($query)) {
+    function quitar(
+        $conn,
+        $id
+    ) {
+
+        $conn->begin_transaction();
+
+        try {
+
+            $query = "
+                SELECT
+                    idCliente,
+                    fichas_usadas,
+                    fichas_ganadas,
+                    pagado
+                FROM pedidos
+                WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "i",
+                $id
+            );
+
+            $stmt->execute();
+
+            $pedido =
+                $stmt
+                    ->get_result()
+                    ->fetch_assoc();
+
+            $fichas =
+                (int)
+                $pedido[
+                    'fichas_usadas'
+                ];
+
+            if (
+                $pedido[
+                    'pagado'
+                ]
+            ) {
+
+                $fichas -=
+                    (int)
+                    $pedido[
+                        'fichas_ganadas'
+                    ];
+            }
+
+            $fichas =
+                max(
+                    0,
+                    $fichas
+                );
+
+            $query = "
+                UPDATE usuarios
+                SET fichas =
+                    fichas + ?
+                WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "ii",
+                $fichas,
+                $pedido['idCliente']
+            );
+
+            $stmt->execute();
+
+            $query = "
+                UPDATE pedidos
+                SET estado = 0
+                WHERE id = ?
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $stmt->bind_param(
+                "i",
+                $id
+            );
+
+            $stmt->execute();
+
+            $conn->commit();
+
             return [
-                'title' => "¡Eliminado!",
-                'text' => "El pedido se ha eliminado",
-                'icon' => "bi bi-check-circle"
+                'title' => '¡Eliminado!',
+                'text' => 'Pedido eliminado.',
+                'icon' => 'bi bi-check-circle'
             ];
-        } else {
+
+        } catch (
+            Exception $e
+        ) {
+
+            $conn->rollback();
+
             return [
-                'title' => "¡Error!",
-                'text' => "Ha ocurrido un error: " . $conn->error,
-                'icon' => "bi bi-x-circle"
+                'title' => '¡Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'bi bi-x-circle'
             ];
         }
     }
@@ -798,6 +1285,7 @@
                 cl.canton,
                 cl.distrito,
                 cl.telefono,
+                cl.nombre_usuario,
 
                 pr.nombre AS producto,
                 pr.precio,

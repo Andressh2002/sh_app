@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $descuento, $descripcion, $fecha_inicial, $fecha_final) {
+    function insertar($conn, $nombre, $descuento, $fecha_inicial, $fecha_final) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -19,11 +19,11 @@
                 ];
             }
     
-            $query = "INSERT INTO descuentos (nombre, descuento, descripcion, fecha_registro, estado, fecha_inicial, fecha_final) 
-                      VALUES (?, ?, ?, ?, 1, ?, ?)";
+            $query = "INSERT INTO descuentos (nombre, descuento, fecha_registro, estado, fecha_inicial, fecha_final) 
+                      VALUES (?, ?, ?, 1, ?, ?)";
             
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("ssssss", $nombre, $descuento, $descripcion, $fecha_registro, $fecha_inicial, $fecha_final);
+            $stmt->bind_param("sssss", $nombre, $descuento, $fecha_registro, $fecha_inicial, $fecha_final);
     
             if ($stmt->execute()) {
                 return [
@@ -75,7 +75,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $descuento, $descripcion, $fecha_inicial, $fecha_final) {
+    function actualizar($conn, $id, $nombre, $descuento, $fecha_inicial, $fecha_final) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM descuentos WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -95,13 +95,12 @@
             $queryUpdate = "UPDATE descuentos SET 
                             nombre = ?, 
                             descuento = ?, 
-                            descripcion = ?,
                             fecha_inicial = ?,
                             fecha_final = ?
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("sssssi", $nombre, $descuento, $descripcion, $fecha_inicial, $fecha_final, $id);
+            $stmt->bind_param("ssssi", $nombre, $descuento, $fecha_inicial, $fecha_final, $id);
     
             if ($stmt->execute()) {
                 return [

@@ -1,10 +1,12 @@
 function guardarPedido(idProduct) {
     const cliente = $('#Sesion').val();
-    const producto = idProduct;
+    const producto = idProduct ?? productoSeleccionado;
     const color = $('#Color').val();
     const colorAccesorio = $('#AccesoryColor').val();
     const cantidad = $('#cantidad').val();
     const precio = $('#Precio').val();
+    const fichasUsadas = $('#FichasUsadas').val();
+    const fichasGanadas = $('#FichasGanadas').val();
     const total = $('#Total').val();
 
     guardarDatos();
@@ -22,8 +24,12 @@ function guardarPedido(idProduct) {
             colorAccesorio: colorAccesorio,
             cantidad: cantidad,
             precio: precio, 
+            fichasUsadas,
+            fichasGanadas,
             total: total
         };
+
+        console.log(data);
 
         $.ajax({
             url: backend + urlOrder,
@@ -32,9 +38,11 @@ function guardarPedido(idProduct) {
             success: function (response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
                 cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
+                buscarFichas(cliente);
             },
-            error: function () {
-                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
+            error: function (error) {
+                cambiarMensajeModal("#modalGuardando", error.title, error.text, error.icon, true);
+                buscarFichas(cliente);
             }
         });
     }
@@ -528,6 +536,18 @@ function renderPedidoCard(
                         </strong>
                     </div>
 
+                    ${pedido.nombre_usuario != "" ? `
+                        <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                            <span>Fichas usadas:</span>
+                            <strong>
+                                <div class="d-flex gap-1 ms-1">
+                                    <p class="mb-0">${pedido.fichas_usadas}</p>
+                                    <img class="fs-4 my-auto" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 20px;">
+                                </div>
+                            </strong>
+                        </div>
+                    ` : ''}
+
                     <div>
                         <span>Total:</span>
                         <strong>
@@ -563,6 +583,18 @@ function renderPedidoCard(
                         </strong>
                     </div>
 
+                    ${pedido.nombre_usuario != "" ? `
+                        <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                            <span>Fichas de recompensa:</span>
+                            <strong>
+                                <div class="d-flex gap-1 ms-1">
+                                    <p class="mb-0">${pedido.fichas_ganadas}</p>
+                                    <img class="fs-4 my-auto" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 20px;">
+                                </div>
+                            </strong>
+                        </div>
+                    ` : ''}
+
                 </div>
 
             </div>
@@ -570,7 +602,7 @@ function renderPedidoCard(
             <div class="order-actions">
 
                 ${
-                    pedido.pagado == 0
+                    pedido.pagado == 0 && pedido.progreso == 100
                     ?
                     `
                     <button
@@ -1008,9 +1040,27 @@ function renderPedidoCliente(pedido, returnHtml = false){
                             </strong>
                         </div>
                         <div>
+                            <span>Fichas usadas</span>
+                            <strong>
+                                <div class="d-flex align-items-center justify-content-center justify-content-lg-start gap-2">
+                                    <p class="mb-0">${pedido.fichas_usadas}</p>
+                                    <img class="fs-4" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 28px;">
+                                </div>
+                            </strong>
+                        </div>
+                        <div>
                             <span>Total</span>
                             <strong class="order-total">
                                 ₡${pedido.total}
+                            </strong>
+                        </div>
+                        <div>
+                            <span>Recompensa tras pago</span>
+                            <strong>
+                                <div class="d-flex align-items-center justify-content-center justify-content-lg-start gap-2">
+                                    <p class="mb-0">${pedido.fichas_ganadas}</p>
+                                    <img class="fs-4" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 28px;">
+                                </div>
                             </strong>
                         </div>
                     </div>
@@ -1321,16 +1371,13 @@ function quitarPedido(
     if (!eliminar) {
         abrirModalConfirmacion({
             titulo: '¿Eliminar pedido?',
-            texto:
-                `¿Desea eliminar "${nombre}" de tu lista de pedidos?`,
+            texto: `¿Desea eliminar "${nombre}" de tu lista de pedidos?`,
             icono: 'bi bi-trash-fill',
             callback: function () {
-                quitarPedido(
-                    id,
-                    idCliente,
-                    nombre,
-                    true
-                );
+                quitarPedido(id, idCliente, nombre, true);
+                if (idCliente) {
+                    buscarFichas(idCliente);
+                }
             }
         });
         return;
@@ -1402,17 +1449,22 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
     const precio = $('#precio').val();
 
     if (!validarCampos(
-        [clienteNombre, clientePrimerApellido, clienteProvincia, clienteCanton, clienteDistrito],
-        ['tú nombre', 'tú primer apellido', 'la provincia', 'el cantón', 'el distrito']
+        [clienteNombre, clientePrimerApellido, clienteProvincia, clienteCanton, clienteDistrito, clienteTelefono],
+        ['tu nombre', 'tu primer apellido', 'la provincia', 'el cantón', 'el distrito', 'tu número de teléfono']
     )) {
         return;
     }
 
-    alertLoadingBlocked(
-        'Enviando pedido',
-        'Se está enviando el pedido, espere un momento...',
-        'warning',
-    );
+    if (!validarCampos(
+        [clienteTelefono.length > 7 ? 'A' : ''],
+        ['el número de teléfono con un formato válido (8 dígitos)']
+    )) {
+        return;
+    }
+
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", 'Guardando...', 'Espere un momento...', 'bi bi-wifi', false);
+
     guardarDatos();
 
     function guardarDatos() {
@@ -1434,7 +1486,6 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
             precio: precio, 
             total: total
         };
-        console.log(data);
 
         $.ajax({
             url: backend + urlOrder,
@@ -1442,45 +1493,21 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
             data: data,
             success: function (response) {
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                alert(
-                    data.title,
-                    data.text,
-                    data.icon,
-                    'Aceptar'
-                );
+                cambiarMensajeModal("#modalGuardando", data.title, data.text, data.icon, true);
             },
-            error: function () {
-                alert(
-                    'Error',
-                    'Hubo un problema al intentar guardar el pedido.',
-                    'error',
-                    'Aceptar'
-                );
+            error: function (error) {
+                cambiarMensajeModal("#modalGuardando", error.title, error.text, error.icon, true);
             }
         });
     }
 }
 
-function abrirModalActualizarProgreso(
-    id,
-    progreso
-){
-
+function abrirModalActualizarProgreso(id, progreso){
     pedidoSeleccionado = id;
-
-    $('#progreso')
-        .val(
-            progreso || 0
-        );
-
-    $('#texto-progreso')
-        .text(
-            `${progreso || 0}%`
-        );
-
-    abrirModal(
-        'modalActualizarProgreso'
-    );
+    $('#progreso').val(progreso || 0);
+    $('#texto-progreso').text(`${progreso || 0}%`);
+    abrirModal('modalActualizarProgreso');
+    
 }
 
 function actualizarProgresoPedido() {
@@ -1488,8 +1515,7 @@ function actualizarProgresoPedido() {
         return;
     }
 
-    const progreso =
-        $('#progreso').val();
+    const progreso = $('#progreso').val();
 
     const accion = 'actualizarProgresoPedido';
     const data = {
@@ -1514,3 +1540,126 @@ function actualizarProgresoPedido() {
         }
     });
 }
+
+function abrirModalFichasUsar(id) {
+
+    productoSeleccionado =
+        id;
+
+    const total =
+        parseFloat(
+            $('#Total').val()
+        ) || 0;
+
+    let fichasCliente =
+        parseInt(
+            $('#usuario-fichas-actuales')
+                .text()
+                .replace(/\D/g, '')
+        );
+
+    fichasCliente =
+        Number.isNaN(
+            fichasCliente
+        )
+            ? 0
+            : fichasCliente;
+
+    $('#FichasCliente')
+        .val(
+            fichasCliente
+        );
+
+    const maximo =
+        Math.min(
+            fichasCliente,
+            Math.floor(
+                total / 10
+            )
+        );
+
+    $('#FichasUsar')
+        .attr(
+            'max',
+            maximo
+        )
+        .val('');
+
+    $('#label-fichas-actuales')
+        .html(`
+            Disponibles:
+            ${fichasCliente}
+        `);
+
+    abrirModal(
+        'modalUsarFichas'
+    );
+
+    actualizarModalFichas();
+}
+
+function actualizarModalFichas() {
+    const precio = parseFloat($('#PrecioBase').val()) || 0;
+    const cantidad = parseInt($('#cantidad').val()) || 1;
+    const recompensaUnitaria = parseInt($('#FichasRecompensa').val()) || 0;
+    const recompensaBase = recompensaUnitaria * cantidad;
+    const fichasCliente = parseInt($('#FichasCliente').val()) || 0;
+    let usar = $('#FichasUsar').val();
+    usar = usar === '' ? 0 : parseInt(usar);
+    const subtotal = precio * cantidad;
+    const maximo = Math.min(fichasCliente, Math.floor(subtotal / 10));
+    usar = Number.isNaN(usar) ? 0 : Math.max(0, Math.min(usar, maximo));
+
+    $('#FichasUsar').attr('max', maximo);
+
+    const descuento = usar * 10;
+    const total = Math.max(0, subtotal - descuento);
+    const porcentajePagado = subtotal > 0 ? (total / subtotal) : 0;
+    const recompensa = Math.max(0, Math.floor(recompensaBase * porcentajePagado));
+
+    $('#label-total-modal')
+    .html(`
+        ₡${total.toLocaleString()}
+    `);
+
+    $('#label-recompensa-modal')
+        .html(`
+            ${recompensa}
+            fichas SH
+        `);
+    
+    $('#Total').val(total);
+    $('#FichasUsadas').val(usar);
+    $('#FichasGanadas').val(recompensa);
+}
+
+$(document)
+    .off(
+        'input',
+        '#FichasUsar'
+    )
+    .on(
+        'input',
+        '#FichasUsar',
+        function () {
+
+            actualizarModalFichas();
+
+        }
+    );
+
+$(document)
+    .off(
+        'change',
+        '#cantidad'
+    )
+    .on(
+        'change',
+        '#cantidad',
+        function () {
+
+            actualizarModalFichas();
+
+        }
+    );
+

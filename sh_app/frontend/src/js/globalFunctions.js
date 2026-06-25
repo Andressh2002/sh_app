@@ -119,7 +119,7 @@ function irReservar(idProducto, idAccesorio) {
     const idColor = $('#Color').val();
     const idColorAccesorio = $('#AccesoryColor').val() == null || $('#AccesoryColor').val().trim() == "" ? "0" : $('#AccesoryColor').val();
     const cantidad = $('#cantidad').val();
-    const total = $('#total').val();
+    const total = $('#Total').val();
     const numColor = $('#NumColor').val();
     const numColorAccesorio = $('#NumAccesoryColor').val();
     location.href = `guardarPedido.php?idProducto=${idProducto}&idAccesorio=${idAccesorio}&idColor=${idColor}&idColorAccesorio=${idColorAccesorio}&numColor=${numColor}&numColorAccesorio=${numColorAccesorio}&cantidad=${cantidad}&total=${total}`;

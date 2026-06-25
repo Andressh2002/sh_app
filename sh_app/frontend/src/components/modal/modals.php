@@ -259,6 +259,174 @@
 
     $modal = $modalActualizarProgreso;
     include '../src/components/modal/modal.php';
+
+
+    /* Modal para seleccionar cantidad de fichas */
+    $modalUsarFichas = [
+        'id' => 'modalUsarFichas',
+        'title' => 'Uso de fichas SH',
+        'icon' => 'bi bi-money',
+        'size' => 'modal-md',
+        'keyboard' => true,
+
+        'body' => '
+
+            <div class="store-modal-body">
+
+                <div
+                    class="
+                        header-coins
+                        text-center
+                        d-flex
+                        align-items-center
+                        justify-content-center
+                        gap-2
+                        mb-4
+                    "
+                >
+
+                    <p
+                        id="label-fichas-actuales"
+                        class="
+                            mb-0
+                            fw-bolder
+                        "
+                    >
+                        ...
+                    </p>
+
+                    <img
+                        src="../src/img/app/SH_Ficha.png"
+                        style="height:48px;"
+                    >
+
+                </div>
+
+                <div class="filter-card admin-input-card px-4 px-sm-5">
+
+                    <label class="filter-title mb-2">
+                        Fichas SH a utilizar
+                    </label>
+
+                    <input
+                        type="number"
+                        id="FichasUsar"
+                        class="form-control filter-input"
+                        value="0"
+                        min="0"
+                    >
+
+                </div>
+
+                <div class="mt-4 text-center">
+
+                    <h5>
+                        Total:
+                        <span id="label-total-modal">
+                            ₡0
+                        </span>
+                    </h5>
+
+                    <div
+                        class="
+                            d-flex
+                            justify-content-center
+                            gap-2
+                            align-items-center
+                        "
+                    >
+                        <span>
+                            Recompensa:
+                        </span>
+
+                        <strong
+                            id="label-recompensa-modal"
+                        >
+                            0
+                        </strong>
+
+                        <img
+                            src="../src/img/app/SH_Ficha.png"
+                            style="height: 28px"
+                        >
+                    </div>
+
+                </div>
+
+            </div>
+        ',
+
+        'buttons' => [
+
+            [
+                'text' => 'Cancelar',
+                'icon' => 'bi bi-x-circle',
+                'class' => 'store-btn-secondary',
+                'dismiss' => true,
+            ],
+
+            [
+                'text' => 'Reservar',
+                'icon' => 'bi bi-check-circle-fill',
+                'class' => 'store-filter-btn',
+                'onclick' => 'guardarPedido()',
+            ]
+        ]
+    ];
+
+    $modal = $modalUsarFichas;
+    include '../src/components/modal/modal.php';
+
+
+    /* Modal para cambiar contraseña */
+    $modalCambiarFichas = [
+        'id' => 'modalCambiarFichas',
+        'title' => 'Cambiar contraseña',
+        'icon' => 'bi bi-key-fill',
+        'size' => 'modal-md',
+        'keyboard' => true,
+
+        'body' => '
+
+            <div class="store-modal-body">
+
+                <div class="filter-card px-4 px-sm-5">
+                    <p class="filter-title">
+                        <i class="bi bi-coin"></i>
+                        Fichas SH
+                    </p>
+                    <input
+                        type="number"
+                        class="form-control filter-input"
+                        id="cambioFichas"
+                        placeholder="Ingrese cantidad"
+                        min="0"
+                    />
+                </div>
+
+            </div>
+        ',
+
+        'buttons' => [
+
+            [
+                'text' => 'Cancelar',
+                'icon' => 'bi bi-x-circle',
+                'class' => 'store-btn-secondary',
+                'dismiss' => true,
+            ],
+
+            [
+                'text' => 'Actualizar',
+                'icon' => 'bi bi-check-circle-fill',
+                'class' => 'store-filter-btn',
+                'onclick' => 'cambiarFichas()',
+            ]
+        ]
+    ];
+
+    $modal = $modalCambiarFichas;
+    include '../src/components/modal/modal.php';
     
 
     /* Modal de guardando */

@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia) {
+    function insertar($conn, $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fichas) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -21,12 +21,12 @@
             }
     
             // Consulta SQL de inserción
-            $query = "INSERT INTO productos (nombre, idCategoria, idColores, precio, imagen_portada, imagen_galeria, descripcion, fecha_registro, pedidos, vendidos, altura, idDescuentos, estado, peso, idFestividad, visible, idRareza, idUniverso, idAccesorio, advertencia, tiempo, comida, existencia, fecha_destacado) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?,  ?, 1, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO productos (nombre, idCategoria, idColores, precio, fichas, imagen_portada, imagen_galeria, descripcion, fecha_registro, pedidos, vendidos, altura, idDescuentos, estado, peso, idFestividad, visible, idRareza, idUniverso, idAccesorio, advertencia, tiempo, comida, existencia, fecha_destacado) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?,  ?, 1, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             $stmt = $conn->prepare($query);
             // Aquí, se pasa el número correcto de parámetros y los tipos
-            $stmt->bind_param("ssssssssssssssssssss", $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $fecha_registro, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fecha_registro);
+            $stmt->bind_param("sssssssssssssssssssss", $nombre, $idCategoria, $idColores, $precio, $fichas, $imagen_portada, $imagen_galeria, $descripcion, $fecha_registro, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fecha_registro);
     
             if ($stmt->execute()) {
                 // Obtener el ID del producto insertado
@@ -155,6 +155,10 @@
                 ac.imagen_color14 AS imagen_accesorio_color14, 
                 ac.imagen_color15 AS imagen_accesorio_color15, 
                 ac.imagen_color16 AS imagen_accesorio_color16, 
+                ac.imagen_color16 AS imagen_accesorio_color17, 
+                ac.imagen_color16 AS imagen_accesorio_color18, 
+                ac.imagen_color16 AS imagen_accesorio_color19, 
+                ac.imagen_color16 AS imagen_accesorio_color20, 
                 (SELECT 
                     GROUP_CONCAT(
                         CONCAT(
@@ -217,7 +221,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia) {
+    function actualizar($conn, $id, $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fichas) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM productos WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -239,6 +243,7 @@
                             idCategoria = ?, 
                             idColores = ?, 
                             precio = ?, 
+                            fichas = ?, 
                             imagen_portada = ?, 
                             imagen_galeria = ?, 
                             descripcion = ?, 
@@ -256,7 +261,7 @@
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("ssssssssssssssssssi", $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $id);
+            $stmt->bind_param("sssssssssssssssssssi", $nombre, $idCategoria, $idColores, $precio, $fichas, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $id);
     
             if ($stmt->execute()) {
                 return [
@@ -302,6 +307,7 @@
                 p.idAccesorio,
                 p.idDescuentos,
                 p.precio,
+                p.fichas,
                 p.descripcion,
                 p.pedidos,
                 p.vendidos,
@@ -675,6 +681,7 @@
             p.idAccesorio,
             p.idDescuentos,
             p.precio,
+            p.fichas,
             p.descripcion,
             p.pedidos,
             p.vendidos,
@@ -782,6 +789,7 @@
                 p.idDescuentos, 
                 p.idAccesorio,
                 p.precio, 
+                p.fichas, 
                 p.id, 
                 p.altura, 
                 p.tiempo, 
@@ -794,6 +802,7 @@
                 p.especial, 
                 p.existencia, 
                 p.comida, 
+                p.fichas, 
                 ROUND(
                     AVG(c.estrellas),
                     1

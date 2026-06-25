@@ -69,6 +69,18 @@
             'placeholder' => 'Escribir precio',
         ],
         [
+            'label' => 'Fichas SH',
+            'id' => 'FichasRecompensa',
+            'icon' => 'bi bi-coin',
+            'input' => 'number',
+            'onchange' => '',
+            'btnHelp' => true,
+            'help' => "Se recomienda un valor: precio * 0.0023",
+            'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'placeholder' => 'Escribir fichas',
+        ],
+        [
             'label' => 'Accesorio',
             'id' => 'Accesorio',
             'icon' => 'bi bi-palette-fill',

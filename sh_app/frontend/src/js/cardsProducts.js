@@ -410,7 +410,7 @@ function mostrarEstrellasCartaProducto(calificacion, idElement) {
 
 let productoActual = null;
 
-function buscarCartaProducto(id, idCliente) {
+function buscarCartaProducto(id, idCliente, userRol = '') {
 
     // Mostrar skeleton general
     $('#producto-page-skeleton').removeClass('d-none');
@@ -435,9 +435,10 @@ function buscarCartaProducto(id, idCliente) {
                         : response;
 
                 productoActual = producto;
+                productoSeleccionado = producto.id;
 
                 // Procesar información
-                procesarProducto(producto, idCliente);
+                procesarProducto(producto, idCliente, userRol);
 
                 // Cargar imágenes
                 cargarImagenes(producto);
@@ -470,7 +471,7 @@ function buscarCartaProducto(id, idCliente) {
     });
 }
 
-function procesarProducto(producto, idCliente) {
+function procesarProducto(producto, idCliente, userRol) {
 
     const fechaActual = new Date();
 
@@ -558,6 +559,50 @@ function procesarProducto(producto, idCliente) {
                     )
                 );
         }
+    }
+
+    // =====================================
+    // DATOS BASE (MODAL)
+    // =====================================
+
+    const recompensaFinal =
+        mejorDescuento
+            ? Math.floor(
+                parseFloat(
+                    producto.fichas
+                ) *
+                (
+                    1 -
+                    (
+                        mejorDescuento.rebaja /
+                        100
+                    )
+                )
+            )
+            : parseInt(
+                producto.fichas
+            ) || 0;
+            
+    $('#PrecioBase')
+        .val(
+            precioFinal
+        );
+
+    $('#FichasRecompensa')
+        .val(
+            recompensaFinal
+        );
+
+    // No sobreescribir si viene vacío
+    if (
+        producto.fichasCliente !==
+        undefined
+    ) {
+
+        $('#FichasCliente')
+            .val(
+                producto.fichasCliente
+            );
     }
 
     // =====================================
@@ -740,6 +785,8 @@ function procesarProducto(producto, idCliente) {
     // PRECIOS
     // =====================================
 
+    let rebajaFinal = 0;
+
     if (mejorDescuento) {
 
         $('#nombrePrecio').html(`
@@ -755,6 +802,8 @@ function procesarProducto(producto, idCliente) {
                 </span>
             </div>
         `);
+
+        rebajaFinal = mejorDescuento.rebaja;
 
         $('#descuento').text(`
             ${mejorDescuento.rebaja}%
@@ -778,6 +827,12 @@ function procesarProducto(producto, idCliente) {
 
         $('#Precio').val(precioFinal);
 
+        if (userRol != '') {
+            $('#fichas-section').removeClass('d-none');
+        }
+
+        $('#text-fichas').html(`Recompensa: ${(producto.fichas * (1 - (mejorDescuento.rebaja / 100))).toFixed(0) || '0'}`);
+
     } else {
 
         $('#nombrePrecio').html(`
@@ -789,6 +844,12 @@ function procesarProducto(producto, idCliente) {
         $('#descuento').text('');
 
         $('#tiempoDescuento').text('');
+
+        if (userRol != '') {
+            $('#fichas-section').removeClass('d-none');
+        }
+
+        $('#text-fichas').html(`Recompensa: ${producto.fichas || '0'}`);
     }
 
     // =====================================
@@ -822,13 +883,21 @@ function procesarProducto(producto, idCliente) {
     // =====================================
 
     $('#cantidad')
-        .off('change')
-        .on('change', function () {
+    .off('change')
+    .on('change', function () {
 
-            calcularTotal(precioFinal);
-        });
+        calcularTotal(
+            precioFinal,
+            producto.fichas,
+            mejorDescuento
+                ? mejorDescuento.rebaja
+                : 0
+        );
 
-    calcularTotal(precioFinal);
+        actualizarModalFichas();
+    });
+
+    calcularTotal(precioFinal, producto.fichas, rebajaFinal);
 
     // =====================================
     // COMENTARIOS
@@ -862,7 +931,8 @@ function procesarProducto(producto, idCliente) {
             .off()
             .on(
                 'click',
-                () => guardarPedido(producto.id)
+                //() => guardarPedido(producto.id)
+                () => abrirModalFichasUsar(producto.id)
             );
 
     } else {
@@ -1514,7 +1584,7 @@ function mostrarParteImagen(index, totalPartes, imagenSrc, paletaId) {
     img.src = imagenSrc; // Cargar la imagen desde la base de datos
 }
 
-function calcularTotal(precio) {
+function calcularTotal(precio, fichas, descuento) {
     let cantidad = $('#cantidad').val();
     const inputTotal = $('#total');
 
@@ -1536,6 +1606,9 @@ function calcularTotal(precio) {
         const string = 'Total: ₡' + total.toString();
         inputTotal.val(total);
         $('#Total').val(total);
+        const fichasFinal = ((fichas * (1 - (descuento / 100))).toFixed(0)) * cantidad || 0;
+        $('#text-fichas').html(`Recompensa: ${fichasFinal}`);
+        $('#Fichas').val(fichasFinal);
 
         label.innerHTML = string;
     } catch (error) {
@@ -2024,6 +2097,10 @@ function buscarPrevisualizacionProducto(id, isAccesorio, numColorProducto, numCo
                         <img id="img-${producto.idAccesorio}" src="${accImg}" class="product-img-hover" alt="Imagen" style="max-width: auto; max-height: 128px;">
                     `;
                 }
+                
+                $('#span-nombre-producto').html(`${producto.nombre}`);
+                $('#span-categoria').html(`${producto.categoria}`);
+                $('#span-universo').html(`${producto.universo}`);
             } catch (error) {
                 console.error('Error al procesar la respuesta:', error);
             }

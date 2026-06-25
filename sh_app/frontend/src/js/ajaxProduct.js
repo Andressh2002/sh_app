@@ -17,6 +17,7 @@ function guardarProducto() {
     const id = document.getElementById('Id').value || null;
     const nombre = $('#Nombre').val();
     const precio = $('#Precio').val();
+    const fichas = $('#FichasRecompensa').val();
     const categoria = $('#Categorias').val();
     const colores = colores_almacenados.map(item => item.id).join(',');
     const descuentos = descuentos_almacenados.map(item => item.id).join(',');
@@ -51,6 +52,7 @@ function guardarProducto() {
                 accion: accion,
                 nombre: nombre,
                 precio: precio,
+                fichas: fichas,
                 categoria: categoria,
                 colores: colores,
                 descuentos: descuentos,
@@ -294,6 +296,7 @@ function mostrarProducto(producto) {
         $('#Festividad').val(producto.idFestividad);
         $('#Accesorio').val(producto.idAccesorio);
         $('#Precio').val(producto.precio);
+        $('#FichasRecompensa').val(producto.fichas);
         $('#Altura').val(producto.altura);
         $('#Anchura').val(producto.anchura);
         $('#Peso').val(producto.peso);
@@ -655,6 +658,16 @@ function renderProductoCard(
                             <span>Precio:</span>
                             <strong>
                                 ₡${producto.precio || 0}
+                            </strong>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                            <span>Fichas:</span>
+                            <strong>
+                                <div class="d-flex gap-1 ms-1">
+                                    <p class="mb-0">${producto.fichas || 0}</p>
+                                    <img class="fs-4 my-auto" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 20px;">
+                                </div>
                             </strong>
                         </div>
 

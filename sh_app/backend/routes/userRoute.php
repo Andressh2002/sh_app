@@ -193,9 +193,7 @@
 
         case 'buscarPorIdAdmin':
 
-            $id =
-                $_POST['id']
-                ?? '';
+            $id = $_POST['id'] ?? '';
 
             $respuesta =
                 buscarPorIdAdmin(
@@ -211,6 +209,20 @@
                 $respuesta
             );
 
+            break;
+
+        case 'buscarFichas':
+            $respuesta = buscarFichas($conn, $_POST['id'] ?? '');
+
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
+            break;
+
+        case 'cambiarFichas':
+            $respuesta = cambiarFichas($conn, $_POST['id'] ?? '', $_POST['fichas'] ?? '');
+
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
             break;
         
         default:

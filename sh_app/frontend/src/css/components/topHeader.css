@@ -1,11 +1,102 @@
 .top-header {
-    height: clamp(32px, 50%, 64px);
+    min-height: 64px;
+
+    display: flex;
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    padding-inline: 8px;
+
+    background-color: black;
 }
 
 .top-header-logo {
-    width: clamp();
-    clip-path: polygon(0 0, 100% 0%, 75% 100%, 0% 100%);
     background-color: white;
-    width: clamp(64px, 50vw, 112px);
-    height: 72px;
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        75% 100%,
+        0 100%
+    );
+
+    width: clamp(72px, 18vw, 112px);
+    height: clamp(48px, 10vw, 72px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+.nav-logo {
+    height: clamp(36px, 7vw, 54px);
+}
+
+.top-header h1 {
+    font-size: clamp(1rem, 3vw, 2rem);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    max-width: 40vw;
+
+    margin-bottom: 0;
+}
+
+.user-menu-container {
+    flex-shrink: 0;
+}
+
+.top-header .text-center img {
+    height: clamp(32px, 8vw, 54px);
+}
+
+/* ---------- MÓVIL ---------- */
+
+@media (max-width: 768px) {
+    .top-header {
+        row-gap: 8px;
+        padding-block: 6px;
+    }
+
+    .top-header h1 {
+        max-width: 150px;
+        font-size: 1rem;
+    }
+
+    .user-menu-info {
+        display: none !important;
+    }
+
+    /* mover fichas a nueva fila */
+    .header-coins {
+        order: 10;
+
+        width: 100%;
+
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-header h1 {
+        max-width: 120px;
+        font-size: .95rem;
+    }
+
+    .top-header-logo {
+        width: 72px;
+        height: 52px;
+    }
+
+    .nav-logo {
+        height: 32px;
+    }
 }

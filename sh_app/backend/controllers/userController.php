@@ -508,6 +508,7 @@
             WHERE
                 u.estado = 1
                 AND u.rol <> 'Invitado'
+                AND u.nombre_usuario <> ''
         ";
 
         if (!empty($rol)) {
@@ -612,5 +613,43 @@
         $usuario['nombre'] = decryptData($usuario['nombre']);
 
         return $usuario;
+    }
+
+    function buscarFichas($conn, $id) {
+        $stmt = $conn->prepare("
+            SELECT
+                u.fichas
+            FROM usuarios u
+            WHERE
+                u.estado = 1
+                AND u.id = ?
+        ");
+
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows <= 0) {
+            return null;
+        }
+
+        $usuario = $result->fetch_assoc();
+        return $usuario;
+    }
+
+    function cambiarFichas($conn, $id, $fichas) {
+        $id = $conn->real_escape_string($id);
+        $fichas = $conn->real_escape_string($fichas);
+    
+        $query = "UPDATE usuarios SET 
+                    fichas = '$fichas' 
+                  WHERE id = '$id';";
+    
+        // Ejecutar múltiples consultas
+        if ($conn->multi_query($query)) {
+            return "Se ha actualizado la cantidad de fichas del usuario";
+        } else {
+            return "Error al actualizar la cantidad de fichas del usuario: " . $conn->error;
+        }
     }
 ?>

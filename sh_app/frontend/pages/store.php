@@ -13,6 +13,7 @@
         ['src' => '../src/img/app/carrusel_pagina1.png'],
         ['src' => '../src/img/app/carrusel_pagina2.png'],
         ['src' => '../src/img/app/carrusel_pagina3.png'],
+        ['src' => '../src/img/app/carrusel_pagina4.png'],
     ]
 ?>
 

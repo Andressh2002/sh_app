@@ -10,21 +10,44 @@
 
     switch ($accion) {
         case 'insertar':
-            if (isset($_POST['cliente']) && isset($_POST['producto']) && isset($_POST['color']) && isset($_POST['cantidad']) && isset($_POST['total'])) {
-                $cliente = $_POST['cliente'];
-                $producto = $_POST['producto'];
-                $color = $_POST['color'];
-                $colorAccesorio = $_POST['colorAccesorio'];
-                $cantidad = $_POST['cantidad'];
-                $total = $_POST['total'];
-                $precio = $_POST['precio'];
+            if (
+                isset($_POST['cliente']) &&
+                isset($_POST['producto']) &&
+                isset($_POST['color']) &&
+                isset($_POST['cantidad']) &&
+                isset($_POST['total']) &&
+                isset($_POST['fichasUsadas']) &&
+                isset($_POST['fichasGanadas'])
+            ) {
 
-                $respuesta = insertar($conn, $cliente, $producto, $color, $cantidad, $total, $colorAccesorio, $precio);
-                echo json_encode($respuesta);
+                $respuesta =
+                    insertar(
+                        $conn,
+                        $_POST['cliente'],
+                        $_POST['producto'],
+                        $_POST['color'],
+                        $_POST['cantidad'],
+                        $_POST['total'],
+                        $_POST['colorAccesorio'] ?? 0,
+                        $_POST['precio'] ?? 0,
+                        $_POST['fichasUsadas'],
+                        $_POST['fichasGanadas']
+                    );
+
+                echo json_encode(
+                    $respuesta
+                );
+
             } else {
-                echo "Faltan datos";
+
+                echo json_encode([
+                    'title'=>'¡Error!',
+                    'text'=>'Faltan datos.',
+                    'icon'=>'bi bi-x-circle'
+                ]);
             }
-            break;
+
+        break;
 
         case 'actualizar':
             if (isset($_POST['id']) && isset($_POST['cliente']) && isset($_POST['producto']) && isset($_POST['color']) && isset($_POST['cantidad']) && isset($_POST['total'])) {

@@ -302,6 +302,10 @@
                                         id="labelTotal"
                                         class="product-price"
                                     ></h3>
+                                    <div id="fichas-section" class="text-center d-flex gap-1 align-items-center d-none">
+                                        <p class="mb-0 fw-bolder" id="text-fichas">Recompensa: ...</p>
+                                        <img class="" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 32px;">
+                                    </div>
                                     <div
                                         class="
                                             navbar-btn-shadow
@@ -460,7 +464,15 @@
 <input type="hidden" id="NumAccesoryColor" value=""> 
 <input type="hidden" id="Sesion" value="<?php echo isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : '' ?>"> 
 <input type="hidden" id="Precio" value=""> 
+<input type="hidden" id="Fichas" value=""> 
 <input type="hidden" id="Total" value=""> 
+
+<input type="hidden" id="FichasCliente" value="">
+<input type="hidden" id="FichasRecompensa" value="">
+<input type="hidden" id="PrecioBase" value="">
+
+<input type="hidden" id="FichasUsadas">
+<input type="hidden" id="FichasGanadas">
 
 <!-- Productos relacionados -->
 <?php 
@@ -483,7 +495,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        buscarCartaProducto(<?php echo json_encode($idProducto); ?>, <?php echo json_encode($idCliente); ?>);
+        buscarCartaProducto(<?php echo json_encode($idProducto); ?>, <?php echo json_encode($idCliente); ?>, <?php echo json_encode($_SESSION['usuario_rol'] ?? ''); ?>);
 
         guardarInteraccion({
             usuario: <?php echo json_encode($_SESSION['usuario_id'] ?? ''); ?>,

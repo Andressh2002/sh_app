@@ -340,6 +340,16 @@ function renderUsuarioCard(
                             </strong>
                         </div>
 
+                        <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                            <span>Fichas SH:</span>
+                            <strong>
+                                <div class="d-flex gap-1 ms-1">
+                                    <p class="mb-0">${usuario.fichas ?? 0}</p>
+                                    <img class="fs-4 my-auto" src="../src/img/app/SH_Ficha.png" alt="sh" style="height: 20px;">
+                                </div>
+                            </strong>
+                        </div>
+
                     </div>
 
                 </div>
@@ -398,6 +408,24 @@ function renderUsuarioCard(
                         Cambiar contraseña
                     </button>
 
+                    <button
+                        class="
+                            store-filter-btn
+                            px-4
+                            justify-content-center
+                            text-decoration-none
+                        "
+                        onclick="
+                            abrirModalCambiarFichas(
+                                '${usuario.id}',
+                                '${usuario.fichas}',
+                            )
+                        "
+                    >
+                        <i class="bi bi-coin"></i>
+                        Cambiar fichas SH
+                    </button>
+
                 </div>
 
             </div>
@@ -448,6 +476,7 @@ function renderUsuarioSkeleton(
                     <div class="skeleton-button"></div>
                     <div class="skeleton-button"></div>
                     <div class="skeleton-button"></div>
+                    <div class="skeleton-button"></div>
                 </div>
             </div>
 
@@ -476,9 +505,17 @@ function registrarUsuario() {
     const telefono = $('#Telefono').val();
 
     if (!validarCampos(
-        [nombre, primerApellido, provincia, canton, distrito, nombreUsuario, contrasennia, contrasennia2],
-        ['tu nombre', 'tu primer apellido', 'la provincia', 'el cantón', 'el distrito', 'un nombre de usuario', 'una contraseña', 'la confirmación de la contraseña']
+        [nombre, primerApellido, provincia, canton, distrito, telefono, nombreUsuario, contrasennia, contrasennia2],
+        ['tu nombre', 'tu primer apellido', 'la provincia', 'el cantón', 'el distrito', 'el teléfono', 'un nombre de usuario', 'una contraseña', 'la confirmación de la contraseña']
     )) {
+        return;
+    }
+
+    if(contrasennia.length < 8){
+        abrirModal('modalValidacion');
+        $('#modalValidacion-body p').text(
+            'El número de teléfono debe ser de 8 dígitos.'
+        );
         return;
     }
 
@@ -704,6 +741,72 @@ function cambiarContrasenniaAdmin(){
                 'bi bi-x-circle',
                 true
             );
+        }
+    });
+}
+
+function buscarFichas(id) {
+    $('#usuario-fichas-actuales').html('cargando...');
+    $.ajax({
+        url: backend + urlUser,
+        type: 'POST',
+        data: {
+            accion: 'buscarFichas',
+            id: id
+        },
+        success: function(response) {
+            try {
+                const usuario = typeof response === 'string' ? JSON.parse(response) : response;
+                $('#usuario-fichas-actuales').html(`${usuario.fichas}`);
+                $('#label-fichas-actuales').html(`Disponibles: ${usuario.fichas}`);
+            } catch (error) {
+                console.error('Error al procesar la respuesta:', error);
+            }
+        },
+        error: function() {
+            console.error('Error al procesar la solicitud.');
+        }
+    });
+}
+
+function abrirModalCambiarFichas(id, fichas){
+    usuarioSeleccionado = id;
+    $('#cambioFichas').val(fichas || 0);
+    abrirModal('modalCambiarFichas');
+    
+}
+
+function cambiarFichas() {
+    if(!usuarioSeleccionado){
+        return;
+    }
+
+    const fichas = $('#cambioFichas').val();
+
+    if (!validarCampos([fichas], ['la cantidad de fichas SH'])) {
+        return;
+    }
+
+    const accion = 'cambiarFichas';
+    const data = {
+        accion: accion,
+        id: usuarioSeleccionado,
+        fichas: fichas,
+    };
+
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Actulizando fichas", "Se está actualizando la cantidad de fichas de este usuario", "bi bi-arrow-clockwise", false);
+
+    $.ajax({
+        url: backend + urlUser,
+        type: 'POST',
+        data: data,
+        success: function (response) {
+            cambiarMensajeModal("#modalGuardando", "Fichas actualizadas", "Se ha actualizado la cantidad de fichas del usuario", "bi bi-check-circle", true);
+            aplicarFiltrosUsuario();
+        },
+        error: function () {
+            cambiarMensajeModal("#modalGuardando", "¡Error!", "Ha ocurrido un error al tratar de actualizar la cantidad de fichas del usuario", "bi bi-x-circle", true);
         }
     });
 }

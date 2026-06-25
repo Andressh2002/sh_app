@@ -29,6 +29,8 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'required' => 'Valor requerido',
         ],
         [
             'label' => 'Segundo nombre',
@@ -38,6 +40,7 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
         [
             'label' => 'Primer apellido',
@@ -47,6 +50,8 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'required' => 'Valor requerido',
         ],
         [
             'label' => 'Segundo apellido',
@@ -56,6 +61,7 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => [null, null],
+            'col' => 'col-12 col-md-6 col-xl-3',
         ],
     ];
 
@@ -68,6 +74,8 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'required' => 'Valor requerido',
         ],
         [
             'label' => 'Cantón',
@@ -77,6 +85,8 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'required' => 'Valor requerido',
         ],
         [
             'label' => 'Distrito',
@@ -86,6 +96,8 @@
             'onchange' => '',
             'btnHelp' => false,
             'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'required' => 'Valor requerido',
         ],
     ];
 
@@ -99,82 +111,133 @@
             'btnHelp' => true,
             'spans' => [null, null],
             'inputInfo' => "No es obligatorio, pero es para poder contactarlo.",
+            'col' => 'col-12 col-md-6 col-xl-3',
+            'required' => 'Valor requerido',
         ],
+    ];
+
+    $menuTable = [
+        'url' => 'products.php',
+        'addMethod' => 'guardarProducto()',
     ];
 ?>
 
 <div class="row my-3 p-4 mx-0">
-    <div class="d-flex align-items-center gap-2 px-0">
-        <h4 class="mb-0">Tu producto</h4>
-        <i class="bi bi-cart-fill fs-4 d-flex align-self-center"></i>
-    </div>
-    <div class="px-0 pb-2 container-fluid">
-        <div class="row p-0 m-0 gap-2">
-            <div class="card rounded-3 overflow-hidden my-2 col-12 col-md p-0 m-0">
-                <div class="card-body admin-subheader-card-bg py-1">
-                    <div class="d-flex align-items-center gap-2">
-                        <p class="card-title p-0 m-0">Producto</p>
-                    </div>
-                </div>
-                <div class="row p-3" id="div-pre-img-producto"></div>
-            </div>
-            <?php if ($saveIdAccesorio !== null && $saveIdAccesorio != 0) : ?>
-                <div class="card rounded-3 overflow-hidden my-2 col-12 col-md p-0 m-0">
-                    <div class="card-body admin-subheader-card-bg py-1">
-                        <div class="d-flex align-items-center gap-2">
-                            <p class="card-title p-0 m-0">Accesorio</p>
+    <div class="container-fluid p-0">
+
+        <div class="d-flex align-items-center gap-2 px-0 mb-2">
+            <h4 class="mb-0">Resumen del pedido</h4>
+            <i class="bi bi-binoculars-fill fs-4 d-flex align-self-center"></i>
+        </div>
+
+        <div class="row">
+            <div class="product-admin-card">
+                    <div class="product-admin-header">
+                        <div>
+                            <p class="product-number">
+                                Vista previa
+                            </p>
+                            <h5 class="product-title" id="span-nombre-producto">
+                                ...
+                            </h5>
                         </div>
                     </div>
-                    <div class="row p-3" id="div-pre-img-accesorio"></div>
+
+                    <div class="product-admin-body">
+                        <div>
+                            <div class="product-admin-image mb-2">
+                                <div class="row p-3" id="div-pre-img-producto"></div>
+                            </div>
+
+                            <?php if ($saveIdAccesorio !== null && $saveIdAccesorio != 0) : ?>
+                                <div class="product-admin-image">
+                                    <div class="row p-3" id="div-pre-img-accesorio"></div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="product-info">
+                            <div class="product-info-grid">
+                                <div>
+                                    <span>Categoría:</span>
+                                    <strong id="span-categoria">
+                                        ...
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span>Universo:</span>
+                                    <strong id="span-universo">
+                                        ...
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span>Cantidad:</span>
+                                    <strong>
+                                        <?php echo $_GET['cantidad'] ?? '' ?>
+                                    </strong>
+                                </div>
+                                <div class="mt-2">
+                                    <span>Precio total:</span>
+                                    <strong>
+                                        <?php echo $_GET['total'] ?? '' ?>
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-actions"></div>
+                    </div>
                 </div>
-            <?php endif; ?>
+            </div>
         </div>
-    </div>
-    <div class="d-flex align-items-center gap-2 px-0">
-        <h4 class="mb-0">Tu información de cliente</h4>
-        <i class="bi bi-person-fill fs-4 d-flex align-self-center"></i>
-    </div>
-    <div class="px-0 pb-2">
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Cliente</p>
-                </div>
-            </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($personalInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
+
+        <div class="d-flex align-items-center gap-2 px-0 mt-4">
+            <h4 class="mb-0">Información personal</h4>
+            <i class="bi bi-person-fill fs-4 d-flex align-self-center"></i>
         </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Ubicación</p>
+
+        <div class="w-100">
+            <div class="overflow-hidden my-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2">
+                        <p class="card-title p-0 m-0">Nombre</p>
+                    </div>
+                </div>
+                <div class="row px-3 py-1">
+                    <?php
+                    foreach ($personalInputs as $input) {
+                        include '../src/components/inputs/input.php';
+                    }
+                    ?>
                 </div>
             </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($locationInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
-            </div>
-        </div>
-        <div class="card rounded-3 overflow-hidden my-2">
-            <div class="card-body admin-subheader-card-bg py-1">
-                <div class="d-flex align-items-center gap-2">
-                    <p class="card-title p-0 m-0">Contacto</p>
+            <div class="overflow-hidden my-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2">
+                        <p class="card-title p-0 m-0">Ubicación</p>
+                    </div>
+                </div>
+                <div class="row px-3 py-1">
+                    <?php
+                    foreach ($locationInputs as $input) {
+                        include '../src/components/inputs/input.php';
+                    }
+                    ?>
                 </div>
             </div>
-            <div class="row px-3 py-1">
-                <?php
-                foreach ($informationInputs as $input) {
-                    include '../src/components/inputs/input.php';
-                }
-                ?>
+            <div class="overflow-hidden my-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2">
+                        <p class="card-title p-0 m-0">Contacto</p>
+                    </div>
+                </div>
+                <div class="row px-3 py-1">
+                    <?php
+                    foreach ($informationInputs as $input) {
+                        include '../src/components/inputs/input.php';
+                    }
+                    ?>
+                </div>
             </div>
         </div>
     </div>
@@ -211,11 +274,22 @@
 </div>
 <div class="bg-clip-path-down-store-section mb-4"></div>
 
-<div class="align-items-center">
-        <button id="btn-guardar-pedido" type="button" class="btn-details text-white border-0 rounded-2 px-4 py-2 d-flex align-items-center mx-auto" onclick='guardarPedidoSinUsuario(<?php echo json_encode($saveIdProducto); ?>, <?php echo json_encode($saveCantidad); ?>, <?php echo json_encode($saveTotal); ?>)'>
-            Realizar pedido<i class="bi bi-cart-fill ms-2 d-flex align-self-center"></i>
-        </button>
+<div class="container-fluid mb-3">
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <div class="navbar-btn-shadow">
+                <button
+                    onclick='guardarPedidoSinUsuario(<?php echo json_encode($saveIdProducto); ?>, <?php echo json_encode($saveCantidad); ?>, <?php echo json_encode($saveTotal); ?>)'
+                    class="store-filter-btn slide_from_left text-decoration-none"
+                >
+                    <i class="bi bi-floppy-fill"></i>
+                    <span>Realizar pedido</span>
+                </button>
+            </div>
+        </div>
     </div>
+</div>
+
 
 <?php
     $content = ob_get_clean();

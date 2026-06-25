@@ -1,11 +1,11 @@
-<div class="top-header d-flex align-items-center p-0 h-100" style="background-color: black;">
+<div class="top-header d-flex align-items-center p-0" style="background-color: black;">
     
     <!-- Grupo izquierdo: logo + texto -->
     <div class="d-flex align-items-center p-0 h-100">
         <div class="top-header-logo d-flex"> 
-            <img class="nav-logo my-auto ms-4" src="../src/img/app/SH_Logo.png" alt="sh" style="height: 54px;">
+            <img class="nav-logo my-auto me-2 me-sm-3 p-1 p-sm-0" src="../src/img/app/SH_Logo.png" alt="sh" style="height: 54px;">
         </div>
-
+        
         <h1 class="ms-2 text-white my-auto">
             <?php echo $pageTitle; ?>
         </h1>
@@ -37,20 +37,6 @@
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end user-menu-dropdown rounded-0">
-
-            <li>
-                <a
-                    class="dropdown-item"
-                    href="usuario.php"
-                >
-                    <i class="bi bi-person-vcard-fill"></i>
-                    Mi perfil
-                </a>
-            </li>
-
-            <li>
-                <hr class="dropdown-divider">
-            </li>
 
             <li>
 
