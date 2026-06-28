@@ -103,7 +103,7 @@ $type = 'festividad';
 
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateHoliday ? 'product-loading' : ''; ?>" id="holiday-form">
 
     <div class="overflow-hidden my-2">
 
@@ -178,18 +178,20 @@ include 'template.php';
 
 <script>
 
+function setHolidayLoading(isLoading){
+    $('#holiday-form').toggleClass(
+        'product-loading',
+        isLoading
+    );
+}
+
 $(document).ready(function(){
+    const isUpdate = <?php echo $updateHoliday ? 'true' : 'false'; ?>;
 
-    if(
-        <?php echo $updateHoliday ? 'true' : 'false'; ?>
-    ){
-
-        buscarFestividad(
-            <?php echo $holidayId; ?>
-        );
-
+    if(isUpdate){
+        setHolidayLoading(true);
+        buscarFestividad(<?php echo $holidayId; ?>);
     }
-
 });
 
 function actualizarDias(id){
@@ -199,11 +201,9 @@ function actualizarDias(id){
             $('#Month' + id).val()
         );
 
-    const diasSelect =
-        $('#Day' + id);
+    const diasSelect = $('#Day' + id);
 
-    const diaActual =
-        diasSelect.val();
+    const diaActual = diasSelect.val();
 
     let dias = 31;
 
@@ -217,9 +217,7 @@ function actualizarDias(id){
 
     diasSelect.empty();
 
-    diasSelect.append(
-        '<option value="">Día</option>'
-    );
+    diasSelect.append('<option value="">Día</option>');
 
     for(let i = 1; i <= dias; i++){
 

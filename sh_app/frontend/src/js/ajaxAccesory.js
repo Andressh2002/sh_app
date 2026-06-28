@@ -183,29 +183,50 @@ function buscarAccesorio(id) {
 }
 
 function mostrarAccesorio(accesorio) {
-    if (accesorio) {
-        $('#Nombre').val(accesorio.nombre);
 
-        const arr = accesorio.idColores.split(',');
-        colores_almacenados = [];
-
-        // Obtener IDs y preparar las promesas
-        const vectorIdColores = accesorio.idColores.split(',').map(Number);
-        const colorPromises = vectorIdColores.map((id, index) => {
-            const imagenColor = accesorio[`imagen_color${index + 1}`];
-            return buscarColorParaAccesorio(id, imagenColor);
-        });
-
-        // Procesar las promesas en el orden original
-        Promise.all(colorPromises).then((colores) => {
-            colores.forEach(color => {
-                seleccionarColor(color.id, color.color1, color.color2, color.color3, color.imagen, color.familia);
-            });
-            actualizarColoresSeleccionados();
-        }).catch(error => {
-            console.error("Error al cargar colores:", error);
-        });
+    if (!accesorio) {
+        setAccesoryLoading(false);
+        return;
     }
+
+    $('#Nombre').val(accesorio.nombre);
+    colores_almacenados = [];
+
+    if (!accesorio.idColores || accesorio.idColores.trim() === '') {
+        setTimeout(function(){ setAccesoryLoading(false); }, 250);
+        return;
+    }
+
+    const vectorIdColores = accesorio.idColores.split(',').map(Number);
+    const colorPromises = vectorIdColores.map(
+        function(id, index){
+            return buscarColorParaAccesorio(id, accesorio[`imagen_color${index + 1}`]);
+        }
+    );
+
+    Promise.all(colorPromises)
+    .then(
+        function(colores){
+            colores.forEach(
+                function(color){
+                    seleccionarColor(color.id, color.color1, color.color2, color.color3, color.imagen, color.familia);
+                }
+            );
+            actualizarColoresSeleccionados();
+            setTimeout(
+                function(){ setAccesoryLoading(false); }, 250
+            );
+        }
+    )
+    .catch(
+        function(error){
+            console.error(
+                'Error al cargar colores:',
+                error
+            );
+            setAccesoryLoading(false);
+        }
+    );
 }
 
 function eliminarAccesorio(id, nombre) {

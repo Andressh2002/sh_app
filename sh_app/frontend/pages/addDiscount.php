@@ -99,7 +99,7 @@
     $type = 'descuento';
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateDiscount ? 'product-loading' : ''; ?>" id="discount-form">
 
     <div class="overflow-hidden my-2">
 
@@ -173,8 +173,19 @@
 ?>
 
 <script>
-    $(document).ready(function() {
-        if (<?php echo $updateDiscount ? 'true' : 'false'; ?>) {
+
+    function setDiscountLoading(isLoading){
+        $('#discount-form').toggleClass(
+            'product-loading',
+            isLoading
+        );
+    }
+
+    $(document).ready(function(){
+        const isUpdate = <?php echo $updateDiscount ? 'true' : 'false'; ?>;
+
+        if(isUpdate){
+            setDiscountLoading(true);
             buscarDescuento(<?php echo $discountId; ?>);
         }
     });

@@ -40,15 +40,16 @@ async function actualizarDashboard(){
 }
 
 function obtenerRarezasParaDashboard(select, all, acceptNull = false) {
-    $.ajax({
+    return $.ajax({
         url: backend + urlRarity,
         type: 'POST',
         data: {
             accion: 'obtener',
             nombre: ''
-        },
-        success: function (response) {
-            try {
+        }
+        }).then(
+            function (response) {
+
                 const rarezas = typeof response === 'string' ? JSON.parse(response) : response;
 
                 rarezas.sort(function (a, b) {
@@ -83,28 +84,23 @@ function obtenerRarezasParaDashboard(select, all, acceptNull = false) {
                             text: rareza.nombre
                         })
                     );
-                });
-
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
+                }
+            );
         },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
+    );
 }
 
 function obtenerUniversosParaDashboard(select, all, acceptNull = false) {
-    $.ajax({
+    return $.ajax({
         url: backend + urlUniverse,
         type: 'POST',
         data: {
             accion: 'obtener',
             nombre: ''
-        },
-        success: function (response) {
-            try {
+        }
+        }).then(
+            function (response) {
+
                 const universos = typeof response === 'string' ? JSON.parse(response) : response;
 
                 universos.sort(function (a, b) {
@@ -139,28 +135,23 @@ function obtenerUniversosParaDashboard(select, all, acceptNull = false) {
                             text: universo.nombre
                         })
                     );
-                });
-
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
+                }
+            );
         },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
+    );
 }
 
 function obtenerFestividadesParaDashboard(select, all, acceptNull = false) {
-    $.ajax({
+    return $.ajax({
         url: backend + urlHoliday,
         type: 'POST',
         data: {
             accion: 'obtener',
             nombre: ''
-        },
-        success: function (response) {
-            try {
+        }
+        }).then(
+            function (response) {
+
                 const universos = typeof response === 'string' ? JSON.parse(response) : response;
 
                 universos.sort(function (a, b) {
@@ -195,28 +186,23 @@ function obtenerFestividadesParaDashboard(select, all, acceptNull = false) {
                             text: universo.nombre
                         })
                     );
-                });
-
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
+                }
+            );
         },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
+    );
 }
 
 function obtenerAccesoriosParaDashboard(select, all, acceptNull = false) {
-    $.ajax({
+    return $.ajax({
         url: backend + urlAccesory,
         type: 'POST',
         data: {
             accion: 'obtener',
             nombre: ''
-        },
-        success: function (response) {
-            try {
+        }
+        }).then(
+            function (response) {
+
                 const accesorios = typeof response === 'string' ? JSON.parse(response) : response;
 
                 accesorios.sort(function (a, b) {
@@ -251,14 +237,8 @@ function obtenerAccesoriosParaDashboard(select, all, acceptNull = false) {
                             text: accesorio.nombre
                         })
                     );
-                });
-
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
+                }
+            );
         },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
+    );
 }

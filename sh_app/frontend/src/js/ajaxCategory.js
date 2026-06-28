@@ -114,12 +114,14 @@ function buscarCategoria(id) {
 }
 
 function mostrarCategoria(categoria) {
-    if (categoria) {
-        $('#Nombre').val(categoria.nombre);
-
-        cargarImagenGuardada(categoria.imagen, '#vistaImagenCategoria');
-        $('#hiddenImagenCategoria').val(categoria.imagen);
+    if (!categoria) {
+        setCategoryLoading(false);
+        return;
     }
+    $('#Nombre').val(categoria.nombre);
+    cargarImagenGuardada(categoria.imagen, '#vistaImagenCategoria');
+    $('#hiddenImagenCategoria').val(categoria.imagen);
+    setTimeout(function(){ setCategoryLoading(false); }, 250);
 }
 
 function eliminarCategoria(id, nombre) {

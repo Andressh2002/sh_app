@@ -60,7 +60,7 @@
     $type = 'categoria';
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateCategory ? 'product-loading' : ''; ?>" id="category-form">
 
     <!-- INFORMACIÓN -->
     <div class="overflow-hidden my-2">
@@ -122,17 +122,21 @@
 ?>
 
 <script>
+    
+    function setCategoryLoading(isLoading){
+        $('#category-form').toggleClass(
+            'product-loading',
+            isLoading
+        );
+    }
 
     $(document).ready(function(){
+        const isUpdate = <?php echo $updateCategory ? 'true' : 'false'; ?>;
 
-        if(
-            <?php echo $updateCategory ? 'true' : 'false'; ?>
-        ){
-            buscarCategoria(
-                <?php echo $categoryId; ?>
-            );
+        if(isUpdate){
+            setCategoryLoading(true);
+            buscarCategoria(<?php echo $categoryId; ?>);
         }
-
     });
 
     const maxSizeInKB = 1000;

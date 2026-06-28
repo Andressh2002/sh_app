@@ -300,7 +300,7 @@
     $type = 'producto';
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateProduct ? 'product-loading' : ''; ?>" id="product-form">
     <div class="overflow-hidden my-2">
         <div class="card-body admin-subheader-card-bg">
             <div class="d-flex align-items-center gap-2">
@@ -411,16 +411,33 @@
 ?>
 
 <script>
-    $(document).ready(function() {
+    function setProductLoading(isLoading) {
+
+        $('#product-form').toggleClass(
+            'product-loading',
+            isLoading
+        );
+    }
+
+    $(document).ready(async function() {
         colores_almacenados = [];
-        if (<?php echo $updateProduct ? 'true' : 'false'; ?>) {
+        const isUpdate = <?php echo $updateProduct ? 'true' : 'false'; ?>;
+
+        if (isUpdate) {
+            setProductLoading(true);
+        }
+
+        await Promise.all([
+            obtenerCategoriasParaProductos('Categorias', false, false),
+            obtenerRarezasParaDashboard('Rareza', false, false),
+            obtenerUniversosParaDashboard('Universo', false, false),
+            obtenerFestividadesParaDashboard('Festividad', false, true),
+            obtenerAccesoriosParaDashboard('Accesorio', false, true)
+        ]);
+
+        if (isUpdate) {
             buscarProducto(<?php echo $productId; ?>);
         }
-        obtenerCategoriasParaProductos('Categorias', false, "false");
-        obtenerRarezasParaDashboard('Rareza', false, "false");
-        obtenerUniversosParaDashboard('Universo', false, "false");
-        obtenerFestividadesParaDashboard('Festividad', false, true);
-        obtenerAccesoriosParaDashboard('Accesorio', false, true);
     });
 
     $('#modalColors').on('shown.bs.modal', function () {

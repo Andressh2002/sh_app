@@ -178,7 +178,7 @@ $type = 'usuario';
 
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateUser ? 'product-loading' : ''; ?>" id="user-form">
 
     <!-- INFORMACIÓN PERSONAL -->
 
@@ -303,20 +303,21 @@ include 'template.php';
 
 <script>
 
-$(document).ready(function() {
+function setUserLoading(isLoading){
+    $('#user-form').toggleClass(
+        'product-loading',
+        isLoading
+    );
+}
 
-    if (
-        <?php echo $updateUser ? 'true' : 'false'; ?>
-    ) {
+$(document).ready(function(){
+    const isUpdate = <?php echo $updateUser ? 'true' : 'false'; ?>;
 
-        buscarUsuario(
-            <?php echo $userId; ?>
-        );
-
-        $('#input-col-Contrasennia')
-            .hide();
+    if(isUpdate){
+        setUserLoading(true);
+        buscarUsuario(<?php echo $userId; ?>);
+        $('#input-col-Contrasennia').hide();
     }
-
 });
 
 </script>

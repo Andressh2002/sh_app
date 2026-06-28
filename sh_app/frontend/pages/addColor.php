@@ -95,7 +95,7 @@ $type = 'color';
 
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateColor ? 'product-loading' : ''; ?>" id="color-form">
 
     <div class="overflow-hidden my-2">
 
@@ -170,18 +170,20 @@ include 'template.php';
 
 <script>
 
-$(document).ready(function(){
-
-    if(
-        <?php echo $updateColor ? 'true' : 'false'; ?>
-    ){
-
-        buscarColor(
-            <?php echo $colorId; ?>
+    function setColorLoading(isLoading){
+        $('#color-form').toggleClass(
+            'product-loading',
+            isLoading
         );
-
     }
 
-});
+    $(document).ready(function(){
+        const isUpdate = <?php echo $updateColor ? 'true' : 'false'; ?>;
+
+        if(isUpdate){
+            setColorLoading(true);
+            buscarColor(<?php echo $colorId; ?>);
+        }
+    });
 
 </script>

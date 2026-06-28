@@ -91,10 +91,13 @@ function buscarRareza(id) {
 }
 
 function mostrarRareza(rareza) {
-    if (rareza) {
-        $('#Nombre').val(rareza.nombre);
-        $('#Color').val(rareza.color);
+    if (!rareza) {
+        setRarityLoading(false);
+        return;
     }
+    $('#Nombre').val(rareza.nombre);
+    $('#Color').val(rareza.color);
+    setTimeout(function(){ setRarityLoading(false); }, 250);
 }
 
 function eliminarRareza(id, nombre, eliminar) {

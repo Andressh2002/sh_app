@@ -92,16 +92,19 @@ function buscarDescuento(id) {
 }
 
 function mostrarDescuento(descuento) {
-    if (descuento) {
-        const fechaInicio = descuento.fecha_inicial.split('-');
-        const fechaFinal = descuento.fecha_final.split('-');
-        $('#Nombre').val(descuento.nombre);
-        $('#Descuento').val(descuento.descuento);
-        $('#DayStartDate').val(fechaInicio[1]);
-        $('#DayEndDate').val(fechaFinal[1]);
-        $('#MonthStartDate').val(fechaInicio[0]);
-        $('#MonthEndDate').val(fechaFinal[0]);
+    if (!descuento) {
+        setDiscountLoading(false);
+        return;
     }
+    const fechaInicio = descuento.fecha_inicial.split('-');
+    const fechaFinal = descuento.fecha_final.split('-');
+    $('#Nombre').val(descuento.nombre);
+    $('#Descuento').val(descuento.descuento);
+    $('#DayStartDate').val(fechaInicio[1]);
+    $('#DayEndDate').val(fechaFinal[1]);
+    $('#MonthStartDate').val(fechaInicio[0]);
+    $('#MonthEndDate').val(fechaFinal[0]);
+    setTimeout(function(){ setDiscountLoading(false); }, 250);
 }
 
 function eliminarDescuento(id, nombre, eliminar) {

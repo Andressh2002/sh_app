@@ -60,7 +60,7 @@
     $type = 'rareza';
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateRarity ? 'product-loading' : ''; ?>" id="rarity-form">
 
     <div class="overflow-hidden my-2">
 
@@ -109,18 +109,20 @@
 
 <script>
 
+    function setRarityLoading(isLoading){
+        $('#rarity-form').toggleClass(
+            'product-loading',
+            isLoading
+        );
+    }
+
     $(document).ready(function(){
+        const isUpdate = <?php echo $updateRarity ? 'true' : 'false'; ?>;
 
-        if(
-            <?php echo $updateRarity ? 'true' : 'false'; ?>
-        ){
-
-            buscarRareza(
-                <?php echo $rarityId; ?>
-            );
-
+        if(isUpdate){
+            setRarityLoading(true);
+            buscarRareza(<?php echo $rarityId; ?>);
         }
-
     });
 
 </script>

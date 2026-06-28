@@ -39,6 +39,14 @@
                     'producto_id' => $producto_id
                 ];
             }
+
+            if (!$stmt->execute()) {
+                return [
+                    'title'=>'Error',
+                    'text'=>$stmt->error,
+                    'icon'=>'bi bi-x-circle'
+                ];
+            }
     
         } catch (mysqli_sql_exception $e) {
             return [
@@ -155,10 +163,10 @@
                 ac.imagen_color14 AS imagen_accesorio_color14, 
                 ac.imagen_color15 AS imagen_accesorio_color15, 
                 ac.imagen_color16 AS imagen_accesorio_color16, 
-                ac.imagen_color16 AS imagen_accesorio_color17, 
-                ac.imagen_color16 AS imagen_accesorio_color18, 
-                ac.imagen_color16 AS imagen_accesorio_color19, 
-                ac.imagen_color16 AS imagen_accesorio_color20, 
+                ac.imagen_color17 AS imagen_accesorio_color17, 
+                ac.imagen_color18 AS imagen_accesorio_color18, 
+                ac.imagen_color19 AS imagen_accesorio_color19, 
+                ac.imagen_color20 AS imagen_accesorio_color20, 
                 (SELECT 
                     GROUP_CONCAT(
                         CONCAT(
@@ -269,6 +277,14 @@
                     'text' => "El producto se ha actualizado correctamente",
                     'icon' => "bi bi-check-circle",
                     'producto_id' => $id // Agrega el id aquí
+                ];
+            } 
+
+            if (!$stmt->execute()) {
+                return [
+                    'title'=>'Error',
+                    'text'=>$stmt->error,
+                    'icon'=>'bi bi-x-circle'
                 ];
             }
     

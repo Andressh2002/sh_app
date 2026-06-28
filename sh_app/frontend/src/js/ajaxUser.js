@@ -103,19 +103,22 @@ function buscarUsuario(id) {
 }
 
 function mostrarUsuario(usuario) {
-    if (usuario) {
-        $('#Nombre').val(usuario.nombre);
-        $('#segundoNombre').val(usuario.segundo_nombre);
-        $('#primerApellido').val(usuario.primer_apellido);
-        $('#segundoApellido').val(usuario.segundo_apellido);
-        $('#nombreUsuario').val(usuario.nombre_usuario);
-        $('#Provincia').val(usuario.provincia);
-        $('#Canton').val(usuario.canton);
-        $('#Distrito').val(usuario.distrito);
-        $('#Telefono').val(usuario.telefono);
-        $('#Rol').val(usuario.rol);
-        $('#Contrasennia').prop('disabled', true);
+    if (!usuario) {
+        setUserLoading(false);
+        return;
     }
+    $('#Nombre').val(usuario.nombre);
+    $('#segundoNombre').val(usuario.segundo_nombre);
+    $('#primerApellido').val(usuario.primer_apellido);
+    $('#segundoApellido').val(usuario.segundo_apellido);
+    $('#nombreUsuario').val(usuario.nombre_usuario);
+    $('#Provincia').val(usuario.provincia);
+    $('#Canton').val(usuario.canton);
+    $('#Distrito').val(usuario.distrito);
+    $('#Telefono').val(usuario.telefono);
+    $('#Rol').val(usuario.rol);
+    $('#Contrasennia').prop('disabled', true);
+    setTimeout(function(){ setUserLoading(false); }, 250);
 }
 
 function eliminarUsuario(id, nombre, eliminar) {
@@ -757,8 +760,8 @@ function buscarFichas(id) {
         success: function(response) {
             try {
                 const usuario = typeof response === 'string' ? JSON.parse(response) : response;
-                $('#usuario-fichas-actuales').html(`${usuario.fichas}`);
-                $('#label-fichas-actuales').html(`Disponibles: ${usuario.fichas}`);
+                $('#usuario-fichas-actuales').html(`${usuario.fichas || 0}`);
+                $('#label-fichas-actuales').html(`Disponibles: ${usuario.fichas || 0}`);
             } catch (error) {
                 console.error('Error al procesar la respuesta:', error);
             }

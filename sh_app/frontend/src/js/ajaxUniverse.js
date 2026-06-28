@@ -127,12 +127,14 @@ function buscarUniverso(id) {
 }
 
 function mostrarUniverso(universo) {
-    if (universo) {
-        $('#Nombre').val(universo.nombre);
-
-        cargarImagenGuardada(universo.imagen, '#vistaImagenUniverso');
-        $('#hiddenImagenUniverso').val(universo.imagen);
+    if (!universo) {
+        setUniverseLoading(false);
+        return;
     }
+    $('#Nombre').val(universo.nombre);
+    cargarImagenGuardada(universo.imagen, '#vistaImagenUniverso');
+    $('#hiddenImagenUniverso').val(universo.imagen);
+    setTimeout(function(){ setUniverseLoading(false); }, 250);
 }
 
 function eliminarUniverso(id, nombre) {

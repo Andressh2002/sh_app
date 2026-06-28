@@ -42,6 +42,12 @@ function guardarProducto() {
     abrirModal('modalGuardando');
     cambiarMensajeModal("#modalGuardando", "Guardando...", 'Espere un momento...', "bi bi-wifi", false);
 
+    if (!$('#Categorias').val() || !$('#Rareza').val() || !$('#Universo').val()){
+        cerrarModal('modalGuardando');
+        cambiarMensajeModal("#modalGuardando", "Error", 'Todavía se están cargando los clasificadores.', "bi bi-x-circle", true);
+        return;
+    }
+
     let arrayResponse = [];
 
     // Función para guardar datos del producto
@@ -332,6 +338,7 @@ function mostrarProducto(producto) {
                     seleccionarColor(color.id, color.color1, color.color2, color.color3, color.imagen, color.familia);
                 });
                 actualizarColoresSeleccionados();
+                setTimeout(function () { setProductLoading(false); }, 250);
             }).catch(error => {
                 console.error("Error al cargar colores:", error);
             });
@@ -346,9 +353,14 @@ function mostrarProducto(producto) {
                     seleccionarDescuento(descuento.id, descuento.nombre, descuento.fecha, descuento.descuento);
                 });
                 actualizarDescuentosSeleccionados();
+                setTimeout(function () { setProductLoading(false); }, 250);
             }).catch(error => {
                 console.error("Error al cargar descuentos:", error);
             });
+        }
+
+        if (producto.idColores && producto.idDescuentos) {
+            setProductLoading(false);
         }
     }
 }
@@ -895,16 +907,17 @@ function renderProductoSkeleton(id){
 }
 
 function obtenerCategoriasParaProductos(select, all, isImagen = true, acceptNull = false) {
-    $.ajax({
+    return $.ajax({
         url: backend + urlCategory,
         type: 'POST',
         data: {
             accion: 'obtener',
             nombre: '',
-            isImagen,
-        },
-        success: function (response) {
-            try {
+            isImagen
+        }
+        }).then(
+            function (response) {
+
                 const categorias = typeof response === 'string' ? JSON.parse(response) : response;
 
                 categorias.sort(function (a, b) {
@@ -939,73 +952,10 @@ function obtenerCategoriasParaProductos(select, all, isImagen = true, acceptNull
                             text: categoria.nombre
                         })
                     );
-                });
-
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
-        },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
-}
-
-function obtenerCategoriasParaProductos(select, all, isImagen = true, acceptNull = false) {
-    $.ajax({
-        url: backend + urlCategory,
-        type: 'POST',
-        data: {
-            accion: 'obtener',
-            nombre: '',
-            isImagen,
-        },
-        success: function (response) {
-            try {
-                const categorias = typeof response === 'string' ? JSON.parse(response) : response;
-
-                categorias.sort(function (a, b) {
-                    return a.nombre.localeCompare(b.nombre);
-                });
-
-                const selectElement = $('#' + select);
-                selectElement.empty();
-
-                if (acceptNull === true) {
-                    selectElement.append(
-                        $('<option>', {
-                            value: '',
-                            text: 'Ninguno'
-                        })
-                    );
                 }
-
-                if (all === true) {
-                    selectElement.append(
-                        $('<option>', {
-                            value: '',
-                            text: 'Todos'
-                        })
-                    );
-                }
-
-                categorias.forEach(function (categoria) {
-                    selectElement.append(
-                        $('<option>', {
-                            value: all ? categoria.nombre : categoria.id,
-                            text: categoria.nombre
-                        })
-                    );
-                });
-
-            } catch (error) {
-                console.error('Error al procesar la respuesta:', error);
-            }
+            );
         },
-        error: function () {
-            console.error('Error al procesar la solicitud.');
-        }
-    });
+    );
 }
 
 function cargarFiltrosParaTablaColoresModal(tabla) {

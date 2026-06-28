@@ -90,13 +90,16 @@ function buscarColor(id) {
 }
 
 function mostrarColor(color) {
-    if (color) {
-        $('#Nombre').val(color.nombre);
-        $('#Color1').val(color.codigo_color_principal);
-        $('#Color2').val(color.codigo_color_secundario);
-        $('#Color3').val(color.codigo_color_terciario);
-        $('#Familia').val(color.color_familia);
+    if (!color) {
+        setColorLoading(false);
+        return;
     }
+    $('#Nombre').val(color.nombre);
+    $('#Color1').val(color.codigo_color_principal);
+    $('#Color2').val(color.codigo_color_secundario);
+    $('#Color3').val(color.codigo_color_terciario);
+    $('#Familia').val(color.color_familia);
+    setTimeout(function(){ setColorLoading(false); }, 250);
 }
 
 function eliminarColor(id, nombre, eliminar) {

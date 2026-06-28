@@ -67,7 +67,7 @@
     $type = 'universo';
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateUniverse ? 'product-loading' : ''; ?>" id="universe-form">
 
     <div class="overflow-hidden my-2">
 
@@ -142,18 +142,20 @@
 
 <script>
 
+    function setUniverseLoading(isLoading){
+        $('#universe-form').toggleClass(
+            'product-loading',
+            isLoading
+        );
+    }
+
     $(document).ready(function(){
+        const isUpdate = <?php echo $updateUniverse ? 'true' : 'false'; ?>;
 
-        if(
-            <?php echo $updateUniverse ? 'true' : 'false'; ?>
-        ){
-
-            buscarUniverso(
-                <?php echo $universeId; ?>
-            );
-
+        if(isUpdate){
+            setUniverseLoading(true);
+            buscarUniverso(<?php echo $universeId; ?>);
         }
-
     });
 
     const maxSizeInKB = 1000;

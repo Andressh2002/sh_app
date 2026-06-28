@@ -39,6 +39,18 @@ $navbarItems = [
     ],
 
     [
+        'label' => 'Facebook',
+        'icon' => 'bi-facebook',
+        'url' => 'https://www.facebook.com/share/12GA8uQTnEW/',
+    ],
+
+    [
+        'label' => 'Instagram',
+        'icon' => 'bi-instagram',
+        'url' => 'https://www.instagram.com/arts_crafts_sh/',
+    ],
+
+    [
         'label' => 'Descargas',
         'icon' => 'bi-cloud-arrow-down',
         'url' => 'descarga.php',

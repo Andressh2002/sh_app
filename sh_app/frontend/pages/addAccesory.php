@@ -58,7 +58,7 @@
     $type = 'accesorio';
 ?>
 
-<div class="w-100">
+<div class="w-100 <?php echo $updateAccesory ? 'product-loading' : ''; ?>" id="accesory-form">
 
     <!-- INFORMACIÓN -->
     <div class="overflow-hidden my-2">
@@ -138,14 +138,25 @@
 
 <script>
 
-    $(document).ready(function(){
+    function setAccesoryLoading(isLoading) {
+
+        $('#accesory-form').toggleClass(
+            'product-loading',
+            isLoading
+        );
+    }
+
+    $(document).ready(async function(){
 
         colores_almacenados = [];
+        const isUpdate = <?php echo $updateAccesory ? 'true' : 'false'; ?>;
 
-        if(<?php echo $updateAccesory ? 'true' : 'false'; ?>){
-
-            buscarAccesorio(
-                <?php echo $accesoryId; ?>
+        if (isUpdate) {
+            setAccesoryLoading(true);
+            setTimeout(
+                function(){
+                    buscarAccesorio(<?php echo $accesoryId; ?>);
+                }, 50
             );
         }
     });

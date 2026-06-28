@@ -10,7 +10,7 @@
     $showSidebar = false;
 ?>
 
-<div class="profile-page container-fluid py-4">
+<div class="profile-page container-fluid py-4 user-loading" id="user-form">
 
     <!-- HEADER -->
     <div class="profile-hero">
@@ -331,7 +331,23 @@
 ?>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        buscarUsuario(<?php echo $_SESSION['usuario_id']; ?>);
-    });
+    function setUserLoading(isLoading){
+        $('#user-form').toggleClass(
+            'user-loading',
+            isLoading
+        );
+    }
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function(){
+
+            setUserLoading(true);
+
+            buscarUsuario(
+                <?php echo $_SESSION['usuario_id']; ?>
+            );
+
+        }
+    );
 </script>

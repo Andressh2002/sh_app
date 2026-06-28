@@ -1,0 +1,117 @@
+/* ========================================= */
+/* SKELETON PRODUCT FORM */
+/* ========================================= */
+
+.product-loading {
+
+    pointer-events: none;
+
+    user-select: none;
+}
+
+.product-loading #product-form {
+
+    position: relative;
+}
+
+.product-loading .admin-input-card,
+.product-loading .filter-card,
+.product-loading .input-group,
+.product-loading .form-control,
+.product-loading .form-select,
+.product-loading textarea,
+.product-loading .store-filter-btn,
+.product-loading [id$="Vista"] {
+
+    position: relative;
+
+    overflow: hidden;
+
+    color: transparent !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            #222 25%,
+            #333 50%,
+            #222 75%
+        ) !important;
+
+    background-size: 300% 100% !important;
+
+    animation:
+        skeleton-loading
+        1.2s
+        infinite;
+
+    border-color: transparent !important;
+}
+
+.product-loading input::placeholder,
+.product-loading textarea::placeholder {
+
+    color: transparent !important;
+}
+
+.product-loading img {
+
+    opacity: 0;
+}
+
+.product-loading label,
+.product-loading span,
+.product-loading option {
+
+    opacity: .15;
+}
+
+@keyframes skeleton-loading {
+
+    0%{
+        background-position: 100% 0;
+    }
+
+    100%{
+        background-position: -100% 0;
+    }
+}
+
+.user-loading {
+
+    pointer-events: none;
+
+    user-select: none;
+}
+
+.user-loading input,
+.user-loading .input-group-text,
+.user-loading .store-filter-btn,
+.user-loading .profile-section,
+.user-loading .profile-security-card,
+.user-loading .profile-avatar {
+
+    color: transparent !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2a2a2a 25%,
+            #3b3b3b 50%,
+            #2a2a2a 75%
+        ) !important;
+
+    background-size:
+        300% 100%;
+
+    animation:
+        skeletonLoading
+        1.2s infinite;
+
+    border-color:
+        transparent !important;
+}
+
+.user-loading button {
+
+    pointer-events: none;
+}

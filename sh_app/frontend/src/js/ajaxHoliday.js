@@ -90,15 +90,18 @@ function buscarFestividad(id) {
 }
 
 function mostrarFestividad(festividad) {
-    if (festividad) {
-        const fechaInicio = festividad.fecha_inicial.split('-');
-        const fechaFinal = festividad.fecha_final.split('-');
-        $('#Nombre').val(festividad.nombre);
-        $('#DayStartDate').val(fechaInicio[1]);
-        $('#DayEndDate').val(fechaFinal[1]);
-        $('#MonthStartDate').val(fechaInicio[0]);
-        $('#MonthEndDate').val(fechaFinal[0]);
+    if (!festividad) {
+        setHolidayLoading(false);
+        return;
     }
+    const fechaInicio = festividad.fecha_inicial.split('-');
+    const fechaFinal = festividad.fecha_final.split('-');
+    $('#Nombre').val(festividad.nombre);
+    $('#DayStartDate').val(fechaInicio[1]);
+    $('#DayEndDate').val(fechaFinal[1]);
+    $('#MonthStartDate').val(fechaInicio[0]);
+    $('#MonthEndDate').val(fechaFinal[0]);
+    setTimeout(function(){ setHolidayLoading(false); }, 250);
 }
 
 function eliminarFestividad(id, nombre, eliminar) {
