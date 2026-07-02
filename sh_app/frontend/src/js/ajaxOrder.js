@@ -8,6 +8,7 @@ function guardarPedido(idProduct) {
     const fichasUsadas = $('#FichasUsadas').val();
     const fichasGanadas = $('#FichasGanadas').val();
     const total = $('#Total').val();
+    const direccion = $('#Direccion').val();
 
     guardarDatos();
 
@@ -26,10 +27,9 @@ function guardarPedido(idProduct) {
             precio: precio, 
             fichasUsadas,
             fichasGanadas,
-            total: total
+            total: total,
+            direccion: direccion,
         };
-
-        console.log(data);
 
         $.ajax({
             url: backend + urlOrder,
@@ -562,6 +562,15 @@ function renderPedidoCard(
                         </strong>
                     </div>
 
+                    ${pedido.lugar_entrega ? `
+                        <div>
+                            <span>Dirección exacta:</span>
+                            <strong>
+                                ${pedido.lugar_entrega || ''}
+                            </strong>
+                        </div>
+                    ` : ''}
+                    
                     <div>
                         <span>Teléfono:</span>
                         <strong>
@@ -1063,6 +1072,12 @@ function renderPedidoCliente(pedido, returnHtml = false){
                                 </div>
                             </strong>
                         </div>
+                        <div>
+                            <span>Dirección de entrega</span>
+                            <strong>
+                                ${pedido.lugar_entrega || 'No ingresada'}
+                            </strong>
+                        </div>
                     </div>
                 </div>
 
@@ -1086,6 +1101,29 @@ function renderPedidoCliente(pedido, returnHtml = false){
                             <i class="bi bi-x-circle-fill"></i>
                             <span>
                                 Cancelar
+                            </span>
+                        </button>
+                        `
+                        :
+                        ''
+                    }
+
+                    ${
+                        !pagado
+                        ?
+                        `
+                        <button
+                            class="store-filter-btn px-4 px-md-5 px-lg-4"
+                            onclick="
+                                abrirModalCambiarDireccion(
+                                    ${pedido.id},
+                                    '${pedido.lugar_entrega}'
+                                )
+                            "
+                        >
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Cambiar dirección
                             </span>
                         </button>
                         `
@@ -1147,6 +1185,7 @@ function renderPedidoSkeleton(id){
 
                 <div class="order-actions">
 
+                    <div class="skeleton-button"></div>
                     <div class="skeleton-button"></div>
 
                 </div>
@@ -1431,6 +1470,7 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
         canton: $('#Canton').val(),
         distrito: $('#Distrito').val(),
         telefono: $('#Telefono').val(),
+        direccion: $('#Direccion_').val(),
     };
 
     const clienteNombre = cliente.nombre;
@@ -1441,6 +1481,7 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
     const clienteCanton = cliente.canton;
     const clienteDistrito = cliente.distrito;
     const clienteTelefono = cliente.telefono;
+    const clienteDireccion = cliente.direccion;
 
     const producto = idProduct;
     const color = $('#Color').val();
@@ -1449,8 +1490,8 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
     const precio = $('#precio').val();
 
     if (!validarCampos(
-        [clienteNombre, clientePrimerApellido, clienteProvincia, clienteCanton, clienteDistrito, clienteTelefono],
-        ['tu nombre', 'tu primer apellido', 'la provincia', 'el cantón', 'el distrito', 'tu número de teléfono']
+        [clienteNombre, clientePrimerApellido, clienteProvincia, clienteCanton, clienteDistrito, clienteDireccion, clienteTelefono],
+        ['tu nombre', 'tu primer apellido', 'la provincia', 'el cantón', 'el distrito', 'el lugar de entrega', 'tu número de teléfono']
     )) {
         return;
     }
@@ -1479,6 +1520,7 @@ function guardarPedidoSinUsuario(idProduct, cant, total) {
             clienteCanton: clienteCanton,
             clienteDistrito: clienteDistrito,
             clienteTelefono: clienteTelefono,
+            clienteDireccion: clienteDireccion,
             producto: producto,
             color: color,
             colorAccesorio: colorAccesorio,
@@ -1663,3 +1705,40 @@ $(document)
         }
     );
 
+function abrirModalCambiarDireccion(id, direccion){
+    pedidoSeleccionado = id;
+    $('#DireccionNueva').val(direccion || '');
+    abrirModal('modalCambioDireccion');
+    
+}
+
+function cambiarDireccion() {
+    if(!pedidoSeleccionado){
+        return;
+    }
+
+    const direccion = $('#DireccionNueva').val();
+
+    const accion = 'cambiarDireccion';
+    const data = {
+        accion: accion,
+        id: pedidoSeleccionado,
+        direccion: direccion,
+    };
+
+    abrirModal('modalGuardando');
+    cambiarMensajeModal("#modalGuardando", "Cambiando dirección de entrega", "Se está actualizando el lugar de entrega de este pedido", "bi bi-arrow-clockwise", false);
+
+    $.ajax({
+        url: backend + urlOrder,
+        type: 'POST',
+        data: data,
+        success: function (response) {
+            cambiarMensajeModal("#modalGuardando", "Dirección actualizada", "Se ha actualizado el lugar de entrega de este pedido", "bi bi-check-circle", true);
+            actualizarPedidosConFiltros();
+        },
+        error: function () {
+            cambiarMensajeModal("#modalGuardando", "¡Error!", "Ha ocurrido un error al tratar de actualizar el lugar de entrega de este pedido", "bi bi-x-circle", true);
+        }
+    });
+}

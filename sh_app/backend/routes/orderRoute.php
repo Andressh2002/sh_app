@@ -31,7 +31,8 @@
                         $_POST['colorAccesorio'] ?? 0,
                         $_POST['precio'] ?? 0,
                         $_POST['fichasUsadas'],
-                        $_POST['fichasGanadas']
+                        $_POST['fichasGanadas'],
+                        $_POST['direccion']
                     );
 
                 echo json_encode(
@@ -164,28 +165,53 @@
             break;
 
         case 'insertarSinUsuario':
-            if (isset($_POST['clienteNombre']) && isset($_POST['clienteSegundoNombre']) && isset($_POST['clientePrimerApellido']) && isset($_POST['clienteSegundoApellido']) && isset($_POST['clienteProvincia']) && isset($_POST['clienteCanton']) && isset($_POST['clienteDistrito']) && isset($_POST['clienteTelefono']) && isset($_POST['producto']) && isset($_POST['color']) && isset($_POST['cantidad']) && isset($_POST['total'])) {
-                $clienteNombre = $_POST['clienteNombre'];
-                $clienteSegundoNombre = $_POST['clienteSegundoNombre'];
-                $clientePrimerApellido = $_POST['clientePrimerApellido'];
-                $clienteSegundoApellido = $_POST['clienteSegundoApellido'];
-                $clienteProvincia = $_POST['clienteProvincia'];
-                $clienteCanton = $_POST['clienteCanton'];
-                $clienteDistrito = $_POST['clienteDistrito'];
-                $clienteTelefono = $_POST['clienteTelefono'];
-                
-                $producto = $_POST['producto'];
-                $color = $_POST['color'];
-                $colorAccesorio = $_POST['colorAccesorio'];
-                $cantidad = $_POST['cantidad'];
-                $total = $_POST['total'];
 
-                $respuesta = insertarSinUsuario($conn, $clienteNombre, $clienteSegundoNombre, $clientePrimerApellido, $clienteSegundoApellido, $clienteProvincia, $clienteCanton, $clienteDistrito, $clienteTelefono, $producto, $color, $cantidad, $total, $colorAccesorio);
-                echo json_encode($respuesta);
+            if (
+                isset($_POST['clienteNombre']) &&
+                isset($_POST['producto']) &&
+                isset($_POST['color']) &&
+                isset($_POST['cantidad']) &&
+                isset($_POST['total'])
+            ) {
+
+                $respuesta =
+                    insertarSinUsuario(
+                        $conn,
+
+                        $_POST['clienteNombre'],
+                        $_POST['clienteSegundoNombre'],
+                        $_POST['clientePrimerApellido'],
+                        $_POST['clienteSegundoApellido'],
+
+                        $_POST['clienteProvincia'],
+                        $_POST['clienteCanton'],
+                        $_POST['clienteDistrito'],
+                        $_POST['clienteTelefono'],
+
+                        $_POST['producto'],
+                        $_POST['color'],
+                        $_POST['cantidad'],
+                        $_POST['total'],
+
+                        $_POST['colorAccesorio'] ?? 0,
+                        $_POST['clienteDireccion']
+                    );
+
+                echo json_encode(
+                    $respuesta
+                );
+
             } else {
-                echo "Faltan datos";
+
+                echo json_encode([
+                    'title'=>'¡Error!',
+                    'text'=>'Faltan datos.',
+                    'icon'=>'bi bi-x-circle'
+                ]);
+
             }
-            break;
+
+        break;
         
         case 'listarIds':
             $cliente = $_POST['cliente'] ?? '';
@@ -254,6 +280,14 @@
             $progreso = $_POST['progreso'] ?? 0;
 
             $respuesta = actualizarProgresoPedido($conn, $id, $progreso);
+            echo $respuesta;
+            break;
+
+        case 'cambiarDireccion':
+            $id = $_POST['id'] ?? '';
+            $direccion = $_POST['direccion'] ?? '';
+
+            $respuesta = cambiarDireccion($conn, $id, $direccion);
             echo $respuesta;
             break;
 

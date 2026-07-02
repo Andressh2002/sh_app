@@ -99,6 +99,17 @@
             'col' => 'col-12 col-md-6 col-xl-3',
             'required' => 'Valor requerido',
         ],
+        [
+            'label' => 'Lugar de entrega',
+            'id' => 'Direccion_',
+            'icon' => 'bi bi-geo-alt-fill',
+            'input' => 'textarea',
+            'onchange' => '',
+            'btnHelp' => false,
+            'spans' => ['Obligatorio', null],
+            'col' => 'col-12 col-lg-6',
+            'required' => 'Valor requerido',
+        ],
     ];
 
     $informationInputs = [

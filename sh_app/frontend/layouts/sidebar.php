@@ -1,134 +1,124 @@
-<?php 
-    // Obtener el nombre de archivo de la página actual
-    $currentPage = basename($_SERVER['REQUEST_URI']);  // Esto devolverá algo como 'store.php'
+<?php
 
-    $sidebarGroups = [
-        [
-            'title' => 'Inicio',
-            'items' => [
+$currentPage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
-                [
-                    'label' => 'Home',
-                    'icon' => 'bi-house-fill',
-                    'url' => 'home.php'
-                ],
-
-                [
-                    'label' => 'Dashboard',
-                    'icon' => 'bi-speedometer',
-                    'url' => 'dashboard.php'
-                ]
-            ]
+$sidebarGroups = [
+    [
+        'title' => 'Inicio',
+        'icon'  => 'bi-grid-fill',
+        'items' => [
+            [
+                'label' => 'Dashboard',
+                'icon'  => 'bi-speedometer',
+                'url'   => 'dashboard.php',
+            ],
+            [
+                'label' => 'Ver tienda',
+                'icon'  => 'bi-shop',
+                'url'   => 'store.php',
+            ],
+            [
+                'label' => 'Home',
+                'icon'  => 'bi-house-fill',
+                'url'   => 'home.php',
+            ],
         ],
+    ],
 
-        [
-            'title' => 'Inventario',
-            'items' => [
-
-                [
-                    'label' => 'Productos',
-                    'icon' => 'bi-palette-fill',
-                    'url' => 'products.php'
-                ],
-
-                [
-                    'label' => 'Accesorios',
-                    'icon' => 'bi-brush-fill',
-                    'url' => 'accesories.php'
-                ]
-            ]
+    [
+        'title' => 'Catálogo',
+        'icon'  => 'bi-box-fill',
+        'items' => [
+            [
+                'label' => 'Productos',
+                'icon'  => 'bi-palette-fill',
+                'url'   => 'products.php',
+            ],
+            [
+                'label' => 'Accesorios',
+                'icon'  => 'bi-brush-fill',
+                'url'   => 'accesories.php',
+            ],
+            [
+                'label' => 'Categorías',
+                'icon'  => 'bi-tools',
+                'url'   => 'categories.php',
+            ],
+            [
+                'label' => 'Universos',
+                'icon'  => 'bi-flag-fill',
+                'url'   => 'universes.php',
+            ],
+            [
+                'label' => 'Rarezas',
+                'icon'  => 'bi-tag-fill',
+                'url'   => 'rarities.php',
+            ],
+            [
+                'label' => 'Colores',
+                'icon'  => 'bi-paint-bucket',
+                'url'   => 'colors.php',
+            ],
         ],
+    ],
 
-        [
-            'title' => 'Clasificadores',
-            'items' => [
-
-                [
-                    'label' => 'Categorías',
-                    'icon' => 'bi-tools',
-                    'url' => 'categories.php'
-                ],
-
-                [
-                    'label' => 'Rarezas',
-                    'icon' => 'bi-tag-fill',
-                    'url' => 'rarities.php'
-                ],
-
-                [
-                    'label' => 'Universos',
-                    'icon' => 'bi-flag-fill',
-                    'url' => 'universes.php'
-                ],
-
-                [
-                    'label' => 'Colores',
-                    'icon' => 'bi-paint-bucket',
-                    'url' => 'colors.php'
-                ],
-
-                [
-                    'label' => 'Festividades',
-                    'icon' => 'bi-calendar-fill',
-                    'url' => 'holidays.php'
-                ],
-
-                [
-                    'label' => 'Descuentos',
-                    'icon' => 'bi-percent',
-                    'url' => 'discounts.php'
-                ]
-            ]
+    [
+        'title' => 'Promociones',
+        'icon'  => 'bi-stars',
+        'items' => [
+            [
+                'label' => 'Descuentos',
+                'icon'  => 'bi-percent',
+                'url'   => 'discounts.php',
+            ],
+            [
+                'label' => 'Festividades',
+                'icon'  => 'bi-calendar-fill',
+                'url'   => 'holidays.php',
+            ],
         ],
+    ],
 
-        [
-            'title' => 'Clientes',
-            'items' => [
-
-                [
-                    'label' => 'Pedidos',
-                    'icon' => 'bi-cart-fill',
-                    'url' => 'orders.php'
-                ],
-
-                [
-                    'label' => 'Usuarios',
-                    'icon' => 'bi-brush-fill',
-                    'url' => 'users.php'
-                ],
-
-                [
-                    'label' => 'Comentarios',
-                    'icon' => 'bi-chat-fill',
-                    'url' => 'comentaries.php'
-                ]
-            ]
+    [
+        'title' => 'Ventas',
+        'icon'  => 'bi-cart-fill',
+        'items' => [
+            [
+                'label' => 'Pedidos',
+                'icon'  => 'bi-cart-fill',
+                'url'   => 'orders.php',
+            ],
+            [
+                'label' => 'Usuarios',
+                'icon'  => 'bi-people-fill',
+                'url'   => 'users.php',
+            ],
+            [
+                'label' => 'Comentarios',
+                'icon'  => 'bi-chat-fill',
+                'url'   => 'comentaries.php',
+            ],
+            [
+                'label' => 'Interacciones',
+                'icon'  => 'bi-broadcast',
+                'url'   => 'interactions.php',
+            ],
         ],
+    ],
 
-        [
-            'title' => 'Tienda',
-            'items' => [
-
-                [
-                    'label' => 'Ver tienda',
-                    'icon' => 'bi-shop',
-                    'url' => 'store.php'
-                ],
-
-                [
-                    'label' => 'Interacciones',
-                    'icon' => 'bi-broadcast',
-                    'url' => 'interactions.php'
-                ],
-
-                [
-                    'label' => 'Configuración',
-                    'icon' => 'bi-gear-fill',
-                    'url' => 'configuration.php'
-                ]
-            ]
+    [
+        'title' => 'Sistema',
+        'icon'  => 'bi-gear-fill',
+        'items' => [
+            [
+                'label' => 'Configuración',
+                'icon'  => 'bi-gear-fill',
+                'url'   => 'configuration.php',
+            ],
         ],
-    ];
+    ],
+];
+
 ?>
 
 <div class="container-fluid d-flex flex-column mx-0 flex-fill" style="height: 100vh; overflow: hidden;">
@@ -141,85 +131,62 @@
 
                 <div class="sidebar-groups">
 
-                <?php foreach($sidebarGroups as $index => $group): ?>
+                    <?php foreach ($sidebarGroups as $index => $group): ?>
 
-                    <?php
+                        <?php
+                        $groupHasActive = array_reduce(
+                            $group['items'],
+                            fn ($carry, $item) => $carry || $currentPage === $item['url'],
+                            false
+                        );
+                        ?>
 
-                    $groupHasActive = false;
+                        <div class="sidebar-group">
 
-                    foreach($group['items'] as $item){
+                            <button
+                                class="sidebar-group-btn <?= $groupHasActive ? 'open active-group' : '' ?>"
+                                data-target="group-<?= $index ?>"
+                            >
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi <?= $group['icon'] ?>"></i>
+                                    <span><?= $group['title'] ?></span>
+                                </div>
 
-                        if($currentPage === $item['url']){
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
 
-                            $groupHasActive = true;
-                            break;
-                        }
-                    }
+                            <div
+                                id="group-<?= $index ?>"
+                                class="sidebar-group-content <?= $groupHasActive ? 'show' : '' ?>"
+                            >
 
-                    ?>
-
-                    <div class="sidebar-group">
-
-                        <button
-                            type="button"
-                            class="sidebar-group-btn <?= $groupHasActive ? 'open' : '' ?>"
-                            data-target="group-<?= $index ?>"
-                        >
-
-                            <span><?= $group['title']; ?></span>
-
-                            <i class="bi bi-chevron-down"></i>
-
-                        </button>
-
-                        <div
-                            id="group-<?= $index ?>"
-                            class="sidebar-group-content <?= $groupHasActive ? 'show' : '' ?>"
-                        >
-
-                            <?php foreach($group['items'] as $item): ?>
-
-                                <?php
-                                    $isActive =
-                                        ($currentPage === $item['url'])
-                                        ? 'active'
-                                        : '';
-                                ?>
-
-                                <?php if($isActive): ?>
-
-                                    <div class="sidebar-item active">
-
-                                        <i class="bi <?= $item['icon']; ?>"></i>
-
-                                        <span><?= $item['label']; ?></span>
-
-                                    </div>
-
-                                <?php else: ?>
+                                <?php foreach ($group['items'] as $item): ?>
 
                                     <a
-                                        href="<?= $item['url']; ?>"
-                                        class="sidebar-item"
+                                        href="<?= $item['url'] ?>"
+                                        class="sidebar-item <?= $currentPage === $item['url'] ? 'active' : '' ?>"
                                     >
+                                        <i class="bi <?= $item['icon'] ?>"></i>
 
-                                        <i class="bi <?= $item['icon']; ?>"></i>
+                                        <span><?= $item['label'] ?></span>
 
-                                        <span><?= $item['label']; ?></span>
+                                        <?php if (isset($item['badge'])): ?>
+                                            <span class="sidebar-badge">
+                                                <?= $item['badge'] ?>
+                                            </span>
+                                        <?php endif; ?>
 
                                     </a>
 
-                                <?php endif; ?>
+                                <?php endforeach; ?>
 
-                            <?php endforeach; ?>
+                            </div>
 
                         </div>
 
-                    </div>
+                    <?php endforeach; ?>
 
-                <?php endforeach; ?>
-
-                </div>    
+                </div>
 
             </div>
         </div>

@@ -11,11 +11,13 @@
         $colorAccesorio,
         $precio,
         $fichasUsadas,
-        $fichasGanadasFront
+        $fichasGanadasFront,
+        $direccion
     ) {
         date_default_timezone_set('America/Costa_Rica');
 
         $fechaRegistro = date('Y-m-d H:i:s');
+        $direccion = encryptData($direccion);
 
         $conn->begin_transaction();
 
@@ -273,20 +275,21 @@
                     idColorAccesorio,
                     precio,
                     fichas_usadas,
-                    fichas_ganadas
+                    fichas_ganadas,
+                    lugar_entrega
                 )
                 VALUES (
                     ?, ?, ?, ?,
                     ?, ?,
                     1,
-                    ?, ?, ?, ?
+                    ?, ?, ?, ?, ?
                 )
             ";
 
             $stmt = $conn->prepare($query);
 
             $stmt->bind_param(
-                "iiiidsdiii",
+                "iiiidsdiiis",
                 $idCliente,
                 $idProducto,
                 $idColor,
@@ -296,7 +299,8 @@
                 $colorAccesorio,
                 $precioFinal,
                 $fichasUsadas,
-                $fichasGanadas
+                $fichasGanadas,
+                $direccion
             );
 
             $stmt->execute();
@@ -935,162 +939,217 @@
         }
     }
 
-    function insertarSinUsuario($conn, $clienteNombre, $clienteSegundoNombre, $clientePrimerApellido, $clienteSegundoApellido, $clienteProvincia, $clienteCanton, $clienteDistrito, $clienteTelefono, $idProducto, $idColor, $cantidad, $total, $colorAccesorio) {
-        date_default_timezone_set('America/Costa_Rica');
-        $fecha_registro = date('Y-m-d H:i:s');
-        $fecha_actual = date('m-d'); // Formato para comparar con los descuentos
+    function insertarSinUsuario(
+        $conn,
 
-        //Agregar el usuario
-        $nombre = encryptData($clienteNombre);
-        $segundoNombre = encryptData($clienteSegundoNombre);
-        $primerApellido = encryptData($clientePrimerApellido);
-        $segundoApellido = encryptData($clienteSegundoApellido);
-        $rol = encryptData('Invitado');
-        $provincia = encryptData($clienteProvincia);
-        $canton = encryptData($clienteCanton);
-        $distrito = encryptData($clienteDistrito);
-        $telefono = encryptData($clienteTelefono);
-        $guestId = null;
-        
-        date_default_timezone_set('America/Costa_Rica');
-        $fecha_registro = date('Y-m-d H:i:s');
-    
+        $clienteNombre,
+        $clienteSegundoNombre,
+        $clientePrimerApellido,
+        $clienteSegundoApellido,
+
+        $clienteProvincia,
+        $clienteCanton,
+        $clienteDistrito,
+        $clienteTelefono,
+
+        $idProducto,
+        $idColor,
+        $cantidad,
+        $total,
+
+        $colorAccesorio,
+        $clienteDireccion
+    ) {
+
+        date_default_timezone_set(
+            'America/Costa_Rica'
+        );
+
+        $fechaRegistro =
+            date(
+                'Y-m-d H:i:s'
+            );
+
+        $conn->begin_transaction();
+
         try {
-            $query = "INSERT INTO usuarios (nombre, rol, fecha_registro, estado, segundo_nombre, primer_apellido, segundo_apellido, provincia, canton, distrito, telefono) 
-                VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)";
-            
-            $stmt = $conn->prepare($query);
-            $stmt->bind_param("ssssssssss", $nombre, $rol, $fecha_registro, $segundoNombre, $primerApellido, $segundoApellido, $provincia, $canton, $distrito, $telefono);
-    
-            if ($stmt->execute()) {
-                $guestId = $conn->insert_id;
+
+            // =====================
+            // CREAR INVITADO
+            // =====================
+
+            $query = "
+                INSERT INTO usuarios(
+                    nombre,
+                    segundo_nombre,
+                    primer_apellido,
+                    segundo_apellido,
+                    provincia,
+                    canton,
+                    distrito,
+                    telefono,
+                    rol,
+                    fecha_registro,
+                    estado
+                )
+                VALUES(
+                    ?,?,?,?,?,?,?,?,
+                    ?,?,
+                    1
+                )
+            ";
+
+            $stmt =
+                $conn->prepare(
+                    $query
+                );
+
+            $rol =
+                encryptData(
+                    'Invitado'
+                );
+
+            // =====================
+            // DATOS ENCRIPTADOS
+            // =====================
+
+            $nombre =
+                encryptData(
+                    $clienteNombre
+                );
+
+            $segundoNombre =
+                encryptData(
+                    $clienteSegundoNombre
+                );
+
+            $primerApellido =
+                encryptData(
+                    $clientePrimerApellido
+                );
+
+            $segundoApellido =
+                encryptData(
+                    $clienteSegundoApellido
+                );
+
+            $provincia =
+                encryptData(
+                    $clienteProvincia
+                );
+
+            $canton =
+                encryptData(
+                    $clienteCanton
+                );
+
+            $distrito =
+                encryptData(
+                    $clienteDistrito
+                );
+
+            $telefono =
+                encryptData(
+                    $clienteTelefono
+                );
+
+            $rol =
+                encryptData(
+                    'Invitado'
+                );
+
+            // =====================
+            // INSERTAR
+            // =====================
+
+            $stmt->bind_param(
+                "ssssssssss",
+
+                $nombre,
+                $segundoNombre,
+                $primerApellido,
+                $segundoApellido,
+
+                $provincia,
+                $canton,
+                $distrito,
+
+                $telefono,
+
+                $rol,
+                $fechaRegistro
+            );
+
+            $stmt->execute();
+
+            $guestId =
+                $conn->insert_id;
+
+            if (!$guestId) {
+
+                throw new Exception(
+                    'No fue posible crear el usuario invitado.'
+                );
+
             }
-    
-        } catch (mysqli_sql_exception $e) {
+
+            // =====================
+            // USAR LÓGICA OFICIAL
+            // =====================
+
+            $respuesta =
+                insertar(
+                    $conn,
+
+                    $guestId,
+                    $idProducto,
+                    $idColor,
+
+                    $cantidad,
+                    $total,
+
+                    $colorAccesorio,
+
+                    0, // precio ignorado
+
+                    0, // fichas usadas
+
+                    0, // fichas ganadas
+
+                    $clienteDireccion
+                );
+
+            if (
+                $respuesta['icon'] !=
+                'bi bi-check-circle'
+            ) {
+
+                throw new Exception(
+                    $respuesta['text']
+                );
+
+            }
+
+            $conn->commit();
+
             return [
-                'title' => "¡Error!",
-                'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "bi bi-x-circle"
+                'title'=>'¡Guardado!',
+                'text'=>'Pedido enviado correctamente.',
+                'icon'=>'bi bi-check-circle'
             ];
-        }
-    
-        try {
-            // Obtener el precio del producto y los IDs de descuentos
-            $queryProducto = "SELECT precio, idDescuentos FROM productos WHERE id = ?";
-            $stmtProd = $conn->prepare($queryProducto);
-            $stmtProd->bind_param("s", $idProducto);
-            $stmtProd->execute();
-            $resultProd = $stmtProd->get_result();
-    
-            if ($resultProd->num_rows == 0) {
-                return [
-                    'title' => "¡Error!",
-                    'text' => "El producto no existe.",
-                    'icon' => "bi bi-x-circle"
-                ];
-            }
-    
-            $producto = $resultProd->fetch_assoc();
-            $precioBase = (float)$producto['precio'];
-            $idDescuentosStr = $producto['idDescuentos'];
-    
-            // Si no hay descuentos, calcular el total normal
-            if (empty($idDescuentosStr)) {
-                $precioFinal = $precioBase;
-                $totalCalculado = $precioFinal * (int)$cantidad;
-            } else {
-                // Obtener los descuentos aplicables
-                $idsDescuentos = explode(',', $idDescuentosStr);
-                $placeholders = implode(',', array_fill(0, count($idsDescuentos), '?'));
-                
-                $queryDescuentos = "SELECT id, fecha_inicial, fecha_final, descuento 
-                                    FROM descuentos 
-                                    WHERE id IN ($placeholders)";
-                $stmtDesc = $conn->prepare($queryDescuentos);
-                
-                $types = str_repeat('i', count($idsDescuentos));
-                $stmtDesc->bind_param($types, ...$idsDescuentos);
-                $stmtDesc->execute();
-                $resultDesc = $stmtDesc->get_result();
 
-                // Verificar si hay resultados
-                if ($resultDesc->num_rows == 0) {
-                    var_dump("No se encontraron descuentos para los IDs:", $idsDescuentos);
-                    exit;
-                }
-    
-                // Encontrar el mejor descuento aplicable
-                $mejorDescuento = 0;
-                $tieneDescuentos = false;  // Variable para saber si encontró al menos un descuento
+        } catch (
+            Exception $e
+        ) {
 
-                while ($descuento = $resultDesc->fetch_assoc()) {
-                    $tieneDescuentos = true; // Se encontró al menos un descuento
+            $conn->rollback();
 
-                    $anioActual = date('Y');
-                    $fechaInicioFormateada = $anioActual . '-' . $descuento['fecha_inicial'];
-                    $fechaFinFormateada = $anioActual . '-' . $descuento['fecha_final'];
-
-                    $fechaInicioConvertida = date('m-d', strtotime($fechaInicioFormateada));
-                    $fechaFinConvertida = date('m-d', strtotime($fechaFinFormateada));
-
-                    if ($fecha_actual >= $fechaInicioConvertida && $fecha_actual <= $fechaFinConvertida) {
-                        $mejorDescuento = max($mejorDescuento, (int)$descuento['descuento']);
-                    }
-                }
-
-                // Si no se encontró ningún descuento, aseguramos que el valor no sea NULL
-                if (!$tieneDescuentos) {
-                    $mejorDescuento = 0;
-                }
-    
-                // Aplicar el mejor descuento encontrado
-                $precioFinal = $precioBase * (1 - ($mejorDescuento / 100));
-                $totalCalculado = $precioFinal * (int)$cantidad;
-            }
-    
-            // Validar si el total enviado es correcto
-            if ((float)$total != round($totalCalculado, 2)) {
-                return [
-                    'title' => "¡Error!",
-                    'text' => "El total enviado no es válido.",
-                    'icon' => "bi bi-x-circle"
-                ];
-            }
-    
-            // Insertar en la tabla 'pedidos'
-            $query1 = "INSERT INTO pedidos (idCliente, idProducto, idColor, cantidad, total, fecha_registro, estado, idColorAccesorio, precio) 
-                       VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)";
-    
-            $stmt = $conn->prepare($query1);
-            $stmt->bind_param("ssssssss",$guestId, $idProducto, $idColor, $cantidad, $total, $fecha_registro, $colorAccesorio, $precioFinal);
-    
-            if ($stmt->execute()) {
-                // Actualizar la cantidad de pedidos en la tabla 'productos'
-                $query2 = "UPDATE productos SET pedidos = pedidos + ? WHERE id = ?";
-                $stmt2 = $conn->prepare($query2);
-                $stmt2->bind_param("is", $cantidad, $idProducto);
-    
-                if ($stmt2->execute()) {
-                    return [
-                        'title' => "¡Guardado!",
-                        'text' => "El pedido se ha enviado correctamente.",
-                        'icon' => "bi bi-check-circle"
-                    ];
-                } else {
-                    return [
-                        'title' => "¡Error!",
-                        'text' => "Error al guardar el pedido: " . $conn->error,
-                        'icon' => "bi bi-x-circle"
-                    ];
-                }
-            }
-    
-        } catch (mysqli_sql_exception $e) {
             return [
-                'title' => "¡Error!",
-                'text' => "Ha ocurrido un error: " . $e->getMessage(),
-                'icon' => "bi bi-x-circle"
+                'title'=>'¡Error!',
+                'text'=>$e->getMessage(),
+                'icon'=>'bi bi-x-circle'
             ];
+
         }
     }
 
@@ -1395,6 +1454,11 @@
         $pedido['telefono'] =
             decryptData(
                 $pedido['telefono']
+            );
+
+        $pedido['lugar_entrega'] =
+            decryptData(
+                $pedido['lugar_entrega']
             );
 
         return $pedido;
@@ -1714,6 +1778,7 @@
         $pedido['primer_apellido'] = decryptData($pedido['primer_apellido']);
         $pedido['segundo_apellido'] = decryptData($pedido['segundo_apellido']);
         $pedido['telefono'] = decryptData($pedido['telefono']);
+        $pedido['lugar_entrega'] = decryptData($pedido['lugar_entrega']);
 
         return $pedido;
     }
@@ -1731,6 +1796,23 @@
             return "Se ha actualizado el progreso del pedido";
         } else {
             return "Error al actualizar el progreso del pedido: " . $conn->error;
+        }
+    }
+
+    function cambiarDireccion($conn, $id, $direccion) {
+        $id = $conn->real_escape_string($id);
+        $direccion = $conn->real_escape_string($direccion);
+        $direccion = encryptData($direccion);
+    
+        $query = "UPDATE pedidos SET 
+                    lugar_entrega = '$direccion' 
+                  WHERE id = '$id';";
+    
+        // Ejecutar múltiples consultas
+        if ($conn->multi_query($query)) {
+            return "Se ha actualizado la dirección del pedido";
+        } else {
+            return "Error al actualizar la dirección del pedido: " . $conn->error;
         }
     }
 

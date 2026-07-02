@@ -264,7 +264,7 @@
     /* Modal para seleccionar cantidad de fichas */
     $modalUsarFichas = [
         'id' => 'modalUsarFichas',
-        'title' => 'Uso de fichas SH',
+        'title' => 'Fichas SH y dirección',
         'icon' => 'bi bi-money',
         'size' => 'modal-md',
         'keyboard' => true,
@@ -273,24 +273,11 @@
 
             <div class="store-modal-body">
 
-                <div
-                    class="
-                        header-coins
-                        text-center
-                        d-flex
-                        align-items-center
-                        justify-content-center
-                        gap-2
-                        mb-4
-                    "
-                >
+                <div class="header-coins text-center d-flex align-items-center justify-content-center gap-2 mb-2">
 
                     <p
                         id="label-fichas-actuales"
-                        class="
-                            mb-0
-                            fw-bolder
-                        "
+                        class="mb-0 fw-bolder"
                     >
                         ...
                     </p>
@@ -304,9 +291,10 @@
 
                 <div class="filter-card admin-input-card px-4 px-sm-5">
 
-                    <label class="filter-title mb-2">
+                    <p class="filter-title">
+                        <i class="bi bi-coin"></i>
                         Fichas SH a utilizar
-                    </label>
+                    </p>
 
                     <input
                         type="number"
@@ -314,11 +302,12 @@
                         class="form-control filter-input"
                         value="0"
                         min="0"
+                        placeholder="Ingresar fichas SH"
                     >
 
                 </div>
 
-                <div class="mt-4 text-center">
+                <div class="mt-2 text-center">
 
                     <h5>
                         Total:
@@ -328,12 +317,7 @@
                     </h5>
 
                     <div
-                        class="
-                            d-flex
-                            justify-content-center
-                            gap-2
-                            align-items-center
-                        "
+                        class="d-flex justify-content-center gap-2 align-items-center"
                     >
                         <span>
                             Recompensa:
@@ -349,6 +333,25 @@
                             src="../src/img/app/SH_Ficha.png"
                             style="height: 28px"
                         >
+                    </div>
+
+                    <div class="filter-card admin-input-card px-4 px-sm-5 mt-4">
+                        <p class="filter-title">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            Dirección de entrega
+                        </p>
+                        
+                        <textarea
+                            class="form-control filter-input"
+                            id="Direccion"
+                            rows="4"
+                            placeholder="Escribir ubicación exácta de entrega"
+                        ></textarea>
+
+                        <small class="admin-input-required text-start">
+                            Valor requerido
+                        </small>
+
                     </div>
 
                 </div>
@@ -375,6 +378,62 @@
     ];
 
     $modal = $modalUsarFichas;
+    include '../src/components/modal/modal.php';
+
+
+    /* Modal para seleccionar cantidad de fichas */
+    $modalCambioDireccion = [
+        'id' => 'modalCambioDireccion',
+        'title' => 'Cambiar dirección',
+        'icon' => 'bi bi-geo-alt',
+        'size' => 'modal-md',
+        'keyboard' => true,
+
+        'body' => '
+
+            <div class="store-modal-body">
+
+                <div class="filter-card admin-input-card px-4 px-sm-5 mt-4">
+                    <p class="filter-title">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        Dirección de entrega
+                    </p>
+                    
+                    <textarea
+                        class="form-control filter-input"
+                        id="DireccionNueva"
+                        rows="4"
+                        placeholder="Escribir ubicación exácta de entrega"
+                    ></textarea>
+
+                    <small class="admin-input-required text-start">
+                        Valor requerido
+                    </small>
+
+                </div>
+
+            </div>
+        ',
+
+        'buttons' => [
+
+            [
+                'text' => 'Cancelar',
+                'icon' => 'bi bi-x-circle',
+                'class' => 'store-btn-secondary',
+                'dismiss' => true,
+            ],
+
+            [
+                'text' => 'Reservar',
+                'icon' => 'bi bi-check-circle-fill',
+                'class' => 'store-filter-btn',
+                'onclick' => 'cambiarDireccion()',
+            ]
+        ]
+    ];
+
+    $modal = $modalCambioDireccion;
     include '../src/components/modal/modal.php';
 
 

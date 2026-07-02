@@ -15,7 +15,7 @@
 
 .sidebar {
 
-    max-height: 100vh;
+    max-height: 100dvh;
 
     overflow-y: auto;
 }
@@ -154,7 +154,6 @@
 
     color: black;
 
-    transform: translateX(4px);
 }
 
 /* ========================================= */
@@ -343,4 +342,87 @@
 .sidebar-group-content .sidebar-item i {
 
     min-width: 20px;
+}
+
+/* ICONO DE GRUPO */
+
+.sidebar-group-btn .bi:first-child{
+
+    font-size:1.05rem;
+
+    color:var(--green);
+
+}
+
+
+/* BADGES */
+
+.sidebar-badge{
+
+    margin-left:auto;
+
+    min-width:24px;
+
+    height:24px;
+
+    padding:
+
+        0 .45rem;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:999px;
+
+    background:
+
+        var(--green);
+
+    color:black;
+
+    font-size:.8rem;
+
+    font-weight:700;
+
+}
+
+
+
+/* BADGE ITEM ACTIVO */
+
+.sidebar-item.active .sidebar-badge{
+
+    background:
+
+        var(--blue);
+
+    color:white;
+
+}
+
+
+
+/* GRUPO */
+
+.sidebar-group{
+
+    margin-bottom:
+
+        1rem;
+
+}
+
+
+
+/* SCROLL MÁS LIMPIO */
+
+.sidebar{
+
+    scrollbar-width:
+
+        thin;
+
 }

@@ -29,7 +29,7 @@
 
             <div>
                 <span>Versión</span>
-                <strong>v1.0.0</strong>
+                <strong>v1.0.1</strong>
             </div>
 
             <div>
