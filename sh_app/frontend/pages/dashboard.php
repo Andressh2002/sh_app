@@ -251,3 +251,17 @@
     $content = ob_get_clean();
     include 'template.php';
 ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        $(async function(){
+            await Promise.all([
+                obtenerCategoriasParaProductos('Categoria', true),
+                obtenerRarezasParaDashboard('Rareza', true),
+                obtenerUniversosParaDashboard('Universo', true)
+            ]);
+
+            actualizarDashboard();
+        });
+    });
+</script>

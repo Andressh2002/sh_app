@@ -5,7 +5,7 @@
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     switch ($accion) {
-        case 'cambiarModoManteniento':
+        case 'cambiarModoMantenimiento':
             if (isset($_POST['clave']) && isset($_POST['valor'])) {
                 $clave = $_POST['clave'];
                 $valor = $_POST['valor'];

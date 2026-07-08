@@ -1,4 +1,4 @@
-function cambiarModoManteniento() {
+function cambiarModoMantenimiento() {
 
     const estadoActual = $('#estado-mantenimiento').text() === "Activado";
     const nuevoValor = estadoActual ? "0" : "1";
@@ -10,7 +10,7 @@ function cambiarModoManteniento() {
         url: backend + urlConfiguration,
         type: 'POST',
         data: {
-            accion: "cambiarModoManteniento",
+            accion: "cambiarModoMantenimiento",
             clave: "maintenance_mode",
             valor: nuevoValor
         },

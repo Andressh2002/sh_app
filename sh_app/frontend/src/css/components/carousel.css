@@ -78,3 +78,7 @@
 
     transform: scale(1.25);
 }
+
+.carousel-clickable{
+    cursor: pointer;
+}
