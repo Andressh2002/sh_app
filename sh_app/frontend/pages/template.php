@@ -1,5 +1,5 @@
 <?php
-    $appVersion = "v4.2.0";
+    $appVersion = "v4.2.1";
 ?>
 
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
     <?php include '../layouts/head.html'; ?>
 </head>
 
-<body class="d-flex flex-column min-vh-100 overflow-visible px-0">
+<body class="d-flex flex-column min-dvh-100 overflow-visible px-0">
 
     <?php if (isset($showHeader) && $showHeader): ?>
         <?php include '../layouts/header.php'; ?>

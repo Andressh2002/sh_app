@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $idCategoria, $idColores, $precio, $imagen_portada, $imagen_galeria, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fichas) {
+    function insertar($conn, $nombre, $idCategoria, $idColores, $precio, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fichas) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -21,12 +21,12 @@
             }
     
             // Consulta SQL de inserción
-            $query = "INSERT INTO productos (nombre, idCategoria, idColores, precio, fichas, imagen_portada, imagen_galeria, descripcion, fecha_registro, pedidos, vendidos, altura, idDescuentos, estado, peso, idFestividad, visible, idRareza, idUniverso, idAccesorio, advertencia, tiempo, comida, existencia, fecha_destacado) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?,  ?, 1, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO productos (nombre, idCategoria, idColores, precio, fichas, descripcion, fecha_registro, pedidos, vendidos, altura, idDescuentos, estado, peso, idFestividad, visible, idRareza, idUniverso, idAccesorio, advertencia, tiempo, comida, existencia, fecha_destacado) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?,  ?, 1, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             $stmt = $conn->prepare($query);
             // Aquí, se pasa el número correcto de parámetros y los tipos
-            $stmt->bind_param("sssssssssssssssssssss", $nombre, $idCategoria, $idColores, $precio, $fichas, $imagen_portada, $imagen_galeria, $descripcion, $fecha_registro, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fecha_registro);
+            $stmt->bind_param("sssssssssssssssssss", $nombre, $idCategoria, $idColores, $precio, $fichas, $descripcion, $fecha_registro, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fecha_registro);
     
             if ($stmt->execute()) {
                 // Obtener el ID del producto insertado
@@ -40,13 +40,11 @@
                 ];
             }
 
-            if (!$stmt->execute()) {
-                return [
-                    'title'=>'Error',
-                    'text'=>$stmt->error,
-                    'icon'=>'bi bi-x-circle'
-                ];
-            }
+            return [
+                'title'=>'Error',
+                'text'=>$stmt->error,
+                'icon'=>'bi bi-x-circle'
+            ];
     
         } catch (mysqli_sql_exception $e) {
             return [
@@ -229,7 +227,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $idCategoria, $idColores, $precio, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fichas) {
+    function actualizar($conn, $id, $nombre, $idCategoria, $idColores, $precio, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $fichas) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM productos WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -252,8 +250,6 @@
                             idColores = ?, 
                             precio = ?, 
                             fichas = ?, 
-                            imagen_portada = ?, 
-                            imagen_galeria = ?, 
                             descripcion = ?, 
                             altura = ?, 
                             idDescuentos = ?,
@@ -269,7 +265,7 @@
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("sssssssssssssssssssi", $nombre, $idCategoria, $idColores, $precio, $fichas, $imagen1, $imagen2, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $id);
+            $stmt->bind_param("sssssssssssssssssi", $nombre, $idCategoria, $idColores, $precio, $fichas, $descripcion, $altura, $descuentos, $peso, $festividad, $rareza, $universo, $accesorio, $advertencia, $tiempo, $comida, $existencia, $id);
     
             if ($stmt->execute()) {
                 return [
@@ -280,13 +276,11 @@
                 ];
             } 
 
-            if (!$stmt->execute()) {
-                return [
-                    'title'=>'Error',
-                    'text'=>$stmt->error,
-                    'icon'=>'bi bi-x-circle'
-                ];
-            }
+            return [
+                'title'=>'Error',
+                'text'=>$stmt->error,
+                'icon'=>'bi bi-x-circle'
+            ];
     
         } catch (mysqli_sql_exception $e) {
             return [
@@ -511,7 +505,7 @@
 
     function insertarImagen($conn, $id, $imagen, $idImagen) {
         try {
-            $columnasPermitidas = ['imagen_color1', 'imagen_color2', 'imagen_color3', 'imagen_color4', 'imagen_color5', 'imagen_color6', 'imagen_color7', 'imagen_color8', 'imagen_color9', 'imagen_color10', 'imagen_color11', 'imagen_color12', 'imagen_color13', 'imagen_color14', 'imagen_color15', 'imagen_color16', 'imagen_color17', 'imagen_color18', 'imagen_color19', 'imagen_color20'];
+            $columnasPermitidas = ['imagen_portada', 'imagen_galeria', 'imagen_color1', 'imagen_color2', 'imagen_color3', 'imagen_color4', 'imagen_color5', 'imagen_color6', 'imagen_color7', 'imagen_color8', 'imagen_color9', 'imagen_color10', 'imagen_color11', 'imagen_color12', 'imagen_color13', 'imagen_color14', 'imagen_color15', 'imagen_color16', 'imagen_color17', 'imagen_color18', 'imagen_color19', 'imagen_color20'];
             
             if (!in_array($idImagen, $columnasPermitidas)) {
                 return [
@@ -523,6 +517,49 @@
             }
     
             $query = "UPDATE productos SET " . $idImagen . " = ? WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("si", $imagen, $id);
+    
+            if ($stmt->execute()) {
+                return [
+                    'title' => "¡Insertado!",
+                    'text' => "La imagen se ha insertado correctamente",
+                    'icon' => "bi bi-check-circle",
+                    'value' => 1
+                ];
+            } else {
+                return [
+                    'title' => "¡Error!",
+                    'text' => "Error al ejecutar la consulta",
+                    'icon' => "bi bi-x-circle",
+                    'value' => 0
+                ];
+            }
+    
+        } catch (mysqli_sql_exception $e) {
+            return [
+                'title' => "¡Error!",
+                'text' => "Error al insertar la imagen: " . $e->getMessage(),
+                'icon' => "bi bi-x-circle",
+                'value' => 0
+            ];
+        }
+    }
+
+    function insertarImagenProducto($conn, $id, $imagen, $campo) {
+        try {
+            $columnasPermitidas = ['imagen_portada', 'imagen_galeria', 'imagen_color1', 'imagen_color2', 'imagen_color3', 'imagen_color4', 'imagen_color5', 'imagen_color6', 'imagen_color7', 'imagen_color8', 'imagen_color9', 'imagen_color10', 'imagen_color11', 'imagen_color12', 'imagen_color13', 'imagen_color14', 'imagen_color15', 'imagen_color16', 'imagen_color17', 'imagen_color18', 'imagen_color19', 'imagen_color20'];
+            
+            if (!in_array($campo, $columnasPermitidas)) {
+                return [
+                    'title' => "¡Error!",
+                    'text' => "Columna no permitida",
+                    'icon' => "bi bi-x-circle",
+                    'value' => 0
+                ];
+            }
+    
+            $query = "UPDATE productos SET " . $campo . " = ? WHERE id = ?";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("si", $imagen, $id);
     

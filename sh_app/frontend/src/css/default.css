@@ -43,3 +43,7 @@ h5 {
 h6 {
   font-size: clamp(0.875rem, 1vw, 1rem * var(--font-size-multiplier));
 }
+
+.min-dvh-100 {
+    min-height: 100dvh !important;
+}

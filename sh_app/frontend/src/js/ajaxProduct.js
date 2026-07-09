@@ -65,8 +65,6 @@ function guardarProducto() {
                 altura: altura,
                 peso: peso,
                 festividad: !existencia ? festividad : '',
-                imagen1: imagen1,
-                imagen2: imagen2,
                 descripcion: descripcion,
                 rareza: rareza,
                 universo: universo,
@@ -102,78 +100,146 @@ function guardarProducto() {
     }
 
     // Función para guardar una imagen
-    function guardarImagen(productId, imagen, nombreCampo) {
-        return new Promise((resolve, reject) => {
-            const formData = new FormData();
-            formData.append('accion', 'insertarImagen');
-            formData.append('id', productId);
-            formData.append('idImagen', nombreCampo);
-            formData.append('imagen', imagen);
+    function guardarImagenProducto(id, imagen, campo){
+        return new Promise((resolve,reject)=>{
 
             $.ajax({
                 url: backend + urlProduct,
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    const data = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (data.icon === 'bi bi-check-circle') {
-                        resolve(); // La imagen se guardó correctamente
-                    } else {
-                        reject('Error al guardar la imagen: ' + data.text);
+                type: "POST",
+                data:{
+                    accion: "insertarImagenProducto",
+                    id: id,
+                    campo: campo,
+                    imagen: imagen
+                },
+
+                success:function(response){
+
+                    const data =
+                        typeof response === "string"
+                        ? JSON.parse(response)
+                        : response;
+
+                    if(data.icon === "bi bi-check-circle"){
+                        resolve();
+                    }else{
+                        reject(data.text);
                     }
                 },
-                error: function () {
-                    reject('Error en la solicitud AJAX de imagen');
+
+                error:function(){
+                    reject();
                 }
             });
+
         });
     }
 
-    // Llamada a las funciones y actualización de la barra de progreso
     guardarDatos()
-        .then(productId => {
-            const totalColores = imagenColores.length;
+    .then(async productId => {
 
-            // Función para procesar las imágenes en serie
-            const procesarImagenes = async () => {
-                for (let index = 0; index < totalColores; index++) {
-                    const imagen = imagenColores[index];
-                    if (imagen) { // Solo intenta guardar si hay una imagen presente
-                        try {
-                            await guardarImagen(productId, imagen, `imagen_color${index + 1}`);
-                        } catch (error) {
-                            console.error(`Error al guardar la imagen ${index + 1}: ${error}`);
-                        }
-                    }
-                }
-            };
+        if(imagen1){
+            await guardarImagenProducto(
+                productId,
+                imagen1,
+                "imagen_portada"
+            );
+        }
 
-            // Llama a la función para procesar las imágenes
-            return procesarImagenes();
-        })
-        .then(() => {
-            // Mensaje de éxito después de que se guarden todas las imágenes
-            cambiarMensajeModal(
-                "#modalGuardando",
-                arrayResponse.title,
-                arrayResponse.text,
-                arrayResponse.icon,
-                true,
+        if(imagen2){
+            await guardarImagenProducto(
+                productId,
+                imagen2,
+                "imagen_galeria"
             );
-            $('#container-progress-bar').hide(); // Oculta la barra de progreso al terminar
-        })
-        .catch(error => {
-            cambiarMensajeModal(
-                "#modalGuardando",
-                arrayResponse.title,
-                arrayResponse.text,
-                arrayResponse.icon,
-                true,
+        }
+
+        for(let index = 0; index < imagenColores.length; index++){
+
+            const imagen = imagenColores[index];
+
+            if(!imagen){
+                continue;
+            }
+
+            await guardarImagenProducto(
+                productId,
+                imagen,
+                `imagen_color${index + 1}`
             );
-            console.error(error);
-        });
+        }
+
+    })
+    .then(() => {
+
+        cambiarMensajeModal(
+            "#modalGuardando",
+            arrayResponse.title,
+            arrayResponse.text,
+            arrayResponse.icon,
+            true
+        );
+
+        $('#container-progress-bar').hide();
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        cambiarMensajeModal(
+            "#modalGuardando",
+            "Error",
+            error,
+            "bi bi-x-circle",
+            true
+        );
+
+    });
+
+    // Llamada a las funciones
+    //guardarDatos()
+    //    .then(productId => {
+    //        const totalColores = imagenColores.length;
+//
+    //        // Función para procesar las imágenes en serie
+    //        const procesarImagenes = async () => {
+    //            for (let index = 0; index < totalColores; index++) {
+    //                const imagen = imagenColores[index];
+    //                if (imagen) { // Solo intenta guardar si hay una imagen presente
+    //                    try {
+    //                        await guardarImagen(productId, imagen, `imagen_color${index + 1}`);
+    //                    } catch (error) {
+    //                        console.error(`Error al guardar la imagen ${index + 1}: ${error}`);
+    //                    }
+    //                }
+    //            }
+    //        };
+//
+    //        // Llama a la función para procesar las imágenes
+    //        return procesarImagenes();
+    //    })
+    //    .then(() => {
+    //        // Mensaje de éxito después de que se guarden todas las imágenes
+    //        cambiarMensajeModal(
+    //            "#modalGuardando",
+    //            arrayResponse.title,
+    //            arrayResponse.text,
+    //            arrayResponse.icon,
+    //            true,
+    //        );
+    //        $('#container-progress-bar').hide(); // Oculta la barra de progreso al terminar
+    //    })
+    //    .catch(error => {
+    //        cambiarMensajeModal(
+    //            "#modalGuardando",
+    //            arrayResponse.title,
+    //            arrayResponse.text,
+    //            arrayResponse.icon,
+    //            true,
+    //        );
+    //        console.error(error);
+    //    });
 }
 
 function cargarEstrellasProducto(
