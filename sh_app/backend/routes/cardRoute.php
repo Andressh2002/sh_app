@@ -98,10 +98,28 @@
             echo json_encode($respuesta);
             break;
 
+        case 'buscarLogoUniverso':
+            $id = isset($_POST['id']) ? $_POST['id'] : '';
+        
+            $respuesta = buscarLogoUniverso($conn, $id);
+        
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
+            break;
+
         case 'buscarImagenProducto':
             $id = isset($_POST['id']) ? $_POST['id'] : '';
         
             $respuesta = buscarImagenProducto($conn, $id);
+        
+            header('Content-Type: application/json');
+            echo json_encode($respuesta);
+            break;
+
+        case 'buscarLogoProducto':
+            $id = isset($_POST['id']) ? $_POST['id'] : '';
+        
+            $respuesta = buscarLogoProducto($conn, $id);
         
             header('Content-Type: application/json');
             echo json_encode($respuesta);

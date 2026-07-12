@@ -239,6 +239,20 @@
         }
     }
 
+    function buscarLogoUniverso($conn, $id) {
+        $stmt = $conn->prepare("SELECT logo FROM universos WHERE id = ? AND estado = 1");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return null;
+        }
+    }
+
     function contarProductos($conn, $filtros, $limite) {
         // Extrae los filtros
         list($nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos) = $filtros;
@@ -439,6 +453,26 @@
             JOIN categorias ct ON p.idCategoria = ct.id
             LEFT JOIN festividades fs ON p.idFestividad = fs.id AND p.idFestividad != 0
             JOIN colores cl ON FIND_IN_SET(cl.id, p.idColores)
+            WHERE p.estado = 1 
+            AND p.visible = 1 
+            AND p.id=?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return null;
+        }
+    }
+
+    function buscarLogoProducto($conn, $id) {
+        $stmt = $conn->prepare("SELECT 
+                u.logo 
+            FROM productos p
+            LEFT JOIN universos u ON p.idUniverso = u.id AND p.idUniverso != 0
             WHERE p.estado = 1 
             AND p.visible = 1 
             AND p.id=?");

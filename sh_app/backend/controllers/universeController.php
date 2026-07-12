@@ -1,5 +1,5 @@
 <?php
-    function insertar($conn, $nombre, $imagen) {
+    function insertar($conn, $nombre) {
         date_default_timezone_set('America/Costa_Rica');
         $fecha_registro = date('Y-m-d H:i:s');
     
@@ -19,17 +19,19 @@
                 ];
             }
     
-            $query = "INSERT INTO universos (nombre, fecha_registro, estado, imagen) 
-                      VALUES (?, ?, 1, ?)";
+            $query = "INSERT INTO universos (nombre, fecha_registro, estado) 
+                      VALUES (?, ?, 1)";
             
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("sss", $nombre, $fecha_registro, $imagen);
+            $stmt->bind_param("ss", $nombre, $fecha_registro);
     
             if ($stmt->execute()) {
+                $universo_id = $conn->insert_id;
                 return [
                     'title' => "¡Guardado!",
                     'text' => "El universo se ha guardado correctamente",
-                    'icon' => "bi bi-check-circle"
+                    'icon' => "bi bi-check-circle",
+                    'universo_id' => $universo_id
                 ];
             }
     
@@ -81,7 +83,7 @@
         }
     }
 
-    function actualizar($conn, $id, $nombre, $descripcion, $imagen) {
+    function actualizar($conn, $id, $nombre) {
         try {
             $queryCheck = "SELECT COUNT(*) AS total FROM universos WHERE nombre = ? AND estado = 1 AND id != ?";
             $stmtCheck = $conn->prepare($queryCheck);
@@ -99,18 +101,18 @@
             }
     
             $queryUpdate = "UPDATE universos SET 
-                            nombre = ?, 
-                            imagen = ? 
+                            nombre = ? 
                             WHERE id = ?";
             
             $stmt = $conn->prepare($queryUpdate);
-            $stmt->bind_param("ssi", $nombre, $imagen, $id);
+            $stmt->bind_param("si", $nombre, $id);
     
             if ($stmt->execute()) {
                 return [
                     'title' => "¡Actualizado!",
                     'text' => "El universo se ha actualizado correctamente",
-                    'icon' => "bi bi-check-circle"
+                    'icon' => "bi bi-check-circle",
+                    'universo_id' => $id
                 ];
             }
     
@@ -158,9 +160,22 @@
     }
 
     function buscarImagen($conn, $id) {
-        $query = "SELECT * FROM universos WHERE 1=1";
+        $query = "SELECT imagen FROM universos WHERE id = " . $conn->real_escape_string($id);
         
-        $query .= " AND id = " . $conn->real_escape_string($id);
+        $result = $conn->query($query);
+        
+        $universos = [];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $universos[] = $row;
+            }
+        }
+        
+        return $universos;
+    }
+
+    function buscarLogo($conn, $id) {
+        $query = "SELECT logo FROM universos WHERE id = " . $conn->real_escape_string($id);
         
         $result = $conn->query($query);
         
@@ -323,5 +338,48 @@
         }
 
         return $result->fetch_assoc();
+    }
+
+    function insertarImagen($conn, $id, $imagen, $campo) {
+        try {
+            $columnasPermitidas = ['imagen', 'logo'];
+            
+            if (!in_array($campo, $columnasPermitidas)) {
+                return [
+                    'title' => "¡Error!",
+                    'text' => "Columna no permitida",
+                    'icon' => "bi bi-x-circle",
+                    'value' => 0
+                ];
+            }
+    
+            $query = "UPDATE universos SET " . $campo . " = ? WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("si", $imagen, $id);
+    
+            if ($stmt->execute()) {
+                return [
+                    'title' => "¡Insertado!",
+                    'text' => "La imagen se ha insertado correctamente",
+                    'icon' => "bi bi-check-circle",
+                    'value' => 1
+                ];
+            } else {
+                return [
+                    'title' => "¡Error!",
+                    'text' => "Error al ejecutar la consulta",
+                    'icon' => "bi bi-x-circle",
+                    'value' => 0
+                ];
+            }
+    
+        } catch (mysqli_sql_exception $e) {
+            return [
+                'title' => "¡Error!",
+                'text' => "Error al insertar la imagen: " . $e->getMessage(),
+                'icon' => "bi bi-x-circle",
+                'value' => 0
+            ];
+        }
     }
 ?>

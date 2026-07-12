@@ -249,8 +249,8 @@ function mostrarCartaProducto(idProducto, callback) {
                             <div class="product-card-shadow h-100">
                                 <a
                                     id="product-card-${producto.id}"
-                                    class="info-card"
-                                    href="../pages/product.php?nombreProducto=${encodeURIComponent(producto.nombre)}&id=${encodeURIComponent(producto.id)}"
+                                    class="info-card product-card"
+                                    href="../pages/product.php?nombreProducto=${encodeURIComponent(producto.nombre)}&id=${encodeURIComponent(producto.id)}&idCategoria=${encodeURIComponent(producto.idCategoria)}"
                                 >
                                     <div
                                         class="card-img-wrapper"
@@ -261,11 +261,21 @@ function mostrarCartaProducto(idProducto, callback) {
                                             role="status"
                                             id="spinner-${idProducto}"
                                         ></div>
+
+                                        <!-- Logo del universo -->
+                                        <img
+                                            class="product-universe-logo d-none"
+                                            id="logo-product-${idProducto}"
+                                            alt="${producto.universo}"
+                                        >
+
+                                        <!-- Imagen principal -->
                                         <img
                                             id="img-${idProducto}"
-                                            class="d-none p-1 p-sm-2 p-md-3 p-lg-4"
+                                            class="product-main-image d-none p-1 p-sm-2 p-md-3 p-lg-4"
                                             alt="${producto.nombre}"
                                         >
+
                                         ${badgeHTML}
                                         ${discountHTML}
                                     </div>
@@ -297,6 +307,7 @@ function mostrarCartaProducto(idProducto, callback) {
 
                     // Cargar la imagen del producto después
                     cargarImagenProducto(idProducto);
+                    cargarLogoProducto(idProducto);
                 } else {
                     cardContainer.remove();
                 }
@@ -344,6 +355,34 @@ function cargarImagenProducto(idProducto) {
                     if (spinnerElement) spinnerElement.remove();
                     imgElement.src = '../src/img/app/no_image.png';
                 };
+            } catch (error) {
+                console.error('Error al procesar la imagen:', error);
+            }
+        },
+        error: function () {
+            console.error('Error al cargar la imagen del producto.');
+        }
+    });
+}
+
+function cargarLogoProducto(idProducto) {
+    $.ajax({
+        url: backend + urlCard,
+        type: 'POST',
+        data: {
+            accion: 'buscarLogoProducto',
+            id: idProducto,
+        },
+        success: function (response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                const imagenURL = data.logo && data.logo !== '' ? data.logo : '../src/img/app/no_image.png';
+
+                const imgElement = document.getElementById(`logo-product-${idProducto}`);
+
+                imgElement.src = imagenURL;
+                imgElement.classList.remove('d-none');
+
             } catch (error) {
                 console.error('Error al procesar la imagen:', error);
             }
@@ -974,7 +1013,7 @@ function procesarProducto(producto, idCliente, userRol) {
 
     const filtros = {
         nombre: '',
-        categorias: [],
+        categorias: [producto.idCategoria],
         precio: [],
         festividades: [],
         rarezas: [],
@@ -1897,26 +1936,35 @@ function mostrarCartaUniverso(idUniverso) {
                 const cardHTML = `
                     <div class="product-card-shadow h-100">
                         <a
-                            class="info-card"
+                            class="info-card universe-card"
                             href="../pages/productos.php?nombreUniverso=${encodeURIComponent(universo.nombre)}&idUniverso=${encodeURIComponent(idUniverso)}"
                         >
 
                             <!-- Imagen -->
-                            <div class="card-img-wrapper">
+                            <div class="card-img-wrapper universe-img-wrapper">
                                 <div
                                     class="spinner-border spinner-color position-absolute"
                                     role="status"
                                     id="spinner-universo-${idUniverso}"
                                 ></div>
+                                
+                                <!-- Logo -->
                                 <img
-                                    class="d-none"
+                                    class="universe-logo d-none"
+                                    id="logo-universo-${idUniverso}"
+                                    alt="Logo ${universo.nombre}"
+                                >
+
+                                <!-- Imagen principal -->
+                                <img
+                                    class="card-main-image d-none"
                                     id="img-universo-${idUniverso}"
                                     alt="${universo.nombre}"
                                 >
                             </div>
 
                             <!-- Body -->
-                            <div class="card-body-wrapper">
+                            <div class="card-body-wrapper universe-body">
                                 <h4 class="card-title">
                                     ${universo.nombre}
                                 </h4>
@@ -1965,6 +2013,7 @@ function mostrarCartaUniverso(idUniverso) {
 
                 // Llamamos para cargar la imagen
                 cargarImagenUniverso(idUniverso);
+                cargarLogoUniverso(idUniverso);
 
             } catch (error) {
                 console.error('Error al procesar la respuesta:', error);
@@ -2008,6 +2057,36 @@ function cargarImagenUniverso(idUniverso) {
                     if (spinnerElement) spinnerElement.remove(); // Eliminamos el spinner si hay error
                     imgElement.src = '../src/img/app/no_image.png'; // Imagen de fallback
                 };
+            } catch (error) {
+                console.error('Error al procesar la imagen:', error);
+            }
+        },
+        error: function () {
+            console.error('Error al cargar la imagen de la categoría.');
+        }
+    });
+}
+
+function cargarLogoUniverso(idUniverso) {
+    $.ajax({
+        url: backend + urlCard,
+        type: 'POST',
+        data: {
+            accion: 'buscarLogoUniverso',
+            id: idUniverso,
+        },
+        success: function (response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                const imagenURL = data.logo && data.logo !== '' ? data.logo : '../src/img/app/no_image.png';
+
+                // Actualizamos la imagen en el DOM
+                const imgElement = document.getElementById(`logo-universo-${idUniverso}`);
+
+                // Seteamos la URL y mostramos la imagen
+                imgElement.src = imagenURL;
+                imgElement.classList.remove('d-none'); // Quitamos la clase que oculta la imagen
+
             } catch (error) {
                 console.error('Error al procesar la imagen:', error);
             }

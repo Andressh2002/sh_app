@@ -8,62 +8,32 @@ $accion = $_POST['accion'] ?? '';
 switch ($accion) {
 
     case 'insertar':
-
-        if (
-            isset($_POST['nombre']) &&
-            isset($_POST['imagen'])
-        ) {
-
-            echo json_encode(
-                insertar(
-                    $conn,
-                    $_POST['nombre'],
-                    $_POST['imagen']
-                )
-            );
-
-        } else {
-
-            echo "Faltan datos";
-        }
-
-    break;
+        echo json_encode(
+            insertar(
+                $conn,
+                $_POST['nombre'] ?? ''
+            )
+        );
+        break;
 
     case 'actualizar':
-
-        if (
-            isset($_POST['id']) &&
-            isset($_POST['nombre']) &&
-            isset($_POST['imagen'])
-        ) {
-
-            echo json_encode(
-                actualizar(
-                    $conn,
-                    $_POST['id'],
-                    $_POST['nombre'],
-                    $_POST['imagen']
-                )
-            );
-
-        } else {
-
-            echo "Faltan datos para actualizar el universo";
-        }
-
-    break;
+        echo json_encode(
+            actualizar(
+                $conn,
+                $_POST['id'] ?? '',
+                $_POST['nombre'] ?? ''
+            )
+        );
+        break;
 
     case 'eliminar':
-
         echo eliminar(
             $conn,
             $_POST['id'] ?? ''
         );
-
     break;
 
     case 'obtener':
-
         $respuesta = obtener(
             $conn,
             $_POST['nombre'] ?? '',
@@ -71,35 +41,38 @@ switch ($accion) {
         );
 
         header('Content-Type: application/json');
-
         echo json_encode($respuesta);
-
     break;
 
     case 'buscar':
-
         $respuesta = buscar(
             $conn,
             $_POST['id'] ?? ''
         );
 
         header('Content-Type: application/json');
-
         echo json_encode($respuesta);
 
     break;
 
     case 'buscarImagen':
-
         $respuesta = buscarImagen(
             $conn,
             $_POST['id'] ?? ''
         );
 
         header('Content-Type: application/json');
-
         echo json_encode($respuesta);
+    break;
 
+    case 'buscarLogo':
+        $respuesta = buscarLogo(
+            $conn,
+            $_POST['id'] ?? ''
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode($respuesta);
     break;
 
     case 'listarIds':
@@ -128,6 +101,35 @@ switch ($accion) {
         echo json_encode($respuesta);
 
     break;
+
+    case 'insertarImagen':
+
+        if(
+            isset($_POST['id']) &&
+            isset($_POST['imagen']) &&
+            isset($_POST['campo'])
+        ){
+
+            $respuesta = insertarImagen(
+                $conn,
+                $_POST['id'],
+                $_POST['imagen'],
+                $_POST['campo']
+            );
+
+            echo json_encode($respuesta);
+
+        }else{
+
+            echo json_encode([
+                "title"=>"Error",
+                "text"=>"Faltan datos",
+                "icon"=>"bi bi-x-circle"
+            ]);
+
+        }
+
+        break;
 
     default:
 

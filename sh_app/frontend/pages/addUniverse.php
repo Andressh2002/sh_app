@@ -36,6 +36,7 @@
             'spans' => ['Obligatorio', null],
             'col' => 'col-12 col-md-6 col-xl-4',
             'placeholder' => 'Escribir nombre',
+            'required' => 'Campo requerido',
         ],
     ];
 
@@ -56,6 +57,27 @@
                 'Máximo un 1 MB (1000 KB) de tamaño'
             ],
             'col' => 'col-12 col-lg-6',
+            'help' => 'Máximo un 1 MB (1000 KB) de tamaño',
+            'required' => 'Campo requerido',
+        ],
+
+        [
+            'label' => 'Logo',
+            'id' => 'logoUniverso',
+            'idVista' => 'vistaLogoUniverso',
+            'idHidden' => 'hiddenLogoUniverso',
+            'value' => '<%= universo.logo %>',
+            'icon' => 'bi bi-image-fill',
+            'input' => 'file',
+            'btnHelp' => true,
+            'inputInfo' => 'Aquí seleccionas un logo para el universo.',
+            'spans' => [
+                'Obligatorio',
+                'Máximo un 1 MB (1000 KB) de tamaño'
+            ],
+            'col' => 'col-12 col-lg-6',
+            'help' => 'Máximo un 1 MB (1000 KB) de tamaño',
+            'required' => 'Campo requerido',
         ]
     ];
 
@@ -102,7 +124,7 @@
             <div class="d-flex align-items-center gap-2">
 
                 <p class="card-title p-0 m-0">
-                    Imagen del universo
+                    Imágenes del universo
                 </p>
 
             </div>

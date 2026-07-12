@@ -5,11 +5,12 @@ function guardarUniverso() {
 
     const nombre = $('#Nombre').val();
     const imagen = $('#hiddenImagenUniverso').val();
+    const logo = $('#hiddenLogoUniverso').val();
 
     if(
         !validarCampos(
-            [nombre, imagen.length > 30 ? 'A' : ''],
-            ['el nombre', 'la imagen']
+            [nombre, imagen.length > 30 ? 'A' : '', logo.length > 30 ? 'A' : ''],
+            ['el nombre', 'la imagen', 'el logo']
         )
     ){
         return;
@@ -25,45 +26,108 @@ function guardarUniverso() {
         false
     );
 
-    $.ajax({
+    let arrayResponse = [];
 
-        url: backend + urlUniverse,
+    function guardarDatos() {
+        return new Promise((resolve, reject) => {
+            const accion = id ? 'actualizar' : 'insertar';
+            const data = {
+                accion: accion,
+                nombre: nombre
+            };
 
-        type: 'POST',
+            if (id) {
+                data.id = id;
+            }
 
-        data: {
-            accion: id ? 'actualizar' : 'insertar',
-            id: id,
-            nombre: nombre,
-            imagen: imagen
-        },
+            $.ajax({
+                url: backend + urlUniverse,
+                type: 'POST',
+                data: data,
+                success: function(response){
+                    const data = typeof response === 'string' ? JSON.parse(response) : response;
+                    arrayResponse = data;
 
-        success: function(response){
+                    if (data.icon === 'bi bi-check-circle' && data.universo_id) {
+                        resolve(data.universo_id); // Devuelve el ID del producto
+                    } else {
+                        reject('Error al guardar el producto: ' + data.text);
+                    }
+                },
 
-            const data =
-                typeof response === 'string'
-                    ? JSON.parse(response)
-                    : response;
+                error: function () {
+                    reject('Error en la solicitud AJAX');
+                }
+            });
+        });
+    }
 
-            cambiarMensajeModal(
-                "#modalGuardando",
-                data.title,
-                data.text,
-                data.icon,
-                true
-            );
-        },
+    function guardarImagenUniverso(id, imagen, campo){
+        return new Promise((resolve,reject)=>{
 
-        error: function(error){
+            $.ajax({
+                url: backend + urlUniverse,
+                type: "POST",
+                data:{
+                    accion: "insertarImagen",
+                    id: id,
+                    campo: campo,
+                    imagen: imagen
+                },
 
-            cambiarMensajeModal(
-                "#modalGuardando",
-                error.title,
-                error.text,
-                error.icon,
-                true
+                success:function(response){
+                    const data = typeof response === "string" ? JSON.parse(response) : response;
+
+                    if(data.icon === "bi bi-check-circle"){
+                        resolve();
+                    }else{
+                        reject(data.text);
+                    }
+                },
+
+                error:function(){
+                    reject();
+                }
+            });
+
+        });
+    }
+
+    guardarDatos()
+    .then(async universeId => {
+        if(imagen){
+            await guardarImagenUniverso(
+                universeId,
+                imagen,
+                "imagen"
             );
         }
+
+        if(logo){
+            await guardarImagenUniverso(
+                universeId,
+                logo,
+                "logo"
+            );
+        }
+    })
+    .then(() => {
+        cambiarMensajeModal(
+            "#modalGuardando",
+            arrayResponse.title,
+            arrayResponse.text,
+            arrayResponse.icon,
+            true
+        );
+    })
+    .catch(error => {
+        cambiarMensajeModal(
+            "#modalGuardando",
+            "Error",
+            error,
+            "bi bi-x-circle",
+            true
+        );
     });
 }
 
@@ -104,6 +168,43 @@ function buscarImagenUniverso(id) {
     });
 }
 
+function buscarLogoUniverso(id) {
+    $.ajax({
+        url: backend + urlUniverse,
+        type: 'POST',
+        data: {
+            accion: 'buscarLogo',
+            id: id,
+        },
+        success: function (response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                const imagenURL = data[0].logo && data[0].logo !== '' ? data[0].logo : '../src/img/app/no_image.png';
+
+                const imgElement = document.getElementById(`img-logo-${id}`);
+                const spinnerElement = document.getElementById(`spinner-logo-${id}`);
+
+                imgElement.src = imagenURL;
+                imgElement.classList.remove('d-none');
+
+                imgElement.onload = () => {
+                    if (spinnerElement) spinnerElement.remove();
+                };
+
+                imgElement.onerror = () => {
+                    if (spinnerElement) spinnerElement.remove();
+                    imgElement.src = '../src/img/app/no_image.png';
+                };
+            } catch (error) {
+                console.error('Error al procesar el logo:', error);
+            }
+        },
+        error: function () {
+            console.error('Error al cargar el logo del universo.');
+        }
+    });
+}
+
 function buscarUniverso(id) {
     $.ajax({
         url: backend + urlUniverse,
@@ -134,6 +235,8 @@ function mostrarUniverso(universo) {
     $('#Nombre').val(universo.nombre);
     cargarImagenGuardada(universo.imagen, '#vistaImagenUniverso');
     $('#hiddenImagenUniverso').val(universo.imagen);
+    cargarImagenGuardada(universo.logo, '#vistaLogoUniverso');
+    $('#hiddenLogoUniverso').val(universo.logo);
     setTimeout(function(){ setUniverseLoading(false); }, 250);
 }
 
@@ -286,6 +389,10 @@ async function cargarUniversosProgresivamente(
             buscarImagenUniverso(
                 universoFinal.id
             );
+
+            buscarLogoUniverso(
+                universoFinal.id
+            );
         }
         catch(error){
 
@@ -334,12 +441,23 @@ function renderUniversoCard(
 
                 <div class="product-admin-image">
 
-                    <img
+                    <div class="w-100 d-block">
+                        <img
                         id="img-${universo.id}"
                         class="product-image"
                         src="../src/img/app/no_image.png"
                         alt="${universo.nombre}"
-                    >
+                        >
+                    </div>
+                    
+                    <div class="w-100 d-block p-3">
+                        <img
+                            id="img-logo-${universo.id}"
+                            class="product-image"
+                            src="../src/img/app/no_image.png"
+                            alt="${universo.nombre}"
+                        >
+                    </div>
 
                 </div>
 

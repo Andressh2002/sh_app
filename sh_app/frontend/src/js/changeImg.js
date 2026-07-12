@@ -144,6 +144,33 @@ try {
 }
 
 try {
+    document.getElementById('logoUniverso').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const hiddenImagen1File = document.getElementById('hiddenLogoUniverso');
+    
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Mostrar la vista previa de la imagen
+                const preview = document.getElementById('vistaLogoUniverso');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                
+                // Actualizar el campo oculto con el nuevo contenido de la imagen
+                hiddenImagen1File.value = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Si no se selecciona ningún archivo, ocultar la vista previa
+            document.getElementById('vistaLogoUniverso').style.display = 'none';
+            hiddenImagen1File.value = ''; // Limpiar el campo oculto si no hay imagen
+        }
+    });
+} catch (error) {
+    //
+}
+
+try {
     document.getElementById('imagenCarrusel').addEventListener('change', function(event) {
         const file = event.target.files[0];
         const hiddenImagen1File = document.getElementById('hiddenImagenCarrusel');
