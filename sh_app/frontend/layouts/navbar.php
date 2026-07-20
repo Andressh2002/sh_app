@@ -15,6 +15,12 @@ $navbarItems = [
     ],
 
     isset($_SESSION['usuario_id']) ? [
+        'label' => 'Lista de deseos',
+        'icon' => 'bi-heart',
+        'url' => 'favoritos.php',
+    ] : null,
+
+    isset($_SESSION['usuario_id']) ? [
         'label' => 'Pedidos',
         'icon' => 'bi-cart',
         'url' => 'pedidos.php',

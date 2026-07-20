@@ -18,6 +18,7 @@ const urlAccesory = 'accesoryRoute.php';
 const urlImage = 'imageRoute.php';
 const urlInteraction = 'interactionRoute.php';
 const urlConfiguration = 'configurationRoute.php';
+const urlFavorite = 'favoritesRoute.php';
 
 let solicitudAjaxActiva = null;
 let cancelarCargaSecuencial = false;

@@ -1,5 +1,9 @@
+let idUser = null;
+
 async function obtenerCartasProductos(filtros, random = null) {
     return new Promise((resolve, reject) => {
+        idUser = filtros.idCliente ?? null;
+        
         const contenedorProductos = document.getElementById('contenedor-productos');
         const contenedorProductosDestacados = document.getElementById('contenedor-productos-destacados');
         const columnaContenedorProductos = document.getElementById('col-productos-ordinarios');
@@ -39,6 +43,8 @@ async function obtenerCartasProductos(filtros, random = null) {
                 idFestividades: filtros.festividades,
                 idRarezas: filtros.rarezas,
                 idUniversos: filtros.universos,
+                idCliente: idUser,
+                modo: filtros.modo,
                 limite: random ? random.limite : null,
             },
             success: function (response) {
@@ -161,6 +167,7 @@ function mostrarCartaProducto(idProducto, callback) {
         data: {
             accion: 'buscarProducto',
             id: idProducto,
+            idCliente: idUser,
         },
         success: function (response) {
             try {
@@ -243,6 +250,9 @@ function mostrarCartaProducto(idProducto, callback) {
 
                 const cardContainer = document.getElementById(`producto-${idProducto}`);
 
+                const heartClass = producto.favorito == 1 ? "bi bi-heart-fill" : "bi bi-heart";
+                const buttonClass = producto.favorito == 1 ? "favorite-btn active" : "favorite-btn";  
+
                 if (mostrarTarjeta) {
                     // Tarjeta sin imagen inicial, pero con spinner
                     const cardHTML = `
@@ -261,6 +271,20 @@ function mostrarCartaProducto(idProducto, callback) {
                                             role="status"
                                             id="spinner-${idProducto}"
                                         ></div>
+
+                                        ${idUser ? `
+                                            <!-- Botón Favorito -->
+                                            <button
+                                                class="${buttonClass}"
+                                                id="favorite-${producto.id}"
+                                                onclick="toggleFavorito(event, ${producto.id})"
+                                            >
+                                                <i
+                                                    id="favorite-icon-${producto.id}"
+                                                    class="${heartClass}"
+                                                ></i>
+                                            </button>
+                                        ` : ''}
 
                                         <!-- Logo del universo -->
                                         <img
@@ -445,6 +469,47 @@ function mostrarEstrellasCartaProducto(calificacion, idElement) {
             `;
         }
     }
+}
+
+function toggleFavorito(event, idProducto){
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        url: backend + urlFavorite,
+        type: "POST",
+        data:{
+            accion:"toggle",
+            idCliente:idUser,
+            idProducto:idProducto
+        },
+
+        success:function(response){
+
+            const data = typeof response==="string"
+                ? JSON.parse(response)
+                : response;
+
+            const boton = document.getElementById(`favorite-${idProducto}`);
+            const icono = document.getElementById(`favorite-icon-${idProducto}`);
+
+            if(data.favorito){
+
+                boton.classList.add("active");
+                icono.className = "bi bi-heart-fill";
+
+            }else{
+
+                boton.classList.remove("active");
+                icono.className = "bi bi-heart";
+
+            }
+
+        }
+
+    });
+
 }
 
 let productoActual = null;
@@ -1017,7 +1082,9 @@ function procesarProducto(producto, idCliente, userRol) {
         precio: [],
         festividades: [],
         rarezas: [],
-        universos: [producto.idUniverso]
+        universos: [producto.idUniverso],
+        idCliente: idCliente ?? '',
+        modo: '',
     };
 
     obtenerCartasProductos(filtros);

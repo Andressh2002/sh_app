@@ -35,7 +35,9 @@
             $idRarezas = isset($_POST['idRarezas']) ? $_POST['idRarezas'] : [];
             $idUniversos = isset($_POST['idUniversos']) ? $_POST['idUniversos'] : [];
             $limite = isset($_POST['limite']) ? $_POST['limite'] : '';
-            $filtros = [$nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos];
+            $idCliente = isset($_POST['idCliente']) ? $_POST['idCliente'] : '';
+            $modo = isset($_POST['modo']) ? $_POST['modo'] : '';
+            $filtros = [$nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos, $idCliente, $modo];
 
             $respuesta = contarProductos($conn, $filtros, $limite);
         
@@ -63,8 +65,9 @@
 
         case 'buscarProducto':
             $id = isset($_POST['id']) ? $_POST['id'] : '';
+            $idCliente  = isset($_POST['idCliente']) ? $_POST['idCliente'] : '';
         
-            $respuesta = buscarProducto($conn, $id);
+            $respuesta = buscarProducto($conn, $id, $idCliente);
         
             header('Content-Type: application/json');
             echo json_encode($respuesta);

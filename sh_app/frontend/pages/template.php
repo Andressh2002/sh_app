@@ -1,5 +1,5 @@
 <?php
-    $appVersion = "v4.2.2";
+    $appVersion = "v4.3.0";
 ?>
 
 <!DOCTYPE html>

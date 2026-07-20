@@ -52,28 +52,6 @@
 
 <div class="container-fluid px-0 mx-0">
 
-    <!-- FILA BOTON -->
-    <div class="row px-0 mx-0">
-
-        <div class="col-12 px-4">
-
-            <div class="navbar-btn-shadow my-4">
-
-                <button
-                    class="store-filter-btn slide_from_left"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modalFiltros"
-                >
-                    <i class="bi bi-funnel-fill"></i>
-                    <span>Filtros</span>
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
     <!-- FILA PRODUCTOS -->
     <div class="row px-0 mx-0">
 
@@ -84,7 +62,7 @@
 
                 <?php 
                     $title = [
-                        'title' => 'Productos destacados',
+                        'title' => 'Favoritos destacados',
                         'icon' => 'bi bi-lightbulb',
                     ];
 
@@ -107,7 +85,7 @@
 
                 <?php 
                     $title = [
-                        'title' => 'Productos de la tienda',
+                        'title' => 'Favoritos',
                         'icon' => 'bi bi-brush',
                     ];
 
@@ -131,56 +109,6 @@
 
 </div>
 
-<!-- Modal de filtros -->
-<div
-    class="modal fade px-0"
-    id="modalFiltros"
-    tabindex="-1"
-    aria-hidden="true"
->
-    <div class="modal-dialog modal-lg">
-
-        <!-- CONTENEDOR DE SOMBRA -->
-        <div class="store-modal-shadow">
-
-            <div class="modal-content store-modal">
-
-                <!-- HEADER -->
-                <div class="store-modal-header">
-
-                    <div class="d-flex align-items-center gap-2 px-1 px-sm-2">
-                        <i class="bi bi-funnel-fill"></i>
-                        <p class="m-0">Filtros de búsqueda</p>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="store-modal-close"
-                        data-bs-dismiss="modal"
-                    >
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-
-                </div>
-
-                <!-- BODY -->
-                <div class="store-modal-body">
-
-                    <?php
-                        foreach ($listFilters as $input) {
-                            include '../src/components/inputs/filters.php';
-                        }
-                    ?>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-</div>
-
 <?php
     $content = ob_get_clean();
 
@@ -200,7 +128,7 @@
             rarezas: [],
             universos: <?php echo $idUniverso ? json_encode([$idUniverso]) : json_encode([]); ?>,
             idCliente: <?php echo json_encode($_SESSION['usuario_id'] ?? ''); ?>,
-            modo: '',
+            modo: 'favoritos',
         };
         obtenerCartasProductos(cartaProductosFiltrosDefecto);
         obtenerListaFiltros('lista-categorias-filtros', 'categorias', nombreCategoria);

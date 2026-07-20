@@ -118,6 +118,7 @@
             festividades: [],
             rarezas: [],
             universos: [],
+            idCliente: <?php echo json_encode($_SESSION['usuario_id'] ?? ''); ?>
         };
         const random = {
             limite: 10,

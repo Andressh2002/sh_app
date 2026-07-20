@@ -43,7 +43,7 @@
     $imageInputs = [
 
         [
-            'label' => 'Imágen',
+            'label' => 'Imagen',
             'id' => 'imagenUniverso',
             'idVista' => 'vistaImagenUniverso',
             'idHidden' => 'hiddenImagenUniverso',
@@ -62,7 +62,7 @@
         ],
 
         [
-            'label' => 'Logo',
+            'label' => 'Icono',
             'id' => 'logoUniverso',
             'idVista' => 'vistaLogoUniverso',
             'idHidden' => 'hiddenLogoUniverso',
@@ -70,7 +70,7 @@
             'icon' => 'bi bi-image-fill',
             'input' => 'file',
             'btnHelp' => true,
-            'inputInfo' => 'Aquí seleccionas un logo para el universo.',
+            'inputInfo' => 'Aquí seleccionas un icono para el universo.',
             'spans' => [
                 'Obligatorio',
                 'Máximo un 1 MB (1000 KB) de tamaño'

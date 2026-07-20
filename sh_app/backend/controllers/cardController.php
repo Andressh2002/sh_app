@@ -255,7 +255,7 @@
 
     function contarProductos($conn, $filtros, $limite) {
         // Extrae los filtros
-        list($nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos) = $filtros;
+        list($nombre, $precio, $idCategorias, $idFestividades, $idRarezas, $idUniversos, $idCliente, $modo) = $filtros;
     
         // Base de la consulta SQL
         $sql = "SELECT pr.id AS id, pr.nombre AS nombre, pr.fecha_destacado FROM productos pr";
@@ -265,6 +265,17 @@
         $where = ["pr.estado = 1", "pr.visible = 1"];
         $parametros = [];
         $tipos = "";
+
+        if($modo == "favoritos"){
+            $joins[] = "
+                INNER JOIN favoritos fv
+                    ON fv.idProducto = pr.id
+                AND fv.idCliente = ?
+            ";
+            
+            $parametros[] = $idCliente;
+            $tipos .= "i";
+        }
     
         // JOIN y filtro por categorías
         if (!empty($idCategorias)) {
@@ -371,7 +382,7 @@
         return $productos;
     }
     
-    function buscarProducto($conn, $id) {
+    function buscarProducto($conn, $id, $idCliente) {
         $stmt = $conn->prepare("SELECT 
                 p.id,
                 p.nombre,
@@ -387,6 +398,14 @@
                 p.especial,
                 p.estado,
                 p.visible,
+                EXISTS(
+                    SELECT 1
+                    FROM favoritos f
+                    WHERE
+                        f.idCliente = ?
+                    AND
+                        f.idProducto = p.id
+                ) AS favorito, 
                 ROUND(
                     AVG(c.estrellas),
                     1
@@ -429,7 +448,7 @@
             WHERE p.estado = 1 
             AND p.visible = 1 
             AND p.id=?");
-        $stmt->bind_param("i", $id);
+        $stmt->bind_param("ii", $idCliente, $id);
         $stmt->execute();
 
         $result = $stmt->get_result();
